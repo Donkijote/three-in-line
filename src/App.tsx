@@ -1,9 +1,13 @@
+import { Layout } from "@/layout/Layout.tsx";
+
 import "./App.css";
 
 function App() {
   return (
     <div data-testid="app">
-      <p>Hello World!</p>
+      <Layout>
+        <p>Hello World!</p>
+      </Layout>
     </div>
   );
 }
