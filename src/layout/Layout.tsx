@@ -1,18 +1,15 @@
-import type { ReactNode } from "react";
+import { useState } from "react";
 
 import { Navbar } from "./component/Navbar";
 import { Sidebar } from "./component/Sidebar";
 
-type LayoutProps = {
-  children: ReactNode;
-};
+export const Layout = () => {
+  const [isOpen, setIsOpen] = useState(false);
 
-export const Layout = ({ children }: LayoutProps) => {
   return (
-    <div>
-      <Navbar />
-      <Sidebar />
-      {children}
-    </div>
+    <>
+      <Navbar toggleDrawer={() => setIsOpen((prevState) => !prevState)} />
+      <Sidebar isOpen={isOpen} />
+    </>
   );
 };

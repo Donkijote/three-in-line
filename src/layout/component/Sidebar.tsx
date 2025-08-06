@@ -1,6 +1,20 @@
-export const Sidebar = () => {
+import { clsx } from "clsx";
+
+type SidebarProps = {
+  isOpen: boolean;
+};
+
+export const Sidebar = ({ isOpen }: SidebarProps) => {
   return (
-    <div className="fixed left-0 flex h-[calc(100dvh)] w-full max-w-[20rem] flex-col rounded-xl bg-white bg-clip-border p-4 text-gray-700 shadow-xl shadow-gray-900/5 transition-transform -translate-x-0">
+    <div
+      className={clsx(
+        "fixed left-0 flex h-[calc(100dvh)] w-full max-w-[20rem] flex-col rounded-xl bg-white bg-clip-border p-4 text-gray-700 shadow-xl shadow-gray-900/5 transition-transform",
+        {
+          "translate-x-0": isOpen,
+          "-translate-x-full": !isOpen,
+        },
+      )}
+    >
       <div className="p-4 mb-2">
         <h5 className="block font-sans text-xl antialiased font-semibold leading-snug tracking-normal ">
           Matches History
