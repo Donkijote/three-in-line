@@ -1,4 +1,4 @@
-const arr = Array.from({ length: 9 }, (_, i) => i + 1);
+const arr = Array.from({ length: 9 }, (_, i) => i % 2);
 
 export const Board = () => {
   return (
@@ -17,10 +17,17 @@ export const Board = () => {
             "grid grid-flow-row grid-cols-3 h-[calc(100dvh-18rem)] bg-black gap-1 max-h-[800px] max-w-[1200px] m-auto"
           }
         >
-          {arr.map((item) => (
-            <div key={item} className={"p-8 bg-white"}>
-              {item}
-            </div>
+          {arr.map((item, index) => (
+            <button
+              key={`${index}-${item}`}
+              className={
+                "flex bg-white justify-center items-center cursor-pointer"
+              }
+            >
+              <span className="material-symbols-rounded !text-7xl md:max-xl:!text-8xl xl:max-2xl:!text-8xl 2xl:!text-9xl">
+                {item ? "close" : "radio_button_unchecked"}
+              </span>
+            </button>
           ))}
         </div>
       </div>
