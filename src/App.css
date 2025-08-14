@@ -21,6 +21,9 @@
   --app-sidebar-text: #374151;
   --app-active: #3B82F6;
   --app-hover: #D1D5DB;
+  --glow-blue: rgba(59, 130, 246, 0.4);    /* primary light blue */
+  --glow-red: rgba(244, 63, 94, 0.4);      /* secondary soft red */
+  --hover-bg: rgba(0, 0, 0, 0.05);         /* faint dark hover for light mode */
 }
 .dark {
   --app-bg: #111827;        /* background (dark) */
@@ -34,6 +37,9 @@
   --app-sidebar-text: #E5E7EB;
   --app-active: #60A5FA;
   --app-hover: #374151;
+  --glow-blue: rgba(96, 165, 250, 0.5);    /* lighter blue pop */
+  --glow-red: rgba(248, 113, 113, 0.5);    /* coral pop */
+  --hover-bg: rgba(255, 255, 255, 0.05);   /* faint light hover for dark mode */
 }
 
 /* ---- Map app tokens to Tailwind theme colors ---- */

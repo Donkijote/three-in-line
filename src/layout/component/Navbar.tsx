@@ -8,10 +8,10 @@ export const Navbar = ({ toggleDrawer }: NavbarProps) => {
   return (
     <nav
       className={
-        "flex flex-row h-16 px-16 gap-4 items-center bg-navbar-bg w-full text-navbar-text shadow"
+        "bg-navbar-bg h-16 px-16 text-navbar-text flex flex-row items-center justify-between py-2 shadow-md border-b border-white/10"
       }
     >
-      <div className={"flex items-center gap-4"}>
+      <div className={"flex items-center gap-2 font-bold text-lg"}>
         <button
           className={"cursor-pointer max-h-6 text-text"}
           onClick={toggleDrawer}
@@ -26,9 +26,7 @@ export const Navbar = ({ toggleDrawer }: NavbarProps) => {
           3 in Line
         </h1>
       </div>
-      <div className={"ml-auto"}>
-        <ThemeToggle />
-      </div>
+      <ThemeToggle />
     </nav>
   );
 };
