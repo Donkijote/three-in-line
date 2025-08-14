@@ -1,42 +1,58 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+@import "tailwindcss";
+@import 'material-symbols';
+
+.material-symbols-rounded {
+  font-variation-settings: 'wght' 300;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+/* Optional: use a .dark class instead of system media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---- App tokens that CHANGE per theme ---- */
+:root {
+  --app-bg: #F9FAFB;        /* background (light) */
+  --app-text: #111827;      /* text (light) */
+  --app-grid: #D1D5DB;      /* grid lines (light) */
+  --app-primary: #3B82F6;   /* X / primary (light) */
+  --app-secondary: #F43F5E; /* O / secondary (light) */
+  --app-navbar-bg: #F3F4F6;
+  --app-navbar-text: #111827;
+  --app-sidebar-bg: #F3F4F6;
+  --app-sidebar-text: #374151;
+  --app-active: #3B82F6;
+  --app-hover: #D1D5DB;
+  --glow-blue: rgba(59, 130, 246, 0.4);    /* primary light blue */
+  --glow-red: rgba(244, 63, 94, 0.4);      /* secondary soft red */
+  --hover-bg: rgba(0, 0, 0, 0.05);         /* faint dark hover for light mode */
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.dark {
+  --app-bg: #111827;        /* background (dark) */
+  --app-text: #F9FAFB;      /* text (dark) */
+  --app-grid: #374151;      /* grid lines (dark) */
+  --app-primary: #60A5FA;   /* X / primary (dark) */
+  --app-secondary: #F87171; /* O / secondary (dark) */
+  --app-navbar-bg: #1F2937;
+  --app-navbar-text: #F9FAFB;
+  --app-sidebar-bg: #1E293B;
+  --app-sidebar-text: #E5E7EB;
+  --app-active: #60A5FA;
+  --app-hover: #374151;
+  --glow-blue: rgba(96, 165, 250, 0.5);    /* lighter blue pop */
+  --glow-red: rgba(248, 113, 113, 0.5);    /* coral pop */
+  --hover-bg: rgba(255, 255, 255, 0.05);   /* faint light hover for dark mode */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+/* ---- Map app tokens to Tailwind theme colors ---- */
+@theme inline {
+  --color-background: var(--app-bg);
+  --color-text: var(--app-text);
+  --color-grid: var(--app-grid);
+  --color-primary: var(--app-primary);
+  --color-secondary: var(--app-secondary);
+  --color-navbar-bg: var(--app-navbar-bg);
+  --color-navbar-text: var(--app-navbar-text);
+  --color-sidebar-bg: var(--app-sidebar-bg);
+  --color-sidebar-text: var(--app-sidebar-text);
+  --color-active: var(--app-active);
+  --color-hover: var(--app-hover);
 }
