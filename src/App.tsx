@@ -1,16 +1,19 @@
-import { Layout } from "@/layout/Layout.tsx";
+import { ThemeProvider } from "@/context/ThemeProvider";
+import { Layout } from "@/layout/Layout";
 import { Board } from "@/modules/board";
 
 import "./App.css";
 
 function App() {
   return (
-    <div data-testid="app" className={"bg-background"}>
-      <Layout />
-      <div className={"px-16 py-8"}>
-        <Board />
+    <ThemeProvider>
+      <div data-testid="app" className={"bg-background"}>
+        <Layout />
+        <div className={"px-16 py-8"}>
+          <Board />
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }
 
