@@ -14,7 +14,7 @@ export const Navbar = ({ toggleDrawer }: NavbarProps) => {
       </button>
       <h1
         className={
-          "text-2xl block font-sans antialiased font-semibold leading-snug tracking-normal text-gray-700"
+          "text-2xl block font-sans antialiased font-semibold leading-snug tracking-normal text-text"
         }
       >
         3 in Line

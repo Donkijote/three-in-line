@@ -4,3 +4,31 @@
 .material-symbols-rounded {
   font-variation-settings: 'wght' 300;
 }
+
+/* Optional: use a .dark class instead of system media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---- App tokens that CHANGE per theme ---- */
+:root {
+  --app-bg: #F9FAFB;        /* background (light) */
+  --app-text: #111827;      /* text (light) */
+  --app-grid: #D1D5DB;      /* grid lines (light) */
+  --app-primary: #3B82F6;   /* X / primary (light) */
+  --app-secondary: #F43F5E; /* O / secondary (light) */
+}
+.dark {
+  --app-bg: #111827;        /* background (dark) */
+  --app-text: #F9FAFB;      /* text (dark) */
+  --app-grid: #374151;      /* grid lines (dark) */
+  --app-primary: #60A5FA;   /* X / primary (dark) */
+  --app-secondary: #F87171; /* O / secondary (dark) */
+}
+
+/* ---- Map app tokens to Tailwind theme colors ---- */
+@theme inline {
+  --color-background: var(--app-bg);
+  --color-text: var(--app-text);
+  --color-grid: var(--app-grid);
+  --color-primary: var(--app-primary);
+  --color-secondary: var(--app-secondary);
+}
