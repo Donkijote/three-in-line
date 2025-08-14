@@ -22,7 +22,13 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom/vitest"]
+    "types": ["vitest/globals", "@testing-library/jest-dom/vitest"],
+
+    /* Paths */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+    }
   },
   "include": ["src"]
 }
