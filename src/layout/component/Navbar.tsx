@@ -8,7 +8,7 @@ export const Navbar = ({ toggleDrawer }: NavbarProps) => {
   return (
     <nav
       className={
-        "flex flex-row h-16 px-16 gap-4 items-center border-b border-gray-200 shadow-xs w-full"
+        "flex flex-row h-16 px-16 gap-4 items-center bg-navbar-bg w-full text-navbar-text shadow"
       }
     >
       <div className={"flex items-center gap-4"}>

@@ -15,6 +15,12 @@
   --app-grid: #D1D5DB;      /* grid lines (light) */
   --app-primary: #3B82F6;   /* X / primary (light) */
   --app-secondary: #F43F5E; /* O / secondary (light) */
+  --app-navbar-bg: #F3F4F6;
+  --app-navbar-text: #111827;
+  --app-sidebar-bg: #F3F4F6;
+  --app-sidebar-text: #374151;
+  --app-active: #3B82F6;
+  --app-hover: #D1D5DB;
 }
 .dark {
   --app-bg: #111827;        /* background (dark) */
@@ -22,6 +28,12 @@
   --app-grid: #374151;      /* grid lines (dark) */
   --app-primary: #60A5FA;   /* X / primary (dark) */
   --app-secondary: #F87171; /* O / secondary (dark) */
+  --app-navbar-bg: #1F2937;
+  --app-navbar-text: #F9FAFB;
+  --app-sidebar-bg: #1E293B;
+  --app-sidebar-text: #E5E7EB;
+  --app-active: #60A5FA;
+  --app-hover: #374151;
 }
 
 /* ---- Map app tokens to Tailwind theme colors ---- */
@@ -31,4 +43,10 @@
   --color-grid: var(--app-grid);
   --color-primary: var(--app-primary);
   --color-secondary: var(--app-secondary);
+  --color-navbar-bg: var(--app-navbar-bg);
+  --color-navbar-text: var(--app-navbar-text);
+  --color-sidebar-bg: var(--app-sidebar-bg);
+  --color-sidebar-text: var(--app-sidebar-text);
+  --color-active: var(--app-active);
+  --color-hover: var(--app-hover);
 }
