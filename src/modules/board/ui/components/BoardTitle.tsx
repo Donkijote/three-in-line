@@ -16,19 +16,24 @@ export const BoardTitle = ({ isPlayerTurn, gameState }: BoardTitleProps) => {
     if (gameState === GameState.WIN) {
       return "You Won!";
     }
-    return "You Lost :(";
+    if (gameState === GameState.LOST) {
+      return "You Lost :(";
+    }
+    return "It's a Tied!";
   }, [isPlayerTurn, gameState]);
 
   return (
-    <div className={"flex flex-col gap-4 items-center"}>
+    <div className={"flex flex-col items-center gap-4"}>
       <h1
-        className={clsx("text-4xl font-bold mb-1", {
+        className={clsx("mb-1 text-4xl font-bold", {
           "text-primary drop-shadow-[0_0_6px_var(--glow-blue)]":
             (isPlayerTurn && gameState === GameState.PROGRESS) ||
             gameState === GameState.WIN,
           "text-secondary drop-shadow-[0_0_6px_var(--glow-red)]":
             (!isPlayerTurn && gameState === GameState.PROGRESS) ||
             gameState === GameState.LOST,
+          "text-amber-500 drop-shadow-[0_0_6px_var(--glow-blue)]":
+            gameState === GameState.TIED,
         })}
       >
         {text}
