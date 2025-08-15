@@ -16,19 +16,11 @@ const winningCombos = [
   [2, 4, 6], // diagonal
 ];
 
+const defaultPlays = [null, null, null, null, null, null, null, null, null];
+
 export const Board = () => {
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
-  const [plays, setPlays] = useState<Array<number | null>>([
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-  ]);
+  const [plays, setPlays] = useState<Array<number | null>>(defaultPlays);
 
   const gameState: GameStateType = useMemo(() => {
     let winner = null;
@@ -58,10 +50,15 @@ export const Board = () => {
     [isPlayerTurn, plays, setIsPlayerTurn],
   );
 
+  const handleRest: () => void = useCallback(() => {
+    setPlays(defaultPlays);
+    setIsPlayerTurn(true);
+  }, []);
+
   const isGameInProgress = gameState === GameState.PROGRESS;
 
   return (
-    <div className="flex h-[calc(100dvh-8rem)] w-full justify-start flex-col gap-12">
+    <div className="flex h-[calc(100dvh-8rem)] w-full flex-col justify-start gap-12">
       <BoardTitle isPlayerTurn={isPlayerTurn} gameState={gameState} />
       <div
         className={
@@ -70,14 +67,14 @@ export const Board = () => {
       >
         <div
           className={
-            "grid grid-flow-row grid-cols-3 h-[calc(100dvh-18rem)] max-h-[812px] max-w-[1200px] m-auto"
+            "m-auto grid h-[calc(100dvh-18rem)] max-h-[812px] max-w-[1200px] grid-flow-row grid-cols-3"
           }
         >
           {plays.map((item, index) => (
             <button
               key={`${index}-${item}`}
               className={clsx(
-                "flex bg-background border-t-0 border-r-0 justify-center border border-grid items-center aspect-square transition-all duration-150 ",
+                "flex aspect-square items-center justify-center border border-t-0 border-r-0 border-grid bg-background transition-all duration-150",
                 {
                   "border-b-0": index >= 6,
                   "border-l-0": index % 3 === 0,
@@ -106,6 +103,16 @@ export const Board = () => {
           ))}
         </div>
       </div>
+      {gameState !== GameState.PROGRESS && (
+        <button
+          className={
+            "mt-4 max-w-[300px] cursor-pointer self-center rounded-full bg-emerald-500 px-6 py-4 text-3xl font-semibold text-white shadow-md drop-shadow-[0_0_6px_rgba(16,185,129,0.5)] transition-all duration-200 hover:bg-emerald-600 hover:shadow-lg dark:hover:bg-emerald-400"
+          }
+          onClick={handleRest}
+        >
+          🔄 New Game
+        </button>
+      )}
     </div>
   );
 };
