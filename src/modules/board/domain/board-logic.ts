@@ -1,4 +1,9 @@
-import { GameState } from "../types";
+import {
+  GameStorage,
+  GameStorageService,
+} from "@/modules/board/application/games-storage";
+
+import { GameState, type GameStateType, type GameStorageType } from "../types";
 
 export const WINNING_COMBOS = [
   [0, 1, 2], // top row
@@ -35,4 +40,70 @@ export const checkWinner = (plays: Array<number | null>) => {
   if (winner !== null && !winner) return GameState.LOST;
   if (!plays.includes(null) && winner === null) return GameState.TIED;
   return GameState.PROGRESS;
+};
+
+export const syncGamesData = () => {
+  const gamesKey = GameStorageService.get(GameStorage.GAMES);
+  const newGame: GameStorageType = {
+    id: new Date().getTime().toString(),
+    date: new Date(),
+    state: GameState.PROGRESS,
+    isPlayerTurn: true,
+    plays: DEFAULT_PLAYS,
+  };
+  if (!gamesKey) {
+    GameStorageService.set(GameStorage.GAMES, [newGame]);
+    return newGame;
+  }
+
+  const games = JSON.parse(gamesKey) as Array<GameStorageType>;
+
+  if (!games.length) {
+    GameStorageService.set(GameStorage.GAMES, [newGame]);
+    return newGame;
+  }
+
+  const latestGame = games[0];
+  if (latestGame.state !== GameState.PROGRESS) {
+    GameStorageService.set(GameStorage.GAMES, [newGame, ...games]);
+    return newGame;
+  }
+
+  return latestGame;
+};
+
+export const syncGamePlay = (
+  plays: GameStorageType["plays"],
+  currentTurn: boolean,
+  state: GameStateType,
+) => {
+  const gamesKey = GameStorageService.get(GameStorage.GAMES);
+  if (!gamesKey) {
+    console.error("Trying to update but key does not exist");
+    return;
+  }
+
+  const games = JSON.parse(gamesKey) as Array<GameStorageType>;
+
+  if (!games.length) {
+    console.error("Trying to update but games not exist");
+    return;
+  }
+
+  const latestGame = games[0];
+  if (latestGame.state !== GameState.PROGRESS) {
+    console.error("Trying to update a finished game");
+    return;
+  }
+
+  const updatedGame = {
+    ...latestGame,
+    isPlayerTurn: !currentTurn,
+    plays,
+    state,
+  };
+  games.splice(0, 1, updatedGame);
+
+  const updatedGames = [...games];
+  GameStorageService.set(GameStorage.GAMES, updatedGames);
 };

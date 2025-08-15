@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { checkWinner, DEFAULT_PLAYS } from "../domain/board-logic";
+import { checkWinner, DEFAULT_PLAYS, syncGamePlay, syncGamesData } from "../domain/board-logic";
 import type { GameStateType } from "../types";
 import { GameState } from "../types";
 import { BoardTitle } from "./components/BoardTitle";
@@ -10,8 +10,6 @@ export const Board = () => {
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   const [plays, setPlays] = useState<Array<number | null>>(DEFAULT_PLAYS);
 
-  const gameState: GameStateType = useMemo(() => checkWinner(plays), [plays]);
-
   const handleAction: (position: number) => void = useCallback(
     (position: number) => {
       if (plays[position] !== null) return;
@@ -19,17 +17,25 @@ export const Board = () => {
       setPlays((prevState) => {
         const newValues = [...prevState];
         newValues[position] = isPlayerTurn ? 1 : 0;
+        syncGamePlay(newValues, isPlayerTurn, checkWinner(newValues));
         return newValues;
       });
       setIsPlayerTurn((prevState) => !prevState);
     },
-    [isPlayerTurn, plays, setIsPlayerTurn],
+    [isPlayerTurn, plays],
   );
 
   const handleRest: () => void = useCallback(() => {
-    setPlays(DEFAULT_PLAYS);
-    setIsPlayerTurn(true);
+    const result = syncGamesData();
+    setPlays(result.plays);
+    setIsPlayerTurn(result.isPlayerTurn);
   }, []);
+
+  const gameState: GameStateType = useMemo(() => checkWinner(plays), [plays]);
+
+  useEffect(() => {
+    handleRest();
+  }, [handleRest]);
 
   const isGameInProgress = gameState === GameState.PROGRESS;
 
