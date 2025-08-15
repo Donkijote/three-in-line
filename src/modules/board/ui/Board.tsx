@@ -1,40 +1,16 @@
 import { clsx } from "clsx";
 import { useCallback, useMemo, useState } from "react";
 
+import { checkWinner, DEFAULT_PLAYS } from "../domain/board-logic";
 import type { GameStateType } from "../types";
 import { GameState } from "../types";
 import { BoardTitle } from "./components/BoardTitle";
 
-const winningCombos = [
-  [0, 1, 2], // top row
-  [3, 4, 5], // middle row
-  [6, 7, 8], // bottom row
-  [0, 3, 6], // left column
-  [1, 4, 7], // middle column
-  [2, 5, 8], // right column
-  [0, 4, 8], // diagonal
-  [2, 4, 6], // diagonal
-];
-
-const defaultPlays = [null, null, null, null, null, null, null, null, null];
-
 export const Board = () => {
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
-  const [plays, setPlays] = useState<Array<number | null>>(defaultPlays);
+  const [plays, setPlays] = useState<Array<number | null>>(DEFAULT_PLAYS);
 
-  const gameState: GameStateType = useMemo(() => {
-    let winner = null;
-    for (const [a, b, c] of winningCombos) {
-      if (plays[a] !== null && plays[a] === plays[b] && plays[a] === plays[c]) {
-        winner = plays[a];
-        break;
-      }
-    }
-    if (winner !== null && winner) return GameState.WIN;
-    if (winner !== null && !winner) return GameState.LOST;
-    if (!plays.includes(null) && winner === null) return GameState.TIED;
-    return GameState.PROGRESS;
-  }, [plays]);
+  const gameState: GameStateType = useMemo(() => checkWinner(plays), [plays]);
 
   const handleAction: (position: number) => void = useCallback(
     (position: number) => {
@@ -51,7 +27,7 @@ export const Board = () => {
   );
 
   const handleRest: () => void = useCallback(() => {
-    setPlays(defaultPlays);
+    setPlays(DEFAULT_PLAYS);
     setIsPlayerTurn(true);
   }, []);
 
