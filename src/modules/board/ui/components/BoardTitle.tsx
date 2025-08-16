@@ -23,7 +23,10 @@ export const BoardTitle = ({ isPlayerTurn, gameState }: BoardTitleProps) => {
   }, [isPlayerTurn, gameState]);
 
   return (
-    <div className={"flex flex-col items-center gap-4"}>
+    <div
+      className={"flex flex-col items-center gap-4"}
+      data-testid={"BoardTitle"}
+    >
       <h1
         className={clsx("mb-1 text-4xl font-bold", {
           "text-primary drop-shadow-[0_0_6px_var(--glow-blue)]":
@@ -35,6 +38,7 @@ export const BoardTitle = ({ isPlayerTurn, gameState }: BoardTitleProps) => {
           "text-amber-500 drop-shadow-[0_0_6px_var(--glow-blue)]":
             gameState === GameState.TIED,
         })}
+        data-testid={"BoardTitle-title"}
       >
         {text}
       </h1>
