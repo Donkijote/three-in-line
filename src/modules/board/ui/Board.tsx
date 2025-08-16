@@ -1,7 +1,12 @@
 import { clsx } from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { checkWinner, DEFAULT_PLAYS, syncGamePlay, syncGamesData } from "../domain/board-logic";
+import {
+  checkWinner,
+  DEFAULT_PLAYS,
+  syncGamePlay,
+  syncGamesData,
+} from "../domain/board-logic";
 import type { GameStateType } from "../types";
 import { GameState } from "../types";
 import { BoardTitle } from "./components/BoardTitle";
@@ -40,7 +45,10 @@ export const Board = () => {
   const isGameInProgress = gameState === GameState.PROGRESS;
 
   return (
-    <div className="flex h-[calc(100dvh-8rem)] w-full flex-col justify-start gap-12">
+    <div
+      className="flex h-[calc(100dvh-8rem)] w-full flex-col justify-start gap-12"
+      data-testid={"Board"}
+    >
       <BoardTitle isPlayerTurn={isPlayerTurn} gameState={gameState} />
       <div
         className={
@@ -65,6 +73,7 @@ export const Board = () => {
               )}
               onClick={() => handleAction(index)}
               disabled={!isGameInProgress}
+              data-testid={`Board-cell-${index}`}
             >
               {item !== null && (
                 <span
