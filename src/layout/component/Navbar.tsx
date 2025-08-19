@@ -8,19 +8,20 @@ export const Navbar = ({ toggleDrawer }: NavbarProps) => {
   return (
     <nav
       className={
-        "bg-navbar-bg h-16 px-16 text-navbar-text flex flex-row items-center justify-between py-2 shadow-md border-b border-white/10"
+        "flex h-16 flex-row items-center justify-between border-b border-white/10 bg-navbar-bg px-16 py-2 text-navbar-text shadow-md"
       }
+      data-testid="navbar"
     >
-      <div className={"flex items-center gap-2 font-bold text-lg"}>
+      <div className={"flex items-center gap-2 text-lg font-bold"}>
         <button
-          className={"cursor-pointer max-h-6 text-text"}
+          className={"max-h-6 cursor-pointer text-text"}
           onClick={toggleDrawer}
         >
           <span className="material-symbols-rounded">menu</span>
         </button>
         <h1
           className={
-            "text-2xl block font-sans antialiased font-semibold leading-snug tracking-normal text-text"
+            "block font-sans text-2xl leading-snug font-semibold tracking-normal text-text antialiased"
           }
         >
           3 in Line
