@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { StorageKeys, StorageService } from "@/application/storage-service.ts";
 
@@ -7,25 +7,22 @@ interface UserSettings {
   difficulty: "easy" | "hard";
 }
 
-export const WelcomeModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
+type WelcomeModalProps = {
+  isOpen: boolean;
+  startGame: () => void;
+};
+
+export const WelcomeModal = ({ isOpen, startGame }: WelcomeModalProps) => {
   const [name, setName] = useState("");
   const [difficulty, setDifficulty] =
     useState<UserSettings["difficulty"]>("easy");
-
-  useEffect(() => {
-    const stored = StorageService.get(StorageKeys.USER_SETTINGS);
-    if (!stored) {
-      setIsOpen(true);
-    }
-  }, []);
 
   const handleSave = () => {
     if (!name.trim()) return;
 
     const settings: UserSettings = { name, difficulty };
     StorageService.set(StorageKeys.USER_SETTINGS, settings);
-    setIsOpen(false);
+    startGame();
   };
 
   if (!isOpen) return null;
