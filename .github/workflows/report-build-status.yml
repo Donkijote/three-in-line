@@ -11,6 +11,7 @@ on:
 jobs:
   report-build-status:
     runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.ready_for_review }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
