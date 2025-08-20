@@ -1,16 +1,15 @@
 import { clsx } from "clsx";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { checkWinner, DEFAULT_PLAYS } from "../domain/board-logic";
+import { checkWinner, DEFAULT_PLAYS, syncGamePlay, syncGamesData } from "../domain/board-logic";
 import type { GameStateType } from "../types";
 import { GameState } from "../types";
 import { BoardTitle } from "./components/BoardTitle";
+import { NewGameButton } from "./components/NewGameButton";
 
 export const Board = () => {
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   const [plays, setPlays] = useState<Array<number | null>>(DEFAULT_PLAYS);
-
-  const gameState: GameStateType = useMemo(() => checkWinner(plays), [plays]);
 
   const handleAction: (position: number) => void = useCallback(
     (position: number) => {
@@ -19,22 +18,33 @@ export const Board = () => {
       setPlays((prevState) => {
         const newValues = [...prevState];
         newValues[position] = isPlayerTurn ? 1 : 0;
+        syncGamePlay(newValues, isPlayerTurn, checkWinner(newValues));
         return newValues;
       });
       setIsPlayerTurn((prevState) => !prevState);
     },
-    [isPlayerTurn, plays, setIsPlayerTurn],
+    [isPlayerTurn, plays],
   );
 
   const handleRest: () => void = useCallback(() => {
-    setPlays(DEFAULT_PLAYS);
-    setIsPlayerTurn(true);
+    const result = syncGamesData();
+    setPlays(result.plays);
+    setIsPlayerTurn(result.isPlayerTurn);
   }, []);
+
+  const gameState: GameStateType = useMemo(() => checkWinner(plays), [plays]);
+
+  useEffect(() => {
+    handleRest();
+  }, [handleRest]);
 
   const isGameInProgress = gameState === GameState.PROGRESS;
 
   return (
-    <div className="flex h-[calc(100dvh-8rem)] w-full flex-col justify-start gap-12">
+    <div
+      className="flex h-[calc(100dvh-8rem)] w-full flex-col justify-start gap-12"
+      data-testid={"Board"}
+    >
       <BoardTitle isPlayerTurn={isPlayerTurn} gameState={gameState} />
       <div
         className={
@@ -59,6 +69,7 @@ export const Board = () => {
               )}
               onClick={() => handleAction(index)}
               disabled={!isGameInProgress}
+              data-testid={`Board-cell-${index}`}
             >
               {item !== null && (
                 <span
@@ -79,16 +90,7 @@ export const Board = () => {
           ))}
         </div>
       </div>
-      {gameState !== GameState.PROGRESS && (
-        <button
-          className={
-            "mt-4 max-w-[300px] cursor-pointer self-center rounded-full bg-emerald-500 px-6 py-4 text-3xl font-semibold text-white shadow-md drop-shadow-[0_0_6px_rgba(16,185,129,0.5)] transition-all duration-200 hover:bg-emerald-600 hover:shadow-lg dark:hover:bg-emerald-400"
-          }
-          onClick={handleRest}
-        >
-          🔄 New Game
-        </button>
-      )}
+      <NewGameButton gameState={gameState} handleRest={handleRest} />
     </div>
   );
 };
