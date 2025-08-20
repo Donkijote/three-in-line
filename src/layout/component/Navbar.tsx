@@ -16,6 +16,7 @@ export const Navbar = ({ toggleDrawer }: NavbarProps) => {
         <button
           className={"max-h-6 cursor-pointer text-text"}
           onClick={toggleDrawer}
+          data-testid="toggle-sidebar"
         >
           <span className="material-symbols-rounded">menu</span>
         </button>

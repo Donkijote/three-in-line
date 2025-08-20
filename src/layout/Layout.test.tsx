@@ -2,7 +2,7 @@ import { beforeAll } from "vitest";
 
 import { ThemeProvider } from "@/context/ThemeProvider.tsx";
 
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { Layout } from "./Layout";
 
@@ -10,7 +10,7 @@ describe("Layout", () => {
   beforeAll(() => {
     window.matchMedia = vi.fn().mockImplementation(() => ({ matches: false }));
   });
-  test("renders Navbar and Sidebar components", () => {
+  test("renders Navbar and Sidebar components and toggle sidebar", () => {
     render(
       <ThemeProvider>
         <Layout />
@@ -19,5 +19,12 @@ describe("Layout", () => {
 
     expect(screen.getByTestId("navbar")).toBeInTheDocument();
     expect(screen.getByTestId("sidebar")).toBeInTheDocument();
+
+    const toggleButton = screen.getByTestId("toggle-sidebar");
+    expect(toggleButton).toBeInTheDocument();
+
+    fireEvent.click(toggleButton);
+
+    expect(screen.getByTestId("sidebar")).toHaveClass("translate-x-0");
   });
 });
