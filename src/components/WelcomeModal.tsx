@@ -1,11 +1,7 @@
 import { useState } from "react";
 
 import { StorageKeys, StorageService } from "@/application/storage-service.ts";
-
-interface UserSettings {
-  name: string;
-  difficulty: "easy" | "hard";
-}
+import type { UserSettings } from "@/types";
 
 type WelcomeModalProps = {
   isOpen: boolean;
@@ -20,7 +16,8 @@ export const WelcomeModal = ({ isOpen, startGame }: WelcomeModalProps) => {
   const handleSave = () => {
     if (!name.trim()) return;
 
-    const settings: UserSettings = { name, difficulty };
+    // TODO: Fetch a random bot name from an API or a predefined list
+    const settings: UserSettings = { name, difficulty, bot: "Bot" };
     StorageService.set(StorageKeys.USER_SETTINGS, settings);
     startGame();
   };

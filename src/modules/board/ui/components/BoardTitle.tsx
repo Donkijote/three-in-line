@@ -1,7 +1,9 @@
 import { clsx } from "clsx";
 import { useMemo } from "react";
 
+import { StorageKeys, StorageService } from "@/application/storage-service.ts";
 import { GameState, type GameStateType } from "@/modules/board/types";
+import type { UserSettings } from "@/types";
 
 type BoardTitleProps = {
   isPlayerTurn: boolean;
@@ -9,9 +11,18 @@ type BoardTitleProps = {
 };
 
 export const BoardTitle = ({ isPlayerTurn, gameState }: BoardTitleProps) => {
+  const userConfigKey = StorageService.get(StorageKeys.USER_SETTINGS);
+  let botName = "Bot";
+  let userName = "Player";
+  if (userConfigKey) {
+    const userSettings = JSON.parse(userConfigKey) as UserSettings;
+    userName = userSettings.name;
+    botName = userSettings.bot;
+  }
+
   const text = useMemo(() => {
     if (gameState === GameState.PROGRESS) {
-      return isPlayerTurn ? "Your Turn!" : "Bot’s Turn!";
+      return isPlayerTurn ? `${userName} Turn!` : `${botName} Turn!`;
     }
     if (gameState === GameState.WIN) {
       return "You Won!";
@@ -20,7 +31,7 @@ export const BoardTitle = ({ isPlayerTurn, gameState }: BoardTitleProps) => {
       return "You Lost :(";
     }
     return "It's a Tied!";
-  }, [isPlayerTurn, gameState]);
+  }, [isPlayerTurn, gameState, userName, botName]);
 
   return (
     <div
@@ -42,7 +53,9 @@ export const BoardTitle = ({ isPlayerTurn, gameState }: BoardTitleProps) => {
       >
         {text}
       </h1>
-      <p className="text-sm text-text opacity-75">Name vs Bot's Name</p>
+      <p className="text-sm text-text opacity-75">
+        {userName} vs {botName}
+      </p>
     </div>
   );
 };
