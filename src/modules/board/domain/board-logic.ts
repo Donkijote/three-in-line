@@ -1,7 +1,4 @@
-import {
-  GameStorage,
-  GameStorageService,
-} from "@/modules/board/application/games-storage";
+import { GameStorage, GameStorageService } from "@/application/games-storage";
 
 import { GameState, type GameStateType, type GameStorageType } from "../types";
 

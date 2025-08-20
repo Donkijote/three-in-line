@@ -1,17 +1,9 @@
 import { afterAll } from "vitest";
 
-import {
-  GameStorage,
-  GameStorageService,
-} from "@/modules/board/application/games-storage.ts";
+import { GameStorage, GameStorageService } from "@/application/games-storage.ts";
 import { GameState, type GameStorageType } from "@/modules/board/types";
 
-import {
-  checkWinner,
-  DEFAULT_PLAYS,
-  syncGamePlay,
-  syncGamesData,
-} from "./board-logic";
+import { checkWinner, DEFAULT_PLAYS, syncGamePlay, syncGamesData } from "./board-logic";
 
 describe("Board Logic", () => {
   afterAll(() => {
