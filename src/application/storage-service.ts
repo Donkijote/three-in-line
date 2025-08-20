@@ -1,5 +1,6 @@
 export const StorageKeys = {
   GAMES: "GAMES",
+  USER_SETTINGS: "USER_SETTINGS",
 } as const;
 
 export const StorageService = {

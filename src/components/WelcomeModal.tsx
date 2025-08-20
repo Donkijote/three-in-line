@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { StorageKeys, StorageService } from "@/application/storage-service.ts";
+
 interface UserSettings {
   name: string;
   difficulty: "easy" | "hard";
@@ -8,10 +10,11 @@ interface UserSettings {
 export const WelcomeModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
-  const [difficulty, setDifficulty] = useState<"easy" | "hard">("easy");
+  const [difficulty, setDifficulty] =
+    useState<UserSettings["difficulty"]>("easy");
 
   useEffect(() => {
-    const stored = localStorage.getItem("userSettings");
+    const stored = StorageService.get(StorageKeys.USER_SETTINGS);
     if (!stored) {
       setIsOpen(true);
     }
@@ -21,7 +24,7 @@ export const WelcomeModal = () => {
     if (!name.trim()) return;
 
     const settings: UserSettings = { name, difficulty };
-    localStorage.setItem("userSettings", JSON.stringify(settings));
+    StorageService.set(StorageKeys.USER_SETTINGS, settings);
     setIsOpen(false);
   };
 
