@@ -19,7 +19,10 @@ export const SidebarElement = ({ game, settings }: HistoryElementProps) => {
   }
 
   return (
-    <button className="flex w-full cursor-pointer items-center rounded-lg p-3 text-start leading-tight text-text transition-all outline-none hover:bg-hover">
+    <button
+      className="flex w-full cursor-pointer items-center rounded-lg p-3 text-start leading-tight text-text transition-all outline-none hover:bg-hover"
+      data-testid={`SidebarElement-match-${game.id}-button`}
+    >
       <div className="mr-4 grid place-items-center">
         <span
           className={clsx("material-symbols-outlined", {
