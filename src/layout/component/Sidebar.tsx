@@ -1,10 +1,28 @@
 import { clsx } from "clsx";
 
+import { StorageKeys, StorageService } from "@/application/storage-service";
+import { GameState, type GameStorageType } from "@/modules/board/types";
+import type { UserSettings } from "@/types";
+
+import { SidebarElement } from "./SidebarElement";
+
 type SidebarProps = {
   isOpen: boolean;
 };
 
 export const Sidebar = ({ isOpen }: SidebarProps) => {
+  const matchesKey = StorageService.get(StorageKeys.GAMES);
+  const userSettingsKey = StorageService.get(StorageKeys.USER_SETTINGS);
+
+  const games = matchesKey
+    ? (JSON.parse(matchesKey) as Array<GameStorageType>).filter(
+        ({ state }) => state !== GameState.PROGRESS,
+      )
+    : [];
+  const userSettings: UserSettings = userSettingsKey
+    ? JSON.parse(userSettingsKey)
+    : { name: "", bot: "", difficulty: "easy" };
+
   return (
     <div
       className={clsx(
@@ -22,22 +40,9 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
         </h2>
       </div>
       <nav className="flex min-w-[240px] flex-col gap-1 space-y-2 p-2 font-sans text-base font-normal">
-        <button className="flex w-full cursor-pointer items-center rounded-lg p-3 text-start leading-tight text-text transition-all outline-none hover:bg-hover">
-          <div className="mr-4 grid place-items-center">
-            <span className="material-symbols-outlined text-primary">
-              check
-            </span>
-          </div>
-          Victory
-        </button>
-        <button className="flex w-full cursor-pointer items-center rounded-lg p-3 text-start leading-tight text-text transition-all outline-none hover:bg-hover">
-          <div className="mr-4 grid place-items-center">
-            <span className="material-symbols-outlined text-secondary">
-              close
-            </span>
-          </div>
-          Defeat
-        </button>
+        {games.map((game) => (
+          <SidebarElement key={game.id} game={game} settings={userSettings} />
+        ))}
       </nav>
     </div>
   );
