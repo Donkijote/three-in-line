@@ -1,9 +1,6 @@
 import { afterAll } from "vitest";
 
-import {
-  GameStorage,
-  GameStorageService,
-} from "@/modules/board/application/games-storage.ts";
+import { StorageKeys, StorageService } from "@/application/storage-service";
 import { GameState, type GameStorageType } from "@/modules/board/types";
 
 import {
@@ -15,7 +12,7 @@ import {
 
 describe("Board Logic", () => {
   afterAll(() => {
-    GameStorageService.remove(GameStorage.GAMES);
+    StorageService.remove(StorageKeys.GAMES);
   });
   test("winner detection", () => {
     const plays = [1, 1, 1, 0, 0, null, null, null, null];
@@ -23,7 +20,7 @@ describe("Board Logic", () => {
     expect(result).toBe(GameState.WIN);
   });
   test("sync game data from local storage with empty key", () => {
-    GameStorageService.set(GameStorage.GAMES, []);
+    StorageService.set(StorageKeys.GAMES, []);
     const newGame = syncGamesData();
 
     expect(newGame).toStrictEqual({
@@ -42,7 +39,7 @@ describe("Board Logic", () => {
       isPlayerTurn: true,
       plays: [1, 1, 1, 0, 0, null, null, null, null],
     };
-    GameStorageService.set(GameStorage.GAMES, [newGame]);
+    StorageService.set(StorageKeys.GAMES, [newGame]);
     const data = syncGamesData();
 
     expect(data).toStrictEqual({
@@ -62,22 +59,22 @@ describe("Board Logic", () => {
       plays: [1, 1, null, 0, 0, null, null, null, null],
     };
 
-    GameStorageService.set(GameStorage.GAMES, [newGame]);
+    StorageService.set(StorageKeys.GAMES, [newGame]);
     const data = syncGamesData();
 
     expect(data).toStrictEqual({ ...newGame, date: data.date });
   });
   test("sync game play to local storage without key", () => {
-    GameStorageService.remove(GameStorage.GAMES);
-    const mockedStorageServiceSet = vi.spyOn(GameStorageService, "set");
+    StorageService.remove(StorageKeys.GAMES);
+    const mockedStorageServiceSet = vi.spyOn(StorageService, "set");
 
     syncGamePlay(DEFAULT_PLAYS, true, GameState.PROGRESS);
 
     expect(mockedStorageServiceSet).not.toHaveBeenCalled();
   });
   test("sync game play to local storage with empty key", () => {
-    GameStorageService.set(GameStorage.GAMES, []);
-    const mockedStorageServiceSet = vi.spyOn(GameStorageService, "set");
+    StorageService.set(StorageKeys.GAMES, []);
+    const mockedStorageServiceSet = vi.spyOn(StorageService, "set");
 
     syncGamePlay(DEFAULT_PLAYS, true, GameState.PROGRESS);
 
@@ -92,8 +89,8 @@ describe("Board Logic", () => {
       plays: [1, 1, 1, 0, 0, null, null, null, null],
     };
 
-    GameStorageService.set(GameStorage.GAMES, [newGame]);
-    const mockedStorageServiceSet = vi.spyOn(GameStorageService, "set");
+    StorageService.set(StorageKeys.GAMES, [newGame]);
+    const mockedStorageServiceSet = vi.spyOn(StorageService, "set");
 
     syncGamePlay(DEFAULT_PLAYS, true, GameState.PROGRESS);
 

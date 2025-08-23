@@ -1,6 +1,6 @@
 import { beforeAll } from "vitest";
 
-import { ThemeProvider } from "@/context/ThemeProvider.tsx";
+import { ThemeProvider } from "@/context/ThemeProvider";
 
 import { fireEvent, render, screen } from "@testing-library/react";
 
