@@ -1,4 +1,4 @@
-import { StorageKeys, StorageService } from "@/application/storage-service.ts";
+import { StorageKeys, StorageService } from "@/application/storage-service";
 
 import { GameState, type GameStateType, type GameStorageType } from "../types";
 

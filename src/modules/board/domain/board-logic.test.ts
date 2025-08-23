@@ -1,9 +1,14 @@
 import { afterAll } from "vitest";
 
-import { StorageKeys, StorageService } from "@/application/storage-service.ts";
+import { StorageKeys, StorageService } from "@/application/storage-service";
 import { GameState, type GameStorageType } from "@/modules/board/types";
 
-import { checkWinner, DEFAULT_PLAYS, syncGamePlay, syncGamesData } from "./board-logic";
+import {
+  checkWinner,
+  DEFAULT_PLAYS,
+  syncGamePlay,
+  syncGamesData,
+} from "./board-logic";
 
 describe("Board Logic", () => {
   afterAll(() => {
