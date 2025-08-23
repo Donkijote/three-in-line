@@ -42,6 +42,7 @@ export const WelcomeModal = ({ isOpen, startGame }: WelcomeModalProps) => {
           onChange={(e) => setName(e.target.value)}
           placeholder="Your name"
           className="w-full rounded-lg border border-grid bg-transparent px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
+          autoFocus={true}
         />
 
         <div className="flex justify-between">
