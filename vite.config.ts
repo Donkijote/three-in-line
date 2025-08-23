@@ -31,7 +31,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
-      exclude: ["./src/main.tsx", "./*.config.*", "./*.d.*"],
+      exclude: ["**/*.test.*", "./src/main.tsx", "./*.config.*", "./*.d.*"],
     },
   },
 } as UserConfig);
