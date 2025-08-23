@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { useMemo } from "react";
 
-import { StorageKeys, StorageService } from "@/application/storage-service.ts";
+import { StorageKeys, StorageService } from "@/application/storage-service";
 import { GameState, type GameStateType } from "@/modules/board/types";
 import type { UserSettings } from "@/types";
 
