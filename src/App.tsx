@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { StorageKeys, StorageService } from "@/application/storage-service.ts";
-import { WelcomeModal } from "@/components/WelcomeModal.tsx";
+import { StorageKeys, StorageService } from "@/application/storage-service";
+import { WelcomeModal } from "@/components/WelcomeModal";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { Layout } from "@/layout/Layout";
 import { Board } from "@/modules/board";
