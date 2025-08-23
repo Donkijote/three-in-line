@@ -1,7 +1,4 @@
-import {
-  GameStorage,
-  GameStorageService,
-} from "@/modules/board/application/games-storage";
+import { StorageKeys, StorageService } from "@/application/storage-service";
 
 import { GameState, type GameStateType, type GameStorageType } from "../types";
 
@@ -43,7 +40,7 @@ export const checkWinner = (plays: Array<number | null>) => {
 };
 
 export const syncGamesData = () => {
-  const gamesKey = GameStorageService.get(GameStorage.GAMES);
+  const gamesKey = StorageService.get(StorageKeys.GAMES);
   const newGame: GameStorageType = {
     id: new Date().getTime().toString(),
     date: new Date(),
@@ -52,20 +49,20 @@ export const syncGamesData = () => {
     plays: DEFAULT_PLAYS,
   };
   if (!gamesKey) {
-    GameStorageService.set(GameStorage.GAMES, [newGame]);
+    StorageService.set(StorageKeys.GAMES, [newGame]);
     return newGame;
   }
 
   const games = JSON.parse(gamesKey) as Array<GameStorageType>;
 
   if (!games.length) {
-    GameStorageService.set(GameStorage.GAMES, [newGame]);
+    StorageService.set(StorageKeys.GAMES, [newGame]);
     return newGame;
   }
 
   const latestGame = games[0];
   if (latestGame.state !== GameState.PROGRESS) {
-    GameStorageService.set(GameStorage.GAMES, [newGame, ...games]);
+    StorageService.set(StorageKeys.GAMES, [newGame, ...games]);
     return newGame;
   }
 
@@ -77,7 +74,7 @@ export const syncGamePlay = (
   currentTurn: boolean,
   state: GameStateType,
 ) => {
-  const gamesKey = GameStorageService.get(GameStorage.GAMES);
+  const gamesKey = StorageService.get(StorageKeys.GAMES);
   if (!gamesKey) {
     console.error("Trying to update but key does not exist");
     return;
@@ -105,5 +102,5 @@ export const syncGamePlay = (
   games.splice(0, 1, updatedGame);
 
   const updatedGames = [...games];
-  GameStorageService.set(GameStorage.GAMES, updatedGames);
+  StorageService.set(StorageKeys.GAMES, updatedGames);
 };

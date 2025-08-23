@@ -1,1 +1,1 @@
-export { Board } from "./ui/Board.tsx";
+export { Board } from "./ui/Board";
