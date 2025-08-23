@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { StorageKeys, StorageService } from "@/application/storage-service.ts";
+import { StorageKeys, StorageService } from "@/application/storage-service";
 import type { UserSettings } from "@/types";
 
 type WelcomeModalProps = {
@@ -25,7 +25,10 @@ export const WelcomeModal = ({ isOpen, startGame }: WelcomeModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      data-testid="welcome-modal"
+    >
       <div className="w-80 space-y-8 rounded-xl bg-background p-6 text-text shadow-lg">
         <div className={"justify-centers flex flex-col items-center gap-2"}>
           <p className={"text-center"}>👋</p>
@@ -43,6 +46,7 @@ export const WelcomeModal = ({ isOpen, startGame }: WelcomeModalProps) => {
           placeholder="Your name"
           className="w-full rounded-lg border border-grid bg-transparent px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
           autoFocus={true}
+          data-testid={"welcome-modal-name-input"}
         />
 
         <div className="flex justify-between">
@@ -53,6 +57,7 @@ export const WelcomeModal = ({ isOpen, startGame }: WelcomeModalProps) => {
                 ? "bg-primary text-white"
                 : "border border-grid"
             }`}
+            data-testid="welcome-modal-bot-difficulty-easy-button"
           >
             Easy
           </button>
@@ -63,6 +68,7 @@ export const WelcomeModal = ({ isOpen, startGame }: WelcomeModalProps) => {
                 ? "bg-secondary text-white"
                 : "border border-grid"
             }`}
+            data-testid="welcome-modal-bot-difficulty-hard-button"
           >
             Hard
           </button>
@@ -71,6 +77,7 @@ export const WelcomeModal = ({ isOpen, startGame }: WelcomeModalProps) => {
         <button
           onClick={handleSave}
           className="w-full cursor-pointer rounded-lg bg-emerald-500 py-2 font-semibold text-white transition hover:bg-emerald-600"
+          data-testid="welcome-modal-save-button"
         >
           Start Game
         </button>
