@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { getBotName } from "@/application/get-bot-name";
 import { StorageKeys, StorageService } from "@/application/storage-service";
 import type { UserSettings } from "@/types";
 
@@ -16,8 +17,8 @@ export const WelcomeModal = ({ isOpen, startGame }: WelcomeModalProps) => {
   const handleSave = () => {
     if (!name.trim()) return;
 
-    // TODO: Fetch a random bot name from an API or a predefined list
-    const settings: UserSettings = { name, difficulty, bot: "Bot" };
+    const bot = getBotName();
+    const settings: UserSettings = { name, difficulty, bot: `Bot ${bot}` };
     StorageService.set(StorageKeys.USER_SETTINGS, settings);
     startGame();
   };
