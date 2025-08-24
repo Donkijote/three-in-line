@@ -1,7 +1,12 @@
 import { clsx } from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { checkWinner, DEFAULT_PLAYS, syncGamePlay, syncGamesData } from "../domain/board-logic";
+import {
+  checkWinner,
+  DEFAULT_PLAYS,
+  syncGamePlay,
+  syncGamesData,
+} from "../domain/board-logic";
 import type { GameStateType } from "../types";
 import { GameState } from "../types";
 import { BoardTitle } from "./components/BoardTitle";
@@ -10,6 +15,8 @@ import { NewGameButton } from "./components/NewGameButton";
 export const Board = () => {
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   const [plays, setPlays] = useState<Array<number | null>>(DEFAULT_PLAYS);
+
+  const gameState: GameStateType = useMemo(() => checkWinner(plays), [plays]);
 
   const handleAction: (position: number) => void = useCallback(
     (position: number) => {
@@ -32,11 +39,28 @@ export const Board = () => {
     setIsPlayerTurn(result.isPlayerTurn);
   }, []);
 
-  const gameState: GameStateType = useMemo(() => checkWinner(plays), [plays]);
+  const handleBotAction: () => void = useCallback(() => {
+    const availableIndexes = plays.reduce<Array<number>>(
+      (acc, currentValue, currentIndex) => {
+        if (currentValue === null) {
+          acc.push(currentIndex);
+        }
+        return acc;
+      },
+      [],
+    );
+    const randomIndex = Math.floor(Math.random() * availableIndexes.length);
+    setTimeout(() => handleAction(availableIndexes[randomIndex]), 1500);
+  }, [plays, handleAction]);
 
   useEffect(() => {
     handleRest();
   }, [handleRest]);
+
+  useEffect(() => {
+    if (isPlayerTurn || gameState !== GameState.PROGRESS) return;
+    handleBotAction();
+  }, [isPlayerTurn, gameState, plays, handleBotAction]);
 
   const isGameInProgress = gameState === GameState.PROGRESS;
 
@@ -64,11 +88,12 @@ export const Board = () => {
                 {
                   "border-b-0": index >= 6,
                   "border-l-0": index % 3 === 0,
-                  "cursor-pointer hover:bg-white/5": isGameInProgress,
+                  "cursor-pointer hover:bg-white/5":
+                    isGameInProgress && isPlayerTurn,
                 },
               )}
               onClick={() => handleAction(index)}
-              disabled={!isGameInProgress}
+              disabled={!isGameInProgress || !isPlayerTurn}
               data-testid={`Board-cell-${index}`}
             >
               {item !== null && (
