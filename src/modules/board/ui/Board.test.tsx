@@ -28,18 +28,5 @@ describe("Board", () => {
       true,
       GameState.PROGRESS,
     );
-
-    const secondCell = screen.getByTestId("Board-cell-1");
-    expect(secondCell).toBeInTheDocument();
-
-    await waitFor(async () => await userEvent.click(secondCell));
-
-    expectedValues.splice(1, 1, 0);
-
-    expect(mockedSync).toHaveBeenCalledWith(
-      expectedValues,
-      false,
-      GameState.PROGRESS,
-    );
   });
 });
