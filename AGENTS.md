@@ -1,12 +1,12 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This is a Vite + React + TypeScript app.
+This is a Vite + React + TypeScript app. The current codebase is organized for the web client only.
 
-- `src/main.tsx` bootstraps the app, `src/App.tsx` holds the root UI.
-- `src/components/` contains reusable React components.
-- `src/lib/` is for shared utilities and helpers.
-- `src/assets/` stores local images and static assets imported by the app.
+- `src/ui/web/main.tsx` bootstraps the app, `src/ui/web/App.tsx` holds the root UI.
+- `src/ui/web/components/` contains reusable React components (including `components/ui`).
+- `src/ui/web/lib/` is for shared UI utilities and helpers.
+- `src/ui/web/assets/` stores local images and static assets imported by the app.
 - `public/` holds static files served as-is.
 - `scripts/` contains repo automation (e.g., `scripts/ghi-pr.sh`).
 
@@ -43,4 +43,4 @@ For pull requests, include a clear summary, link any related issues, and add scr
 ## Configuration Notes
 - Vite config lives in `vite.config.ts`.
 - TypeScript configs are in `tsconfig*.json`.
-- Styling uses Tailwind via `src/index.css`.
+- Styling uses Tailwind via `src/ui/web/styles/globals.css`.

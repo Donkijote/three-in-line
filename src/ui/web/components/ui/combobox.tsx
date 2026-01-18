@@ -6,7 +6,7 @@ import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 
 import { Combobox as ComboboxPrimitive } from "@base-ui/react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/ui/web/lib/utils";
 
 import { Button } from "./button";
 import {

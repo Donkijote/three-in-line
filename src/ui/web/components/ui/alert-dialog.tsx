@@ -2,7 +2,7 @@ import type * as React from "react";
 
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/ui/web/lib/utils";
 
 import { Button } from "./button";
 
