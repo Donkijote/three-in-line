@@ -395,7 +395,19 @@ At root:
 - `bun run dev`
 - `bun run build`
 - `bun run lint`
+- `bun run test`
 - `bun run preview`
+
+---
+
+## Testing
+
+Vitest runs unit tests in a JSDOM environment. Place tests in `src/` with
+`*.test.ts(x)` or `*.spec.ts(x)` names and run:
+
+```bash
+bun run test
+```
 
 ---
 
