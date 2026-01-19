@@ -35,6 +35,7 @@ Use Bun (preferred) or npm to run scripts from `package.json`.
 - React components use PascalCase (e.g., `GameBoard.tsx`).
 - Hooks use `use*` naming (e.g., `useGameState.ts`).
 - Prefer absolute imports with `@/` when possible.
+- Relative imports are allowed inside `src/ui/web/components/**` when importing sibling or nested child components (use `./` or `../` only).
 
 ## Testing Guidelines
 Tests use Vitest with a JSDOM environment.

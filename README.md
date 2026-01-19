@@ -369,6 +369,7 @@ Rules:
 ## Import Conventions (Web)
 - Prefer absolute imports with `@/` whenever possible.
 - Shared web utilities live in `src/ui/web/lib/`.
+- Relative imports are allowed inside `src/ui/web/components/**` for sibling or nested child components (use `./` or `../` only).
 
 ---
 
