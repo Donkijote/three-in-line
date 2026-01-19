@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { ConvexProvider as ConvexReactProvider } from "convex/react";
 
@@ -8,7 +8,7 @@ type ConvexProviderProps = {
   children: ReactNode;
 };
 
-export function ConvexProvider({ children }: ConvexProviderProps) {
+export function ConvexProvider({ children }: Readonly<ConvexProviderProps>) {
   return (
     <ConvexReactProvider client={convexClient}>{children}</ConvexReactProvider>
   );
