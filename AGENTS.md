@@ -1,14 +1,22 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This is a Vite + React + TypeScript app. The current codebase is organized for the web client only.
+This is a Vite + React + TypeScript app using TanStack Router. The current codebase is organized for the web client only.
 
-- `src/ui/web/main.tsx` bootstraps the app, `src/ui/web/App.tsx` holds the root UI.
+- `src/ui/web/main.tsx` bootstraps the app with `RouterProvider`.
+- `src/ui/web/router.tsx` defines the TanStack Router instance.
+- `src/ui/web/routes/` contains file-based routes (`__root.tsx`, `index.tsx`).
 - `src/ui/web/components/` contains reusable React components (including `components/ui`).
 - `src/ui/web/lib/` is for shared UI utilities and helpers.
 - `src/ui/web/assets/` stores local images and static assets imported by the app.
 - `public/` holds static files served as-is.
 - `scripts/` contains repo automation (e.g., `scripts/ghi-pr.sh`).
+
+## Routing Conventions
+- File-based routes live in `src/ui/web/routes/`.
+- `__root.tsx` is the root layout; `index.tsx` maps to `/`.
+- Use nested folders/files for nested URLs.
+- Shared UI stays in `src/ui/web/components/`; keep route components thin.
 
 ## Build, Test, and Development Commands
 Use Bun (preferred) or npm to run scripts from `package.json`.
@@ -44,3 +52,4 @@ For pull requests, include a clear summary, link any related issues, and add scr
 - Vite config lives in `vite.config.ts`.
 - TypeScript configs are in `tsconfig*.json`.
 - Styling uses Tailwind via `src/ui/web/styles/globals.css`.
+- TanStack Router uses `@tanstack/router-plugin` in Vite and generates `src/ui/web/routeTree.gen.ts`.
