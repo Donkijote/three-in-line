@@ -132,14 +132,6 @@ Recommended layout:
 │   │   │   │   ├── providers
 │   │   │   │   │   ├── ConvexProvider.tsx
 │   │   │   │   │   └── ThemeProvider.tsx
-│   │   │   │   ├── router.tsx
-│   │   │   │   └── routes
-│   │   │   │       ├── __root.tsx
-│   │   │   │       ├── index.tsx
-│   │   │   │       ├── lobby.tsx
-│   │   │   │       ├── room.$roomId.tsx
-│   │   │   │       ├── profile.$username.tsx
-│   │   │   │       └── settings.tsx
 │   │   │   ├── modules
 │   │   │   │   ├── home
 │   │   │   │   │   ├── screens
@@ -184,9 +176,23 @@ Recommended layout:
 │   │   │   │   │    └── ErrorState.tsx
 │   │   │   │   └── ui
 │   │   │   │       └── (generated shadcn/ui components)
+│   │   │   ├── modules
+│   │   │   │   └── home
+│   │   │   │       ├── components
+│   │   │   │       │   ├── ComponentExample.tsx
+│   │   │   │       │   └── Example.tsx
+│   │   │   │       └── screens
+│   │   │   │           └── HomeScreen.tsx
+│   │   │   ├── routes
+│   │   │   │   ├── __root.tsx
+│   │   │   │   └── index.tsx
 │   │   │   ├── styles
 │   │   │   │   └── globals.css
-│   │   │   └── main.tsx
+│   │   │   ├── lib
+│   │   │   │   └── utils.ts
+│   │   │   ├── main.tsx
+│   │   │   ├── router.tsx
+│   │   │   └── routeTree.gen.ts
 │   │   ├── mobile
 │   │   │   ├── app
 │   │   │   │   ├── navigation
@@ -357,6 +363,12 @@ Rules:
 - `__root.tsx` defines the root layout and hosts shared providers or UI chrome.
 - Use `index.tsx` for `/` and nested folders for nested paths.
 - Route components are defined via `createFileRoute` and kept small; move shared UI to `src/ui/web/components`.
+
+---
+
+## Import Conventions (Web)
+- Prefer absolute imports with `@/` whenever possible.
+- Shared web utilities live in `src/ui/web/lib/`.
 
 ---
 

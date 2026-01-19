@@ -6,9 +6,11 @@ This is a Vite + React + TypeScript app using TanStack Router. The current codeb
 - `src/ui/web/main.tsx` bootstraps the app with `RouterProvider`.
 - `src/ui/web/router.tsx` defines the TanStack Router instance.
 - `src/ui/web/routes/` contains file-based routes (`__root.tsx`, `index.tsx`).
-- `src/ui/web/components/` contains reusable React components (including `components/ui`).
+- `src/ui/web/modules/` groups feature areas by screen and components.
+- `src/ui/web/components/` contains React components UI, including `components/ui`.
 - `src/ui/web/lib/` is for shared UI utilities and helpers.
 - `src/ui/web/assets/` stores local images and static assets imported by the app.
+- `src/ui/web/styles/` stores global styling like `globals.css`.
 - `public/` holds static files served as-is.
 - `scripts/` contains repo automation (e.g., `scripts/ghi-pr.sh`).
 
@@ -32,6 +34,7 @@ Use Bun (preferred) or npm to run scripts from `package.json`.
 - Indentation is 2 spaces; quotes are double in JS/TS.
 - React components use PascalCase (e.g., `GameBoard.tsx`).
 - Hooks use `use*` naming (e.g., `useGameState.ts`).
+- Prefer absolute imports with `@/` when possible.
 
 ## Testing Guidelines
 Tests use Vitest with a JSDOM environment.

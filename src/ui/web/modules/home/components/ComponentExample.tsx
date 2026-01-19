@@ -31,7 +31,6 @@ import {
   UserIcon,
 } from "lucide-react";
 
-import { Example, ExampleWrapper } from "./example";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,9 +42,9 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "./ui/alert-dialog";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+} from "@/ui/web/components/ui/alert-dialog";
+import { Badge } from "@/ui/web/components/ui/badge";
+import { Button } from "@/ui/web/components/ui/button";
 import {
   Card,
   CardAction,
@@ -54,7 +53,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "./ui/card";
+} from "@/ui/web/components/ui/card";
 import {
   Combobox,
   ComboboxContent,
@@ -62,7 +61,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from "./ui/combobox";
+} from "@/ui/web/components/ui/combobox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -79,9 +78,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Field, FieldGroup, FieldLabel } from "./ui/field";
-import { Input } from "./ui/input";
+} from "@/ui/web/components/ui/dropdown-menu";
+import { Field, FieldGroup, FieldLabel } from "@/ui/web/components/ui/field";
+import { Input } from "@/ui/web/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -89,8 +88,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Textarea } from "./ui/textarea";
+} from "@/ui/web/components/ui/select";
+import { Textarea } from "@/ui/web/components/ui/textarea";
+import {
+  Example,
+  ExampleWrapper,
+} from "@/ui/web/modules/home/components/Example";
 
 export function ComponentExample() {
   return (

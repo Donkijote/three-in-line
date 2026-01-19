@@ -13,9 +13,9 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/ui/web/components",
-    "utils": "@/ui/web/lib/utils",
+    "utils": "@/ui/web/utils/utils",
     "ui": "@/ui/web/components/ui",
-    "lib": "@/ui/web/lib",
+    "lib": "@/ui/web/utils",
     "hooks": "@/ui/web/hooks"
   },
   "menuColor": "default",
