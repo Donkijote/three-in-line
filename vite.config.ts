@@ -1,17 +1,24 @@
-import path from "path";
-import { defineConfig, type UserConfig } from "vite";
+import { defineConfig } from "vite";
 
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
+
+import path from "node:path";
 
 // https://vite.dev/config/
 export default defineConfig({
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+  server: {
+    port: 3000,
+    open: true,
   },
   plugins: [
+    tanstackRouter({
+      routesDirectory: "src/ui/web/routes",
+      generatedRouteTree: "src/ui/web/routeTree.gen.ts",
+      target: "react",
+      autoCodeSplitting: true,
+    }),
     react({
       babel: {
         plugins: ["babel-plugin-react-compiler"],
@@ -19,19 +26,10 @@ export default defineConfig({
     }),
     tailwindcss(),
   ],
-  server: {
-    open: true,
-    port: 3000,
-  },
-  test: {
-    environment: "jsdom",
-    globals: true,
-    setupFiles: ["./vite.setup-tests.ts"],
-    include: ["./src/**/*.test.ts", "./src/**/*.test.tsx"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html"],
-      exclude: ["**/*.test.*", "./src/main.tsx", "./*.config.*", "./*.d.*"],
+  resolve: {
+    alias: {
+      "@/convex": path.resolve(__dirname, "./convex"),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
-} as UserConfig);
+});
