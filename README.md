@@ -128,7 +128,7 @@ Recommended layout:
 │   │   │       └── BoardViewModel.ts
 │   │   │
 │   │   ├── web
-│   │   │   ├── app
+│   │   │   ├── application
 │   │   │   │   ├── providers
 │   │   │   │   │   ├── ConvexProvider.tsx
 │   │   │   │   │   └── ThemeProvider.tsx
@@ -333,6 +333,27 @@ Adapters are the **only place** where you talk to:
 - Convex client APIs
 - Browser / mobile storage
 - OS or platform APIs
+
+---
+
+### Convex React (Web) example (mock)
+```tsx
+import type { ReactNode } from "react";
+
+import { ConvexProvider, useQuery } from "convex/react";
+
+import { convexClient } from "@/infrastructure/convex/client";
+import { api } from "../../convex/_generated/api";
+
+function AppProviders({ children }: { children: ReactNode }) {
+  return <ConvexProvider client={convexClient}>{children}</ConvexProvider>;
+}
+
+function RoomsList() {
+  const rooms = useQuery(api.rooms.list) ?? [];
+  return <div>Rooms: {rooms.length}</div>;
+}
+```
 
 ---
 
