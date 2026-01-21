@@ -1,6 +1,7 @@
 import {
   createContext,
   type PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -37,11 +38,13 @@ const resolveTheme = (theme: ThemePreference): ResolvedTheme =>
   theme === "system" ? getSystemTheme() : theme;
 
 const applyThemeClass = (resolvedTheme: ResolvedTheme) => {
-  if (typeof document === "undefined") {
-    return;
-  }
+  if (typeof document === "undefined") return;
 
-  document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
+  const root = document.documentElement;
+  const isDark = root.classList.contains("dark");
+
+  if (resolvedTheme === "dark" && !isDark) root.classList.add("dark");
+  if (resolvedTheme === "light" && isDark) root.classList.remove("dark");
 };
 
 const getInitialTheme = (): ThemePreference => {
@@ -54,43 +57,42 @@ const getInitialTheme = (): ThemePreference => {
 };
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-  const [theme, setTheme] = useState<ThemePreference>(getInitialTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
-    resolveTheme(getInitialTheme()),
-  );
+  const [{ theme, resolvedTheme }, setState] = useState(() => {
+    const initialTheme = getInitialTheme();
+    const initialResolved = resolveTheme(initialTheme);
+    applyThemeClass(initialResolved);
+
+    return { theme: initialTheme, resolvedTheme: initialResolved };
+  });
+
+  const setTheme = useCallback((nextTheme: ThemePreference) => {
+    setState(() => {
+      const nextResolved = resolveTheme(nextTheme);
+      applyThemeClass(nextResolved);
+      saveThemePreference(nextTheme);
+      return { theme: nextTheme, resolvedTheme: nextResolved };
+    });
+  }, []);
 
   useEffect(() => {
-    const nextResolvedTheme = resolveTheme(theme);
-    setResolvedTheme(nextResolvedTheme);
-    applyThemeClass(nextResolvedTheme);
-    saveThemePreference(theme);
-  }, [theme]);
-
-  useEffect(() => {
-    if (theme !== "system" || typeof window === "undefined") {
-      return undefined;
-    }
+    if (theme !== "system" || typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
-      const nextResolvedTheme = resolveTheme("system");
-      setResolvedTheme(nextResolvedTheme);
-      applyThemeClass(nextResolvedTheme);
+      const nextResolved = resolveTheme("system");
+      setState((prev) => {
+        applyThemeClass(nextResolved);
+        return { ...prev, resolvedTheme: nextResolved };
+      });
     };
 
     mediaQuery.addEventListener("change", handleChange);
-    return () => {
-      mediaQuery.removeEventListener("change", handleChange);
-    };
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
 
   const value = useMemo(
-    () => ({
-      theme,
-      resolvedTheme,
-      setTheme,
-    }),
-    [theme, resolvedTheme],
+    () => ({ theme, resolvedTheme, setTheme }),
+    [theme, resolvedTheme, setTheme],
   );
 
   return (
