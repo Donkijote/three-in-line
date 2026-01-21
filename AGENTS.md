@@ -8,6 +8,7 @@ This is a Vite + React + TypeScript app using TanStack Router. The current codeb
 - `src/ui/web/routes/` contains file-based routes (`__root.tsx`, `index.tsx`).
 - `src/ui/web/modules/` groups feature areas by screen and components.
 - `src/ui/web/components/` contains React components UI, including `components/ui`.
+- `src/ui/web/layout/` contains app-wide layout wrappers.
 - `src/ui/web/lib/` is for shared UI utilities and helpers.
 - `src/ui/web/assets/` stores local images and static assets imported by the app.
 - `src/ui/web/styles/` stores global styling like `globals.css`.
@@ -34,8 +35,12 @@ Use Bun (preferred) or npm to run scripts from `package.json`.
 - Indentation is 2 spaces; quotes are double in JS/TS.
 - React components use PascalCase (e.g., `GameBoard.tsx`).
 - Hooks use `use*` naming (e.g., `useGameState.ts`).
+- Prefer arrow functions for components, hooks, utils, and most other functions.
+- For route files, function declarations are allowed; if using arrow functions, define them before the `export const Route` to avoid runtime issues.
 - Prefer absolute imports with `@/` when possible.
 - Relative imports are allowed inside `src/ui/web/components/**` when importing sibling or nested child components (use `./` or `../` only).
+- Prefer direct React type/value imports (e.g., `import type { ComponentPropsWithoutRef } from "react"`) over `import * as React`.
+- Use typography components for text; add new typography variants only when reused multiple times, otherwise use the closest typography component and override via `className`.
 
 ## Testing Guidelines
 Tests use Vitest with a JSDOM environment.

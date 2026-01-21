@@ -19,6 +19,10 @@ A small-but-serious Tic-Tac-Toe project built as a **cross-platform app** with a
 - **TypeScript**
 - **Biome** — linting & formatting
 
+### Coding Conventions
+- Prefer arrow functions for components, hooks, utils, and most other functions.
+- For route files, function declarations are allowed; if using arrow functions, define them before the `export const Route` to avoid runtime issues.
+
 ### Routing
 - **TanStack Router** with file-based routes (`src/ui/web/routes`) in SPA mode.
 
