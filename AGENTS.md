@@ -41,6 +41,7 @@ Use Bun (preferred) or npm to run scripts from `package.json`.
 - Relative imports are allowed inside `src/ui/web/components/**` when importing sibling or nested child components (use `./` or `../` only).
 - Prefer direct React type/value imports (e.g., `import type { ComponentPropsWithoutRef } from "react"`) over `import * as React`.
 - Use typography components for text; add new typography variants only when reused multiple times, otherwise use the closest typography component and override via `className`.
+- When adding Tailwind color classes, use the custom theme tokens from `src/ui/web/styles/globals.css` (e.g., `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`) instead of hard-coded colors.
 
 ## Testing Guidelines
 Tests use Vitest with a JSDOM environment.
