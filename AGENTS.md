@@ -42,6 +42,7 @@ Use Bun (preferred) or npm to run scripts from `package.json`.
 - Prefer direct React type/value imports (e.g., `import type { ComponentPropsWithoutRef } from "react"`) over `import * as React`.
 - Use typography components for text; add new typography variants only when reused multiple times, otherwise use the closest typography component and override via `className`.
 - When adding Tailwind color classes, use the custom theme tokens from `src/ui/web/styles/globals.css` (e.g., `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`) instead of hard-coded colors.
+- Expose Convex queries/mutations via hooks in `src/infrastructure/convex/*Api.ts` and consume those hooks from UI modules/screens.
 
 ## Testing Guidelines
 Tests use Vitest with a JSDOM environment.
