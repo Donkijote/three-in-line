@@ -39,6 +39,8 @@ Use Bun (preferred) or npm to run scripts from `package.json`.
 - For route files, function declarations are allowed; if using arrow functions, define them before the `export const Route` to avoid runtime issues.
 - Prefer absolute imports with `@/` when possible.
 - Relative imports are allowed inside `src/ui/web/components/**` when importing sibling or nested child components (use `./` or `../` only).
+- Prefer direct React type/value imports (e.g., `import type { ComponentPropsWithoutRef } from "react"`) over `import * as React`.
+- Use typography components for text; add new typography variants only when reused multiple times, otherwise use the closest typography component and override via `className`.
 
 ## Testing Guidelines
 Tests use Vitest with a JSDOM environment.
