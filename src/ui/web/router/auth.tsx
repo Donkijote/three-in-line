@@ -4,10 +4,12 @@ import { Authenticated, Unauthenticated, useConvexAuth } from "convex/react";
 
 import { Navigate } from "@tanstack/react-router";
 
+import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
+
 export const RequireAuth = ({ children }: PropsWithChildren) => {
   const { isAuthenticated, isLoading } = useConvexAuth();
 
-  if (isLoading) return null; // or <FullPageLoader />
+  if (isLoading) return <FullPageLoader />;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -19,7 +21,7 @@ export const RequireAuth = ({ children }: PropsWithChildren) => {
 export const RequireUnAuth = ({ children }: PropsWithChildren) => {
   const { isAuthenticated, isLoading } = useConvexAuth();
 
-  if (isLoading) return null;
+  if (isLoading) return <FullPageLoader message="Unauthorized" />;
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
