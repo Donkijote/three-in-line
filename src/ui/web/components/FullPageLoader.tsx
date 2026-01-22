@@ -1,6 +1,6 @@
 import { Activity, type ComponentPropsWithoutRef } from "react";
 
-import { H3, P, Small } from "@/ui/web/components/typography";
+import { H3, P, Small } from "@/ui/web/components/Typography";
 import { cn } from "@/ui/web/lib/utils";
 
 type FullPageLoaderProps = ComponentPropsWithoutRef<"div"> & {

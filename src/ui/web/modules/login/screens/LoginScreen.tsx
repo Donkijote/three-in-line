@@ -1,4 +1,4 @@
-import { H1, P, Small } from "@/ui/web/components/typography";
+import { H1, P, Small } from "@/ui/web/components/Typography";
 import { AvatarOptions } from "@/ui/web/modules/login/components/AvatarOptions";
 import { LoginForm } from "@/ui/web/modules/login/components/LoginForm";
 

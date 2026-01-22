@@ -8,7 +8,7 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useForm } from "@tanstack/react-form";
 
 import { useCheckEmailExists } from "@/infrastructure/convex/UserApi";
-import { Small } from "@/ui/web/components/typography";
+import { Small } from "@/ui/web/components/Typography";
 import { Button } from "@/ui/web/components/ui/button";
 import {
   InputGroup,

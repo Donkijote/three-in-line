@@ -2,7 +2,7 @@ import { Activity, type Dispatch, type SetStateAction, useState } from "react";
 
 import { CircleCheck, Plus } from "lucide-react";
 
-import { Small } from "@/ui/web/components/typography";
+import { Small } from "@/ui/web/components/Typography";
 import { cn } from "@/ui/web/lib/utils";
 
 type AvatarOption = {
