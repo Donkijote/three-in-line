@@ -1,3 +1,5 @@
+import { Authenticated } from "convex/react";
+
 import { createFileRoute } from "@tanstack/react-router";
 
 import { HomeScreen } from "@/ui/web/modules/home/screens/HomeScreen";
@@ -7,5 +9,9 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeRoute() {
-  return <HomeScreen />;
+  return (
+    <Authenticated>
+      <HomeScreen />
+    </Authenticated>
+  );
 }
