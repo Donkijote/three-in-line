@@ -13,10 +13,10 @@ export default defineSchema({
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
-    codeName: v.optional(v.string()),
+    username: v.optional(v.string()),
   })
     .index("email", ["email"])
-    .index("by_codeName", ["codeName"]),
+    .index("by_username", ["username"]),
   tasks: defineTable({
     text: v.string(),
     isCompleted: v.boolean(),

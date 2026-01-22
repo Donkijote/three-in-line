@@ -4,15 +4,15 @@ import { useConvex } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 
-export function useCheckCodenameExists() {
+export function useCheckEmailExists() {
   const convex = useConvex();
   const [isChecking, setIsChecking] = useState(false);
 
-  const checkCodenameExists = useCallback(
-    async (codeName: string) => {
+  const checkEmailExists = useCallback(
+    async (email: string) => {
       setIsChecking(true);
       try {
-        return await convex.query(api.users.checkCodenameExists, { codeName });
+        return await convex.query(api.users.checkEmailExists, { email });
       } finally {
         setIsChecking(false);
       }
@@ -20,5 +20,5 @@ export function useCheckCodenameExists() {
     [convex],
   );
 
-  return { checkCodenameExists, isChecking };
+  return { checkEmailExists, isChecking };
 }
