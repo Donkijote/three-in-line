@@ -1,8 +1,7 @@
-import { Authenticated } from "convex/react";
-
 import { createFileRoute } from "@tanstack/react-router";
 
 import { HomeScreen } from "@/ui/web/modules/home/screens/HomeScreen";
+import { RequireAuth } from "@/ui/web/router/auth";
 
 export const Route = createFileRoute("/")({
   component: HomeRoute,
@@ -10,8 +9,8 @@ export const Route = createFileRoute("/")({
 
 function HomeRoute() {
   return (
-    <Authenticated>
+    <RequireAuth>
       <HomeScreen />
-    </Authenticated>
+    </RequireAuth>
   );
 }

@@ -1,8 +1,7 @@
-import { Unauthenticated } from "convex/react";
-
 import { createFileRoute } from "@tanstack/react-router";
 
 import { LoginScreen } from "@/ui/web/modules/login/screens/LoginScreen";
+import { RequireUnAuth } from "@/ui/web/router/auth";
 
 export const Route = createFileRoute("/login")({
   component: LoginRoute,
@@ -10,8 +9,8 @@ export const Route = createFileRoute("/login")({
 
 function LoginRoute() {
   return (
-    <Unauthenticated>
+    <RequireUnAuth>
       <LoginScreen />
-    </Unauthenticated>
+    </RequireUnAuth>
   );
 }
