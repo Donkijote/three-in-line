@@ -62,7 +62,7 @@ export const LoginForm = ({ children }: LoginFormProps) => {
 
   return (
     <form
-      className="flex flex-col gap-8"
+      className="flex flex-col gap-8 flex-1"
       onSubmit={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -161,7 +161,16 @@ export const LoginForm = ({ children }: LoginFormProps) => {
           </form.Field>
         </div>
       </Activity>
-      {children}
+
+      <Activity
+        name={"avatars"}
+        mode={
+          doesCodeNameExist === null || doesCodeNameExist ? "hidden" : "visible"
+        }
+      >
+        {children}
+      </Activity>
+
       <form.Subscribe
         selector={(state) => ({
           canSubmit: state.canSubmit,
