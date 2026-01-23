@@ -41,11 +41,21 @@ export const AvatarOptions = () => {
             onSelect={setSelectedAvatar}
           />
         ))}
-        {/*<AvatarOptionItem
-          avatar={customAvatarOptions}
-          onSelect={setSelectedAvatar}
-          isCustom={true}
-        />*/}
+        <button
+          type="button"
+          className={
+            "cursor-pointer flex min-w-30 flex-col items-center gap-3 rounded-3xl border px-4 py-5 text-left relative border-border/60 bg-card/30 text-muted-foreground"
+          }
+        >
+          <div
+            className={
+              "flex size-16 items-center justify-center rounded-full bg-muted/40 text-muted-foreground"
+            }
+          >
+            <Plus className="size-4" />
+          </div>
+          <Small className={"text-xs font-semibold text-inherit"}>CUSTOM</Small>
+        </button>
       </div>
     </div>
   );
@@ -70,9 +80,11 @@ const AvatarOptionItem = ({
       type="button"
       className={cn(
         "cursor-pointer flex min-w-30 flex-col items-center gap-3 rounded-3xl border px-4 py-5 text-left relative",
-        isSelected
-          ? "border-primary/70 bg-card/40 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-          : "border-border/60 bg-card/30 text-muted-foreground",
+        {
+          "border-primary/70 bg-card/40 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]":
+            isSelected,
+          "border-border/60 bg-card/30 text-muted-foreground": !isSelected,
+        },
       )}
       onClick={() => onSelect(avatar)}
     >
@@ -103,10 +115,10 @@ const AvatarOptionItem = ({
         />
       </Activity>
       <Small
-        className={cn(
-          "text-xs font-semibold",
-          isSelected ? "text-foreground/80" : "text-inherit",
-        )}
+        className={cn("text-xs font-semibold", {
+          "text-foreground/80": isSelected,
+          "text-inherit": !isSelected,
+        })}
       >
         {avatar.name}
       </Small>
