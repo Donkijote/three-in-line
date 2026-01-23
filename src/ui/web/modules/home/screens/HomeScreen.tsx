@@ -1,16 +1,30 @@
+import { useAuthActions } from "@convex-dev/auth/react";
+
 import {
   useTasks,
   useToggleTaskCompletion,
 } from "@/infrastructure/convex/TaskApi";
+import { Button } from "@/ui/web/components/ui/button";
 import { cn } from "@/ui/web/lib/utils";
 import { ComponentExample } from "@/ui/web/modules/home/components/ComponentExample";
 
 export function HomeScreen() {
   const tasks = useTasks();
   const toggleComplete = useToggleTaskCompletion();
+  const { signOut } = useAuthActions();
 
   return (
     <div className={"flex flex-col gap-8"}>
+      <div className="flex items-center justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => void signOut()}
+        >
+          Log out
+        </Button>
+      </div>
       <ComponentExample />
       <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
