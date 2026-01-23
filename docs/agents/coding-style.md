@@ -1,0 +1,14 @@
+# Coding Style & Naming Conventions
+
+- Formatting and linting are handled by Biome (`biome.json`).
+- Indentation is 2 spaces; quotes are double in JS/TS.
+- React components use PascalCase (e.g., `GameBoard.tsx`).
+- Hooks use `use*` naming (e.g., `useGameState.ts`).
+- Prefer arrow functions for components, hooks, utils, and most other functions.
+- For route files, function declarations are allowed; if using arrow functions, define them before the `export const Route` to avoid runtime issues.
+- Prefer absolute imports with `@/` when possible.
+- Relative imports are allowed inside `src/ui/web/components/**` when importing sibling or nested child components (use `./` or `../` only).
+- Prefer direct React type/value imports (e.g., `import type { ComponentPropsWithoutRef } from "react"`) over `import * as React`.
+- Use typography components for text; add new typography variants only when reused multiple times, otherwise use the closest typography component and override via `className`.
+- When adding Tailwind color classes, use the custom theme tokens from `src/ui/web/styles/globals.css` (e.g., `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`) instead of hard-coded colors.
+- Expose Convex queries/mutations via hooks in `src/infrastructure/convex/*Api.ts` and consume those hooks from UI modules/screens.
