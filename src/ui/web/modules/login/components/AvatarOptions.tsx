@@ -8,6 +8,7 @@ import {
 } from "@/ui/shared/avatars";
 import { Small } from "@/ui/web/components/Typography";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
+import { AvatarMoreOptions } from "@/ui/web/modules/login/components/AvatarMoreOptions";
 
 import { AvatarOptionItem } from "./AvatarOptionItem";
 
@@ -24,9 +25,7 @@ export const AvatarOptions = () => {
         <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
           Select avatar
         </Small>
-        <Small className="text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
-          see more
-        </Small>
+        <AvatarMoreOptions />
       </div>
 
       <ScrollArea className="w-full rounded-md">
