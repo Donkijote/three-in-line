@@ -3,20 +3,11 @@ import { v } from "convex/values";
 
 import { authTables } from "@convex-dev/auth/server";
 
+import { UserSchema } from "./schemas/user";
+
 export default defineSchema({
   ...authTables,
-  users: defineTable({
-    name: v.optional(v.string()),
-    image: v.optional(v.string()),
-    email: v.optional(v.string()),
-    emailVerificationTime: v.optional(v.number()),
-    phone: v.optional(v.string()),
-    phoneVerificationTime: v.optional(v.number()),
-    isAnonymous: v.optional(v.boolean()),
-    username: v.optional(v.string()),
-  })
-    .index("email", ["email"])
-    .index("by_username", ["username"]),
+  users: UserSchema,
   tasks: defineTable({
     text: v.string(),
     isCompleted: v.boolean(),
