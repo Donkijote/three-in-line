@@ -12,12 +12,20 @@ import { AvatarMoreOptions } from "@/ui/web/modules/login/components/AvatarMoreO
 
 import { AvatarOptionItem } from "./AvatarOptionItem";
 
-const avatarOptions = pickRandomPresetAvatars();
-
 export const AvatarOptions = () => {
+  const [avatarOptions, setAvatarOptions] = useState<AvatarPreset[]>(
+    pickRandomPresetAvatars(),
+  );
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarPreset>(
     avatarOptions[0],
   );
+
+  const onAcceptAvatar = (avatar: AvatarPreset) => {
+    setAvatarOptions((previousAvatars) => {
+      return [avatar, ...previousAvatars.slice(1)];
+    });
+    setSelectedAvatar(avatar);
+  };
 
   return (
     <div className="space-y-4 md:space-y-5">
@@ -25,7 +33,7 @@ export const AvatarOptions = () => {
         <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
           Select avatar
         </Small>
-        <AvatarMoreOptions onAccept={setSelectedAvatar} />
+        <AvatarMoreOptions onAccept={onAcceptAvatar} />
       </div>
 
       <ScrollArea className="w-full rounded-md">
