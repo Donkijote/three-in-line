@@ -28,7 +28,7 @@ export const AvatarMoreOptions = () => {
       </DrawerTrigger>
       <DrawerContent
         className={
-          "data-[vaul-drawer-direction=bottom]:h-screen data-[vaul-drawer-direction=bottom]:max-h-[95vh] sm:data-[vaul-drawer-direction=right]:max-w-[70vh] data-[vaul-drawer-direction=right]:w-[70vh]"
+          "data-[vaul-drawer-direction=bottom]:h-screen data-[vaul-drawer-direction=bottom]:max-h-[95vh] sm:data-[vaul-drawer-direction=right]:max-w-[70vh] lg:data-[vaul-drawer-direction=right]:w-[70vh] md:data-[vaul-drawer-direction=right]:w-[50vh]"
         }
       >
         <DrawerHeader className={"relative"}>
