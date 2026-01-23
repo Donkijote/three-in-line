@@ -2,31 +2,22 @@ import { Activity, type Dispatch, type SetStateAction, useState } from "react";
 
 import { CircleCheck, Plus } from "lucide-react";
 
+import {
+  type AvatarPreset,
+  pickRandomPresetAvatars,
+} from "@/ui/shared/avatars";
 import { Small } from "@/ui/web/components/Typography";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/ui/web/components/ui/avatar";
 import { cn } from "@/ui/web/lib/utils";
 
-type AvatarOption = {
-  id: string;
-  label: string;
-  initials: string;
-};
-
-const avatarOptions: AvatarOption[] = [
-  { id: "bot-01", label: "Bot 01", initials: "B1" },
-  { id: "unit-09", label: "Unit 09", initials: "U9" },
-  { id: "x-ray", label: "X-Ray", initials: "XR" },
-  { id: "pixel", label: "Pixel", initials: "PX" },
-  { id: "al", label: "AL", initials: "AL" },
-];
-
-const customAvatarOptions: AvatarOption = {
-  id: "custom",
-  label: "Custom",
-  initials: "",
-};
+const avatarOptions = pickRandomPresetAvatars();
 
 export const AvatarOptions = () => {
-  const [selectedAvatar, setSelectedAvatar] = useState<AvatarOption>(
+  const [selectedAvatar, setSelectedAvatar] = useState<AvatarPreset>(
     avatarOptions[0],
   );
 
@@ -50,19 +41,19 @@ export const AvatarOptions = () => {
             onSelect={setSelectedAvatar}
           />
         ))}
-        <AvatarOptionItem
+        {/*<AvatarOptionItem
           avatar={customAvatarOptions}
           onSelect={setSelectedAvatar}
           isCustom={true}
-        />
+        />*/}
       </div>
     </div>
   );
 };
 
 type AvatarOptionItemProps = {
-  onSelect: Dispatch<SetStateAction<AvatarOption>>;
-  avatar: AvatarOption;
+  onSelect: Dispatch<SetStateAction<AvatarPreset>>;
+  avatar: AvatarPreset;
   isSelected?: boolean;
   isCustom?: boolean;
 };
@@ -97,7 +88,10 @@ const AvatarOptionItem = ({
         {isCustom ? (
           <Plus className="size-4" />
         ) : (
-          <span className="text-sm font-semibold">{avatar.initials}</span>
+          <Avatar size={"lg"} className={"size-16!"}>
+            <AvatarImage src={avatar.src} />
+            <AvatarFallback>{avatar.initials}</AvatarFallback>
+          </Avatar>
         )}
       </div>
       <Activity
@@ -114,7 +108,7 @@ const AvatarOptionItem = ({
           isSelected ? "text-foreground/80" : "text-inherit",
         )}
       >
-        {avatar.label}
+        {avatar.name}
       </Small>
     </button>
   );
