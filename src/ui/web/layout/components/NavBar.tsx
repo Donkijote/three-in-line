@@ -32,7 +32,7 @@ export const NavBar = () => {
       aria-label="Primary"
       className="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4"
     >
-      <div className="flex w-full max-w-xs md:max-w-md items-center justify-between rounded-full border border-border/60 bg-card/80 px-4 py-2 shadow-[0_18px_50px_-35px_rgba(0,0,0,0.7)] backdrop-blur-[4px]">
+      <div className="flex w-full max-w-xs md:max-w-md items-center justify-between rounded-full border border-border/60 bg-card/80 px-4 py-2 shadow-[0_18px_50px_-35px_rgba(0,0,0,0.7)] backdrop-blur-xs">
         {navItems.map((item) => {
           const isActive = item.to ? pathname === item.to : false;
           const Icon = item.icon;
@@ -48,7 +48,7 @@ export const NavBar = () => {
               </span>
               <span
                 className={cn(
-                  "text-[11px] font-semibold uppercase tracking-[0.2em]",
+                  "text-[10px] font-semibold uppercase tracking-[0.2em]",
                   {
                     "text-primary": isActive,
                     "text-muted-foreground": !isActive,
