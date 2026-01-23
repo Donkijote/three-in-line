@@ -12,6 +12,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
+import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
 import { cn } from "@/ui/web/lib/utils";
 
 const avatarOptions = pickRandomPresetAvatars();
@@ -28,35 +29,40 @@ export const AvatarOptions = () => {
           Select avatar
         </Small>
         <Small className="text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
-          Scroll for more
+          see more
         </Small>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-3 md:flex-wrap md:overflow-visible md:pb-0">
-        {avatarOptions.map((avatar) => (
-          <AvatarOptionItem
-            key={avatar.id}
-            isSelected={avatar.id === selectedAvatar.id}
-            avatar={avatar}
-            onSelect={setSelectedAvatar}
-          />
-        ))}
-        <button
-          type="button"
-          className={
-            "cursor-pointer flex min-w-30 flex-col items-center gap-3 rounded-3xl border px-4 py-5 text-left relative border-border/60 bg-card/30 text-muted-foreground"
-          }
-        >
-          <div
+      <ScrollArea className="w-full rounded-md">
+        <div className="flex gap-4 overflow-x-auto pb-3 md:flex-wrap md:overflow-visible md:pb-0">
+          {avatarOptions.map((avatar) => (
+            <AvatarOptionItem
+              key={avatar.id}
+              isSelected={avatar.id === selectedAvatar.id}
+              avatar={avatar}
+              onSelect={setSelectedAvatar}
+            />
+          ))}
+          <button
+            type="button"
             className={
-              "flex size-16 items-center justify-center rounded-full bg-muted/40 text-muted-foreground"
+              "cursor-pointer flex min-w-30 flex-col items-center gap-3 rounded-3xl border px-4 py-5 text-left relative border-border/60 bg-card/30 text-muted-foreground"
             }
           >
-            <Plus className="size-4" />
-          </div>
-          <Small className={"text-xs font-semibold text-inherit"}>CUSTOM</Small>
-        </button>
-      </div>
+            <div
+              className={
+                "flex size-16 items-center justify-center rounded-full bg-muted/40 text-muted-foreground"
+              }
+            >
+              <Plus className="size-4" />
+            </div>
+            <Small className={"text-xs font-semibold text-inherit"}>
+              CUSTOM
+            </Small>
+          </button>
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 };
