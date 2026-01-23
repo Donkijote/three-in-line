@@ -18,6 +18,10 @@ export default defineConfig({
     exclude: [
       "src/ui/web/components/ui/**",
       "src/infrastructure/convex/**",
+      "src/ui/web/routes/**",
+      "src/ui/web/main.tsx",
+      "src/ui/web/router.tsx",
+      "src/ui/web/routeTree.gen.ts",
       "convex/**",
     ],
     coverage: {
@@ -26,6 +30,10 @@ export default defineConfig({
       exclude: [
         "src/ui/web/components/ui/**",
         "src/infrastructure/convex/**",
+        "src/ui/web/routes/**",
+        "src/ui/web/main.tsx",
+        "src/ui/web/router.tsx",
+        "src/ui/web/routeTree.gen.ts",
         "convex/**",
       ],
     },
