@@ -13,6 +13,7 @@ export default defineConfig({
     clearMocks: true,
     mockReset: true,
     environment: "jsdom",
+    setupFiles: ["./setupTests.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     exclude: [
       "src/ui/web/components/ui/**",
