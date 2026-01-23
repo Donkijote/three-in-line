@@ -1,4 +1,4 @@
-import { Activity, useState } from "react";
+import { Activity, useEffect, useEffectEvent, useState } from "react";
 
 import { ArrowRight, Loader, Pencil } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce";
@@ -6,7 +6,12 @@ import { useDebouncedCallback } from "use-debounce";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useForm } from "@tanstack/react-form";
 
+import {
+  getRandomPresetAvatarId,
+  type UserAvatar,
+} from "@/domain/entities/Avatar";
 import { useCheckEmailExists } from "@/infrastructure/convex/UserApi";
+import { toUserAvatar } from "@/ui/shared/avatars/presets";
 import { Small } from "@/ui/web/components/Typography";
 import { Button } from "@/ui/web/components/ui/button";
 import {
@@ -16,6 +21,13 @@ import {
 } from "@/ui/web/components/ui/input-group";
 import { isValidEmail } from "@/ui/web/lib/utils";
 import { AvatarOptions } from "@/ui/web/modules/login/components/AvatarOptions";
+
+type LoginFormData = {
+  email: string;
+  password: string;
+  flow: string;
+  avatar?: UserAvatar;
+};
 
 export const LoginForm = () => {
   const { signIn } = useAuthActions();
@@ -29,9 +41,14 @@ export const LoginForm = () => {
       email: "",
       password: "",
       flow: "",
-    },
+    } as LoginFormData,
     onSubmit: async ({ value }) => {
-      await signIn("password", value);
+      const payload =
+        value.flow === "signIn"
+          ? { email: value.email, password: value.password, flow: value.flow }
+          : value;
+
+      await signIn("password", payload);
     },
   });
 
@@ -56,6 +73,16 @@ export const LoginForm = () => {
     void handleCheckCodeName(value);
   }, 600);
 
+  const isSignUp = doesCodeNameExist === false;
+
+  const updateFlowField = useEffectEvent((value: boolean | null) => {
+    form.setFieldValue("flow", value ? "signIn" : "signUp", {});
+  });
+
+  useEffect(() => {
+    updateFlowField(doesCodeNameExist);
+  }, [doesCodeNameExist]);
+
   return (
     <form
       className="flex flex-col gap-8 flex-1"
@@ -65,10 +92,7 @@ export const LoginForm = () => {
         void form.handleSubmit();
       }}
     >
-      <form.Field
-        name={"flow"}
-        defaultValue={doesCodeNameExist ? "signIn" : "signUp"}
-      >
+      <form.Field name={"flow"}>
         {(field) => (
           <input name="flow" type="hidden" value={field.state.value} />
         )}
@@ -158,13 +182,38 @@ export const LoginForm = () => {
         </div>
       </Activity>
 
-      <Activity
-        name={"avatars"}
-        mode={
-          doesCodeNameExist === null || doesCodeNameExist ? "hidden" : "visible"
-        }
-      >
-        <AvatarOptions />
+      <Activity name={"avatars"} mode={isSignUp ? "visible" : "hidden"}>
+        <form.Field
+          name="avatar"
+          defaultValue={{
+            type: "preset",
+            value: getRandomPresetAvatarId(),
+          }}
+          validators={{
+            onChange: ({ value }) =>
+              value?.value ? undefined : "Avatar is required",
+          }}
+        >
+          {(field) => (
+            <>
+              <input
+                name="avatar.type"
+                type="hidden"
+                value={field.state.value?.type}
+              />
+              <input
+                name="avatar.value"
+                type="hidden"
+                value={field.state.value?.value}
+              />
+              <AvatarOptions
+                onChange={(avatar) => {
+                  field.handleChange(toUserAvatar(avatar));
+                }}
+              />
+            </>
+          )}
+        </form.Field>
       </Activity>
 
       <form.Subscribe

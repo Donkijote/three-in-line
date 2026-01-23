@@ -1,4 +1,4 @@
-import type { PresetAvatarId } from "@/domain/entities/Avatar";
+import type { PresetAvatarId, UserAvatar } from "@/domain/entities/Avatar";
 
 import type { AvatarPreset } from "./types";
 
@@ -216,3 +216,8 @@ export const pickRandomPresetAvatars = (count = 6): AvatarPreset[] => {
 
   return shuffled.slice(0, count);
 };
+
+export const toUserAvatar = (avatar: AvatarPreset): UserAvatar => ({
+  type: "preset",
+  value: avatar.id,
+});

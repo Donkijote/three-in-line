@@ -12,7 +12,11 @@ import { AvatarMoreOptions } from "@/ui/web/modules/login/components/AvatarMoreO
 
 import { AvatarOptionItem } from "./AvatarOptionItem";
 
-export const AvatarOptions = () => {
+type AvatarOptionsProps = {
+  onChange: (avatar: AvatarPreset) => void;
+};
+
+export const AvatarOptions = ({ onChange }: AvatarOptionsProps) => {
   const [avatarOptions, setAvatarOptions] = useState<AvatarPreset[]>(
     pickRandomPresetAvatars(),
   );
@@ -20,11 +24,16 @@ export const AvatarOptions = () => {
     avatarOptions[0],
   );
 
+  const onSelectAvatar = (avatar: AvatarPreset) => {
+    setSelectedAvatar(avatar);
+    onChange(avatar);
+  };
+
   const onAcceptAvatar = (avatar: AvatarPreset) => {
     setAvatarOptions((previousAvatars) => {
       return [avatar, ...previousAvatars.slice(1)];
     });
-    setSelectedAvatar(avatar);
+    onSelectAvatar(avatar);
   };
 
   return (
@@ -43,7 +52,7 @@ export const AvatarOptions = () => {
               key={avatar.id}
               isSelected={avatar.id === selectedAvatar.id}
               avatar={avatar}
-              onSelect={setSelectedAvatar}
+              onSelect={onSelectAvatar}
             />
           ))}
           <button

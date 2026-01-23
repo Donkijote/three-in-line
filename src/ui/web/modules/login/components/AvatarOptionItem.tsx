@@ -1,4 +1,4 @@
-import { Activity, type Dispatch, type SetStateAction } from "react";
+import { Activity } from "react";
 
 import { CircleCheck, Plus } from "lucide-react";
 
@@ -12,7 +12,7 @@ import {
 import { cn } from "@/ui/web/lib/utils";
 
 type AvatarOptionItemProps = {
-  onSelect: Dispatch<SetStateAction<AvatarPreset>>;
+  onSelect: (avatar: AvatarPreset) => void;
   avatar: AvatarPreset;
   isSelected?: boolean;
   isCustom?: boolean;
