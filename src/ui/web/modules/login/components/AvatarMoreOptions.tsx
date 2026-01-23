@@ -1,6 +1,8 @@
+import { useState } from "react";
+
 import { X } from "lucide-react";
 
-import { PRESET_AVATARS } from "@/ui/shared/avatars";
+import { type AvatarPreset, PRESET_AVATARS } from "@/ui/shared/avatars";
 import { Small } from "@/ui/web/components/Typography";
 import { Button } from "@/ui/web/components/ui/button";
 import {
@@ -16,8 +18,21 @@ import { ScrollArea } from "@/ui/web/components/ui/scroll-area";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { AvatarOptionItem } from "@/ui/web/modules/login/components/AvatarOptionItem";
 
-export const AvatarMoreOptions = () => {
+type AvatarMoreOptionsProps = {
+  onAccept: (avatar: AvatarPreset) => void;
+};
+
+export const AvatarMoreOptions = ({ onAccept }: AvatarMoreOptionsProps) => {
   const { isMobile } = useMediaQuery();
+  const [selectedAvatar, setSelectedAvatar] = useState<AvatarPreset | null>(
+    null,
+  );
+
+  const onAcceptAvatar = () => {
+    if (!selectedAvatar) return;
+    onAccept(selectedAvatar);
+    setSelectedAvatar(null);
+  };
 
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
@@ -33,7 +48,10 @@ export const AvatarMoreOptions = () => {
       >
         <DrawerHeader className={"relative"}>
           <DrawerTitle>Avatars</DrawerTitle>
-          <DrawerClose className={"absolute right-4 cursor-pointer"}>
+          <DrawerClose
+            className={"absolute right-4 cursor-pointer"}
+            onClick={() => setSelectedAvatar(null)}
+          >
             <X className={"size-6"} />
           </DrawerClose>
         </DrawerHeader>
@@ -42,14 +60,27 @@ export const AvatarMoreOptions = () => {
             {PRESET_AVATARS.map((avatar) => (
               <AvatarOptionItem
                 key={avatar.id}
-                onSelect={() => null}
+                isSelected={avatar.id === selectedAvatar?.id}
+                onSelect={(avatar) => setSelectedAvatar(avatar as AvatarPreset)}
                 avatar={avatar}
               />
             ))}
           </div>
         </ScrollArea>
         <DrawerFooter>
-          <Button>Accept</Button>
+          <DrawerClose
+            disabled={!selectedAvatar}
+            onClick={onAcceptAvatar}
+            className={"w-full"}
+          >
+            <Button
+              type="button"
+              disabled={!selectedAvatar}
+              className={"w-full"}
+            >
+              Accept
+            </Button>
+          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

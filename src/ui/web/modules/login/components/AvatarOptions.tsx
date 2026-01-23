@@ -25,7 +25,7 @@ export const AvatarOptions = () => {
         <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
           Select avatar
         </Small>
-        <AvatarMoreOptions />
+        <AvatarMoreOptions onAccept={setSelectedAvatar} />
       </div>
 
       <ScrollArea className="w-full rounded-md">
