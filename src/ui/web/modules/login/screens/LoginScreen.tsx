@@ -1,5 +1,4 @@
-import { H1, P, Small } from "@/ui/web/components/Typography";
-import { AvatarOptions } from "@/ui/web/modules/login/components/AvatarOptions";
+import { H1, P } from "@/ui/web/components/Typography";
 import { LoginForm } from "@/ui/web/modules/login/components/LoginForm";
 
 export const LoginScreen = () => {
@@ -18,19 +17,7 @@ export const LoginScreen = () => {
           </P>
         </div>
 
-        <LoginForm>
-          <div className="space-y-4 md:space-y-5">
-            <div className="flex items-center justify-between">
-              <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
-                Select avatar
-              </Small>
-              <Small className="text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
-                Scroll for more
-              </Small>
-            </div>
-            <AvatarOptions />
-          </div>
-        </LoginForm>
+        <LoginForm />
       </div>
     </div>
   );

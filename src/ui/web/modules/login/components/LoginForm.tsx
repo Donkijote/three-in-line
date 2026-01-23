@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Activity, useState } from "react";
 
 import { ArrowRight, Loader, Pencil } from "lucide-react";
@@ -16,12 +15,9 @@ import {
   InputGroupInput,
 } from "@/ui/web/components/ui/input-group";
 import { isValidEmail } from "@/ui/web/lib/utils";
+import { AvatarOptions } from "@/ui/web/modules/login/components/AvatarOptions";
 
-type LoginFormProps = {
-  children?: ReactNode;
-};
-
-export const LoginForm = ({ children }: LoginFormProps) => {
+export const LoginForm = () => {
   const { signIn } = useAuthActions();
   const [doesCodeNameExist, setDoesCodeNameExist] = useState<boolean | null>(
     null,
@@ -168,7 +164,7 @@ export const LoginForm = ({ children }: LoginFormProps) => {
           doesCodeNameExist === null || doesCodeNameExist ? "hidden" : "visible"
         }
       >
-        {children}
+        <AvatarOptions />
       </Activity>
 
       <form.Subscribe

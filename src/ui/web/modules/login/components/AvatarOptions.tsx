@@ -31,20 +31,31 @@ export const AvatarOptions = () => {
   );
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-3 md:flex-wrap md:overflow-visible md:pb-0">
-      {avatarOptions.map((avatar) => (
+    <div className="space-y-4 md:space-y-5">
+      <div className="flex items-center justify-between">
+        <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
+          Select avatar
+        </Small>
+        <Small className="text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
+          Scroll for more
+        </Small>
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto pb-3 md:flex-wrap md:overflow-visible md:pb-0">
+        {avatarOptions.map((avatar) => (
+          <AvatarOptionItem
+            key={avatar.id}
+            isSelected={avatar.id === selectedAvatar.id}
+            avatar={avatar}
+            onSelect={setSelectedAvatar}
+          />
+        ))}
         <AvatarOptionItem
-          key={avatar.id}
-          isSelected={avatar.id === selectedAvatar.id}
-          avatar={avatar}
+          avatar={customAvatarOptions}
           onSelect={setSelectedAvatar}
+          isCustom={true}
         />
-      ))}
-      <AvatarOptionItem
-        avatar={customAvatarOptions}
-        onSelect={setSelectedAvatar}
-        isCustom={true}
-      />
+      </div>
     </div>
   );
 };
