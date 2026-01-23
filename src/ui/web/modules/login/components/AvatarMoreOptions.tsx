@@ -13,11 +13,14 @@ import {
   DrawerTrigger,
 } from "@/ui/web/components/ui/drawer";
 import { ScrollArea } from "@/ui/web/components/ui/scroll-area";
+import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { AvatarOptionItem } from "@/ui/web/modules/login/components/AvatarOptionItem";
 
 export const AvatarMoreOptions = () => {
+  const { isMobile } = useMediaQuery();
+
   return (
-    <Drawer direction={"bottom"}>
+    <Drawer direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger>
         <Small className="cursor-pointer text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
           see more
