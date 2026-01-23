@@ -10,13 +10,13 @@ import { cn } from "@/ui/web/lib/utils";
 type NavItem = {
   label: string;
   icon: ComponentType<{ className?: string }>;
-  to?: string;
+  to: string;
 };
 
 const navItems: NavItem[] = [
   { label: "Home", icon: Home, to: "/" },
-  { label: "Play", icon: Gamepad2 },
-  { label: "Settings", icon: Settings },
+  { label: "Play", icon: Gamepad2, to: "/play" },
+  { label: "Settings", icon: Settings, to: "/settings" },
 ];
 
 export const NavBar = () => {
@@ -60,27 +60,14 @@ export const NavBar = () => {
             </span>
           );
 
-          if (item.to) {
-            return (
-              <Link
-                key={item.label}
-                to={item.to}
-                className="flex flex-1 justify-center"
-              >
-                {content}
-              </Link>
-            );
-          }
-
           return (
-            <button
+            <Link
               key={item.label}
-              type="button"
-              className="flex flex-1 cursor-not-allowed justify-center opacity-60"
-              aria-disabled="true"
+              to={item.to}
+              className="flex flex-1 justify-center"
             >
               {content}
-            </button>
+            </Link>
           );
         })}
       </div>
