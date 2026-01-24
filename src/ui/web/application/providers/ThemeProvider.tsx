@@ -8,11 +8,8 @@ import {
   useState,
 } from "react";
 
-import {
-  loadThemePreference,
-  saveThemePreference,
-} from "@/ui/web/theme/storage";
-import { isThemePreference, type ThemePreference } from "@/ui/web/theme/theme";
+import type { ThemePreference } from "@/domain/entities/UserPreferences";
+import { useUserPreferences } from "@/ui/web/application/providers/UserPreferencesProvider";
 
 type ResolvedTheme = "light" | "dark";
 
@@ -47,32 +44,28 @@ const applyThemeClass = (resolvedTheme: ResolvedTheme) => {
   if (resolvedTheme === "light" && isDark) root.classList.remove("dark");
 };
 
-const getInitialTheme = (): ThemePreference => {
-  const storedPreference = loadThemePreference();
-  if (storedPreference && isThemePreference(storedPreference)) {
-    return storedPreference;
-  }
-
-  return "system";
-};
-
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-  const [{ theme, resolvedTheme }, setState] = useState(() => {
-    const initialTheme = getInitialTheme();
-    const initialResolved = resolveTheme(initialTheme);
-    applyThemeClass(initialResolved);
+  const { preferences, updatePreferences } = useUserPreferences();
+  const theme = preferences.theme;
 
-    return { theme: initialTheme, resolvedTheme: initialResolved };
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => {
+    const initialResolved = resolveTheme(theme);
+    applyThemeClass(initialResolved);
+    return initialResolved;
   });
 
-  const setTheme = useCallback((nextTheme: ThemePreference) => {
-    setState(() => {
-      const nextResolved = resolveTheme(nextTheme);
-      applyThemeClass(nextResolved);
-      saveThemePreference(nextTheme);
-      return { theme: nextTheme, resolvedTheme: nextResolved };
-    });
-  }, []);
+  useEffect(() => {
+    const nextResolved = resolveTheme(theme);
+    setResolvedTheme(nextResolved);
+    applyThemeClass(nextResolved);
+  }, [theme]);
+
+  const setTheme = useCallback(
+    (nextTheme: ThemePreference) => {
+      updatePreferences({ theme: nextTheme });
+    },
+    [updatePreferences],
+  );
 
   useEffect(() => {
     if (theme !== "system" || typeof window === "undefined") return;
@@ -80,10 +73,8 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
       const nextResolved = resolveTheme("system");
-      setState((prev) => {
-        applyThemeClass(nextResolved);
-        return { ...prev, resolvedTheme: nextResolved };
-      });
+      setResolvedTheme(nextResolved);
+      applyThemeClass(nextResolved);
     };
 
     mediaQuery.addEventListener("change", handleChange);

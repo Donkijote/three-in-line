@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server";
 import { type Infer, v } from "convex/values";
 
-const avatar = v.object({
+export const avatar = v.object({
   type: v.union(
     v.literal("custom"),
     v.literal("preset"),
@@ -20,6 +20,7 @@ export const UserSchema = defineTable({
   isAnonymous: v.optional(v.boolean()),
   username: v.optional(v.string()),
   avatar: v.optional(avatar),
+  avatars: v.optional(v.array(avatar)),
 })
   .index("email", ["email"])
   .index("by_username", ["username"]);

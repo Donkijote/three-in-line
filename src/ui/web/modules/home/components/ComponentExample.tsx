@@ -95,7 +95,7 @@ import {
   Example,
   ExampleWrapper,
 } from "@/ui/web/modules/home/components/Example";
-import { isThemePreference } from "@/ui/web/theme/theme";
+import { isThemePreference } from "@/domain/entities/UserPreferences";
 
 export const ComponentExample = () => (
   <ExampleWrapper>

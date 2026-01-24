@@ -10,31 +10,24 @@ describe("webLocalStorage", () => {
     localStorage.clear();
   });
 
-  it("writes and reads theme preference values", () => {
-    writeLocalStorage(localStorageKeys.themePreference, "dark");
+  it("writes and reads values", () => {
+    writeLocalStorage(localStorageKeys.userPreferences, { theme: "dark" });
 
-    expect(readLocalStorage(localStorageKeys.themePreference)).toBe("dark");
+    expect(readLocalStorage(localStorageKeys.userPreferences)).toEqual({
+      theme: "dark",
+    });
   });
 
   it("returns null for invalid JSON payloads", () => {
-    localStorage.setItem(localStorageKeys.themePreference, "not-json");
+    localStorage.setItem(localStorageKeys.userPreferences, "not-json");
 
-    expect(readLocalStorage(localStorageKeys.themePreference)).toBeNull();
-  });
-
-  it("returns null for unsupported theme preferences", () => {
-    localStorage.setItem(
-      localStorageKeys.themePreference,
-      JSON.stringify("nope"),
-    );
-
-    expect(readLocalStorage(localStorageKeys.themePreference)).toBeNull();
+    expect(readLocalStorage(localStorageKeys.userPreferences)).toBeNull();
   });
 
   it("removes values from localStorage", () => {
-    writeLocalStorage(localStorageKeys.themePreference, "system");
-    removeLocalStorage(localStorageKeys.themePreference);
+    writeLocalStorage(localStorageKeys.userPreferences, { theme: "system" });
+    removeLocalStorage(localStorageKeys.userPreferences);
 
-    expect(readLocalStorage(localStorageKeys.themePreference)).toBeNull();
+    expect(readLocalStorage(localStorageKeys.userPreferences)).toBeNull();
   });
 });

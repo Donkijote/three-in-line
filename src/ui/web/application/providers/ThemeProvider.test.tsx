@@ -5,10 +5,11 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { renderToString } from "react-dom/server";
-import { vi } from "vitest";
 
 import { ThemeProvider, useTheme } from "./ThemeProvider";
+import { UserPreferencesProvider } from "./UserPreferencesProvider";
 
 type MatchMediaController = {
   setMatches: (matches: boolean) => void;
@@ -73,6 +74,12 @@ const ThemeConsumer = () => {
 };
 
 describe("ThemeProvider", () => {
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <UserPreferencesProvider>
+      <ThemeProvider>{children}</ThemeProvider>
+    </UserPreferencesProvider>
+  );
+
   beforeEach(() => {
     localStorage.clear();
     document.documentElement.classList.remove("dark");
@@ -81,9 +88,11 @@ describe("ThemeProvider", () => {
   it("uses system preference and applies the matching class", () => {
     setupMatchMedia(true);
     render(
-      <ThemeProvider>
-        <ThemeConsumer />
-      </ThemeProvider>,
+      <UserPreferencesProvider>
+        <ThemeProvider>
+          <ThemeConsumer />
+        </ThemeProvider>
+      </UserPreferencesProvider>,
     );
 
     const values = screen.getByTestId("theme-values");
@@ -95,7 +104,7 @@ describe("ThemeProvider", () => {
   it("updates theme, resolves it, and persists the preference", () => {
     setupMatchMedia(true);
     const { result } = renderHook(() => useTheme(), {
-      wrapper: ({ children }) => <ThemeProvider>{children}</ThemeProvider>,
+      wrapper,
     });
 
     act(() => {
@@ -105,15 +114,24 @@ describe("ThemeProvider", () => {
     expect(result.current.theme).toBe("light");
     expect(result.current.resolvedTheme).toBe("light");
     expect(document.documentElement.classList.contains("dark")).toBe(false);
-    expect(localStorage.getItem("theme")).toBe(JSON.stringify("light"));
+    expect(localStorage.getItem("userPreferences")).toBe(
+      JSON.stringify({
+        theme: "light",
+        gameSounds: true,
+        haptics: true,
+      }),
+    );
   });
 
   it("uses a stored theme preference when available", () => {
-    localStorage.setItem("theme", JSON.stringify("dark"));
+    localStorage.setItem(
+      "userPreferences",
+      JSON.stringify({ theme: "dark", gameSounds: true, haptics: true }),
+    );
     setupMatchMedia(false);
 
     const { result } = renderHook(() => useTheme(), {
-      wrapper: ({ children }) => <ThemeProvider>{children}</ThemeProvider>,
+      wrapper,
     });
 
     expect(result.current.theme).toBe("dark");
@@ -125,11 +143,13 @@ describe("ThemeProvider", () => {
     vi.stubGlobal("window", undefined);
 
     try {
-      const markup = renderToString(
+    const markup = renderToString(
+      <UserPreferencesProvider>
         <ThemeProvider>
           <ThemeConsumer />
-        </ThemeProvider>,
-      );
+        </ThemeProvider>
+      </UserPreferencesProvider>,
+    );
 
       expect(markup).toContain('data-resolved="light"');
       expect(markup).toContain('data-theme="system"');
@@ -141,7 +161,7 @@ describe("ThemeProvider", () => {
   it("responds to system theme changes while in system mode", async () => {
     const { setMatches } = setupMatchMedia(false);
     const { result } = renderHook(() => useTheme(), {
-      wrapper: ({ children }) => <ThemeProvider>{children}</ThemeProvider>,
+      wrapper,
     });
 
     expect(result.current.resolvedTheme).toBe("light");
