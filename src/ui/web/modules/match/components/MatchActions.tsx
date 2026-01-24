@@ -1,0 +1,53 @@
+import { Dot, Flag, RotateCcw } from "lucide-react";
+
+import { Link } from "@tanstack/react-router";
+
+import { Muted } from "@/ui/web/components/Typography";
+import { Badge } from "@/ui/web/components/ui/badge";
+import { Button } from "@/ui/web/components/ui/button";
+import { cn } from "@/ui/web/lib/utils";
+
+type MatchActionsProps = {
+  variant?: "default" | "hud";
+  className?: string;
+};
+
+export const MatchActions = ({
+  variant = "default",
+  className,
+}: MatchActionsProps) => {
+  const isHud = variant === "hud";
+
+  return (
+    <div className={cn("flex flex-col gap-6", className)}>
+      <div
+        className={cn(
+          "flex flex-col gap-3",
+          !isHud && "md:flex-row md:justify-center",
+        )}
+      >
+        <Button className="h-12 text-sm font-semibold">
+          <RotateCcw className="size-4" />
+          Reset Round
+        </Button>
+        <Button
+          asChild
+          variant="outline"
+          className="h-12 text-sm font-semibold"
+        >
+          <Link to="/play" aria-label="Abandon match">
+            <Flag className="size-4 text-destructive" />
+            <span className="text-destructive">Abandon Match</span>
+          </Link>
+        </Button>
+      </div>
+      <div className={"flex justify-center"}>
+        <Badge variant={"secondary"} className={"text-muted-foreground"}>
+          <Muted className="text-xs">Round 6</Muted>
+          <Dot />
+          <Muted className="text-xs">Best of 10</Muted>
+        </Badge>
+      </div>
+    </div>
+  );
+};

@@ -17,7 +17,7 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
         <main
           className={cn(
             "mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12",
-            shouldOffset ? "pb-24" : "pb-0",
+            shouldOffset ? "pb-24 has-[.no-offset]:pb-0" : "pb-0",
           )}
         >
           {children}
