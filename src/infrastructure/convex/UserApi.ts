@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { useConvex } from "convex/react";
+import { useConvex, useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 
@@ -40,4 +40,8 @@ export function useCheckUsernameExists() {
   );
 
   return { checkUsernameExists, isChecking };
+}
+
+export function useCurrentUser() {
+  return useQuery(api.users.getCurrentUser);
 }

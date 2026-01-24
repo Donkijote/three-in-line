@@ -1,9 +1,12 @@
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 
 import { CircleCheck, CircleX, Loader } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce";
 
-import { useCheckUsernameExists } from "@/infrastructure/convex/UserApi";
+import {
+  useCheckUsernameExists,
+  useCurrentUser,
+} from "@/infrastructure/convex/UserApi";
 import { Small } from "@/ui/web/components/Typography";
 import {
   InputGroup,
@@ -11,18 +14,33 @@ import {
   InputGroupInput,
 } from "@/ui/web/components/ui/input-group";
 
-const DEFAULT_DISPLAY_NAME = "PixelMaster_99";
-
 export const DisplayNameSection = () => {
-  const [displayName, setDisplayName] = useState(DEFAULT_DISPLAY_NAME);
+  const currentUser = useCurrentUser();
+  const currentUsername = currentUser?.username?.trim() ?? "";
+  const [displayName, setDisplayName] = useState("");
+  const [hasEdited, setHasEdited] = useState(false);
   const [doesNameExist, setDoesNameExist] = useState<boolean | null>(null);
   const { checkUsernameExists, isChecking } = useCheckUsernameExists();
+
+  useEffect(() => {
+    if (hasEdited) {
+      return;
+    }
+
+    setDisplayName(currentUsername);
+    setDoesNameExist(currentUsername ? false : null);
+  }, [currentUsername, hasEdited]);
 
   const handleCheckUsername = async (value: string) => {
     const trimmedValue = value.trim();
 
     if (!trimmedValue) {
       setDoesNameExist(null);
+      return;
+    }
+
+    if (trimmedValue === currentUsername) {
+      setDoesNameExist(false);
       return;
     }
 
@@ -42,10 +60,17 @@ export const DisplayNameSection = () => {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
     setDisplayName(nextValue);
+    setHasEdited(true);
 
     if (!nextValue.trim()) {
       debouncedCheckUsername.cancel();
       setDoesNameExist(null);
+      return;
+    }
+
+    if (nextValue.trim() === currentUsername) {
+      debouncedCheckUsername.cancel();
+      setDoesNameExist(false);
       return;
     }
 
@@ -81,7 +106,7 @@ export const DisplayNameSection = () => {
         <InputGroupInput
           id="login-username"
           type="text"
-          placeholder={DEFAULT_DISPLAY_NAME}
+          placeholder={"PixelMaster_99"}
           className={
             "text-base text-foreground placeholder:text-muted-foreground/70"
           }
