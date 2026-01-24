@@ -1,12 +1,12 @@
-import { LogOut, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 
 import { PRESET_AVATARS, pickRandomPresetAvatars } from "@/ui/shared/avatars";
 import { H3, Small } from "@/ui/web/components/Typography";
 import { Avatar, AvatarImage } from "@/ui/web/components/ui/avatar";
-import { Button } from "@/ui/web/components/ui/button";
 import { Input } from "@/ui/web/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
 import { cn } from "@/ui/web/lib/utils";
+import { LogoutButton } from "@/ui/web/modules/settings/screens/components/LogoutButton";
 import { PreferencesSection } from "@/ui/web/modules/settings/screens/components/PreferencesSection";
 
 export const SettingsScreen = () => {
@@ -86,13 +86,7 @@ export const SettingsScreen = () => {
 
       <PreferencesSection />
 
-      <Button
-        variant={"link"}
-        className={"text-muted-foreground/60 hover:no-underline"}
-      >
-        <LogOut className="size-4" />
-        Log Out
-      </Button>
+      <LogoutButton />
 
       <p className="text-center text-xs uppercase tracking-[0.2em] text-muted-foreground/60">
         Version 2.4.0 (Build 8892)
