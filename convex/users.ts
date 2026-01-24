@@ -2,7 +2,7 @@ import { v } from "convex/values";
 
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-import { query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const checkEmailExists = query({
   args: { email: v.string() },
@@ -46,6 +46,33 @@ export const getCurrentUser = query({
       return null;
     }
 
+    return await ctx.db.get(userId);
+  },
+});
+
+export const updateUsername = mutation({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const trimmed = args.username.trim();
+    if (!trimmed) {
+      throw new Error("Username is required");
+    }
+
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", trimmed))
+      .first();
+
+    if (existingUser && existingUser._id !== userId) {
+      throw new Error("Username already exists");
+    }
+
+    await ctx.db.patch(userId, { username: trimmed });
     return await ctx.db.get(userId);
   },
 });
