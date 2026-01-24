@@ -2,7 +2,11 @@ import { Pencil, Plus } from "lucide-react";
 
 import { PRESET_AVATARS, pickRandomPresetAvatars } from "@/ui/shared/avatars";
 import { H3, Small } from "@/ui/web/components/Typography";
-import { Avatar, AvatarImage } from "@/ui/web/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/ui/web/components/ui/avatar";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
 import { cn } from "@/ui/web/lib/utils";
 import { DisplayNameSection } from "@/ui/web/modules/settings/screens/components/DisplayNameSection";
@@ -28,6 +32,7 @@ export const SettingsScreen = () => {
             className="relative size-24! ring-3 ring-black/90 shadow-[0_0_15px_0px_var(--chart-1)] cursor-pointer"
           >
             <AvatarImage src={PRESET_AVATARS[0].src} />
+            <AvatarFallback>{PRESET_AVATARS[0].initials}</AvatarFallback>
           </Avatar>
           <span className="absolute bottom-1 right-1 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground cursor-pointer">
             <Pencil className="size-3" />
@@ -61,6 +66,9 @@ export const SettingsScreen = () => {
                 )}
               >
                 <AvatarImage src={avatar.src} className={"rounded-xl"} />
+                <AvatarFallback className={"rounded-xl"}>
+                  {avatar.initials}
+                </AvatarFallback>
               </Avatar>
             ))}
             <button
