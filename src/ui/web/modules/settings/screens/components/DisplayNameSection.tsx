@@ -128,8 +128,8 @@ export const DisplayNameSection = () => {
   };
 
   return (
-    <div className="flex flex-col justify-center gap-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col justify-center gap-2">
+      <div className="flex items-center justify-between h-8">
         <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Display Name
         </Small>
