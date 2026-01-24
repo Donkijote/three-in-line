@@ -15,25 +15,11 @@ import {
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
-import { cn } from "@/ui/web/lib/utils";
+import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
 
 type AvatarEntry = {
   type: "custom" | "preset" | "generated";
   value: string;
-};
-
-const getInitials = (value: string) => {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return "";
-  }
-
-  const parts = trimmed.split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-  }
-
-  return trimmed.slice(0, 2).toUpperCase();
 };
 
 export const PreviousAvatarsSection = () => {
@@ -42,15 +28,15 @@ export const PreviousAvatarsSection = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const avatars = (currentUser?.avatars ?? []) as AvatarEntry[];
 
-  const fallbackInitials = useMemo(() => {
-    const emailHandle = currentUser?.email?.split("@")[0] ?? "";
-    return (
-      getInitials(currentUser?.name ?? "") ||
-      getInitials(currentUser?.username ?? "") ||
-      getInitials(emailHandle) ||
-      "?"
-    );
-  }, [currentUser?.email, currentUser?.name, currentUser?.username]);
+  const fallbackInitials = useMemo(
+    () =>
+      getFallbackInitials({
+        name: currentUser?.name,
+        username: currentUser?.username,
+        email: currentUser?.email,
+      }),
+    [currentUser?.email, currentUser?.name, currentUser?.username],
+  );
 
   const handleSelectAvatar = async (avatar: AvatarEntry) => {
     if (isUpdating) {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Loader, Pencil } from "lucide-react";
 
@@ -14,21 +14,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
-import { cn } from "@/ui/web/lib/utils";
-
-const getInitials = (value: string) => {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return "";
-  }
-
-  const parts = trimmed.split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-  }
-
-  return trimmed.slice(0, 2).toUpperCase();
-};
+import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
 
 export const AvatarSection = () => {
   const currentUser = useCurrentUser();
@@ -42,12 +28,15 @@ export const AvatarSection = () => {
       ? getPresetAvatarById(avatar.value).src
       : (avatar?.value ?? currentUser?.image ?? null);
 
-  const emailHandle = currentUser?.email?.split("@")[0] ?? "";
-  const initials =
-    getInitials(currentUser?.name ?? "") ||
-    getInitials(currentUser?.username ?? "") ||
-    getInitials(emailHandle) ||
-    "?";
+  const fallbackInitials = useMemo(
+    () =>
+      getFallbackInitials({
+        name: currentUser?.name,
+        username: currentUser?.username,
+        email: currentUser?.email,
+      }),
+    [currentUser?.email, currentUser?.name, currentUser?.username],
+  );
 
   const handleAccept = async (avatarPreset: AvatarPreset) => {
     if (isUpdating) {
@@ -77,8 +66,10 @@ export const AvatarSection = () => {
               isUpdating && "pointer-events-none opacity-80",
             )}
           >
-            {avatarSrc && <AvatarImage src={avatarSrc} alt={initials} />}
-            <AvatarFallback>{initials}</AvatarFallback>
+            {avatarSrc && (
+              <AvatarImage src={avatarSrc} alt={fallbackInitials} />
+            )}
+            <AvatarFallback>{fallbackInitials}</AvatarFallback>
             {isUpdating && (
               <span className="absolute inset-0 grid place-items-center rounded-full bg-black/40 text-white">
                 <Loader className="size-5 animate-spin" />
