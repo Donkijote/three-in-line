@@ -20,6 +20,7 @@ export const UserSchema = defineTable({
   isAnonymous: v.optional(v.boolean()),
   username: v.optional(v.string()),
   avatar: v.optional(avatar),
+  avatars: v.optional(v.array(avatar)),
 })
   .index("email", ["email"])
   .index("by_username", ["username"]);

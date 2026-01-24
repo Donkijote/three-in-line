@@ -2,9 +2,8 @@ import { v } from "convex/values";
 
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-import { avatar } from "@/convex/schemas/user";
-
 import { mutation, query } from "./_generated/server";
+import { avatar } from "./schemas/user";
 
 export const checkEmailExists = query({
   args: { email: v.string() },
@@ -89,7 +88,15 @@ export const updateAvatar = mutation({
       throw new Error("Unauthorized");
     }
 
-    await ctx.db.patch(userId, { avatar: args.avatar });
+    const user = await ctx.db.get(userId);
+    const previousAvatars = user?.avatars ?? [];
+    const deduped = previousAvatars.filter(
+      (item) =>
+        !(item.type === args.avatar.type && item.value === args.avatar.value),
+    );
+    const nextAvatars = [args.avatar, ...deduped].slice(0, 10);
+
+    await ctx.db.patch(userId, { avatar: args.avatar, avatars: nextAvatars });
     return await ctx.db.get(userId);
   },
 });
