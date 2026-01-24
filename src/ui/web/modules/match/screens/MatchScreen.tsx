@@ -58,25 +58,45 @@ export const MatchScreen = () => {
               </Activity>
 
               <Card
-                className={cn(
-                  player.isTurn &&
-                    "ring-2 ring-primary/60 shadow-[0_0_18px_-6px_var(--chart-1)] relative",
-                )}
+                className={cn("transition pt-4 pb-3", {
+                  "ring-2 ring-primary/60 shadow-[0_0_18px_-6px_var(--chart-1)] relative":
+                    player.isTurn,
+                  "opacity-60": !player.isTurn,
+                })}
               >
-                <CardContent className="flex flex-col items-center gap-3">
+                <CardContent className="flex flex-col items-center gap-2 pt-1">
                   <Avatar
                     size={"lg"}
-                    className="size-12! border border-border/60"
+                    className={cn("size-16!", {
+                      "ring-4 ring-primary": player.isTurn,
+                      grayscale: !player.isTurn,
+                    })}
                   >
-                    <AvatarImage src={player.avatar} alt={player.name} />
+                    <AvatarImage
+                      src={player.avatar}
+                      alt={player.name}
+                      className={cn({
+                        "ring-2 ring-black": player.isTurn,
+                      })}
+                    />
                     <AvatarFallback>{player.name.slice(0, 1)}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-center">
                     <div className="flex items-center gap-2">
                       <H6 className="text-base font-semibold">{player.name}</H6>
-                      <H6 className={"text-primary"}>({player.symbol})</H6>
+                      <H6
+                        className={cn("text-muted-foreground", {
+                          "text-primary": player.isTurn,
+                        })}
+                      >
+                        ({player.symbol})
+                      </H6>
                     </div>
-                    <Muted className="text-xs text-muted-foreground/70">
+                    <Muted
+                      className={cn("text-xs text-muted-foreground/50", {
+                        "text-muted-foreground/70": player.isTurn,
+                      })}
+                    >
                       Wins: {player.wins}
                     </Muted>
                   </div>
