@@ -1,30 +1,16 @@
-import { LogOut, Moon, Pencil, Plus, Vibrate, Volume2 } from "lucide-react";
+import { LogOut, Pencil, Plus } from "lucide-react";
 
 import { PRESET_AVATARS, pickRandomPresetAvatars } from "@/ui/shared/avatars";
 import { H3, Small } from "@/ui/web/components/Typography";
 import { Avatar, AvatarImage } from "@/ui/web/components/ui/avatar";
 import { Button } from "@/ui/web/components/ui/button";
-import { Card, CardContent } from "@/ui/web/components/ui/card";
 import { Input } from "@/ui/web/components/ui/input";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemMedia,
-  ItemSeparator,
-  ItemTitle,
-} from "@/ui/web/components/ui/item";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
-import { Switch } from "@/ui/web/components/ui/switch";
 import { cn } from "@/ui/web/lib/utils";
+import { PreferencesSection } from "@/ui/web/modules/settings/screens/components/PreferencesSection";
 
 export const SettingsScreen = () => {
   const avatars = pickRandomPresetAvatars(10);
-  const preferences = [
-    { label: "Game Sounds", icon: Volume2, enabled: true },
-    { label: "Haptic Feedback", icon: Vibrate, enabled: true },
-    { label: "Dark Theme", icon: Moon, enabled: true },
-  ];
 
   return (
     <section className="mx-auto flex w-full h-full max-w-xl flex-col gap-10 pb-12 pt-10">
@@ -98,40 +84,7 @@ export const SettingsScreen = () => {
         </ScrollArea>
       </div>
 
-      <div className="flex flex-col justify-center gap-4">
-        <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Preferences
-        </Small>
-        <Card className={"py-0"}>
-          <CardContent className={"px-0"}>
-            {preferences.map((preference, index) => {
-              const Icon = preference.icon;
-              return (
-                <div key={preference.label}>
-                  <Item>
-                    <ItemMedia
-                      variant="icon"
-                      className={"bg-secondary p-2 rounded-lg"}
-                    >
-                      <Icon />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>{preference.label}</ItemTitle>
-                    </ItemContent>
-                    <ItemActions>
-                      <Switch
-                        id="switch-focus-mode"
-                        defaultChecked={preference.enabled}
-                      />
-                    </ItemActions>
-                  </Item>
-                  {index < 2 && <ItemSeparator />}
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </div>
+      <PreferencesSection />
 
       <Button
         variant={"link"}
