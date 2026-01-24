@@ -131,7 +131,7 @@ export const MatchScreen = () => {
           </div>
         </Card>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 md:flex-row md:justify-center">
           <Button className="h-12 text-sm font-semibold">
             <RotateCcw className="size-4" />
             Reset Round
