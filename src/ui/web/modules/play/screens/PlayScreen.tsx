@@ -1,12 +1,119 @@
-import { H1, P } from "@/ui/web/components/Typography";
+import {
+  ChevronRight,
+  Clock,
+  Grid2x2,
+  Grid3x3,
+  Hash,
+  Medal,
+  Trophy,
+} from "lucide-react";
+
+import { H3, H6, Muted } from "@/ui/web/components/Typography";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemGroup,
+  ItemMedia,
+} from "@/ui/web/components/ui/item";
+import { cn } from "@/ui/web/lib/utils";
+
+const modes = [
+  {
+    id: "classic",
+    title: "Classic Mode",
+    description: "Standard rules. The original game.",
+    icon: Hash,
+    accent: "text-emerald-500",
+  },
+  {
+    id: "best-of-three",
+    title: "Best of Three",
+    description: "First to 2 wins takes the crown.",
+    icon: Trophy,
+    accent: "text-yellow-500",
+  },
+  {
+    id: "best-of-five",
+    title: "Best of Five",
+    description: "An extended battle for dominance.",
+    icon: Medal,
+    accent: "text-fuchsia-500",
+  },
+  {
+    id: "time-challenge",
+    title: "Time Challenge",
+    description: "Make your move before time runs out.",
+    icon: Clock,
+    accent: "text-orange-500",
+  },
+  {
+    id: "grid-4x4",
+    title: "4x4 Grid",
+    description: "Connect 4 to win on a bigger board.",
+    icon: Grid2x2,
+    accent: "text-sky-500",
+  },
+  {
+    id: "grid-6x6",
+    title: "6x6 Grid",
+    description: "Complex strategy on a massive field.",
+    icon: Grid3x3,
+    accent: "text-purple-500",
+  },
+] as const;
 
 export const PlayScreen = () => {
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card/70 p-6 shadow-sm">
-      <H1 className="text-2xl">Play</H1>
-      <P className="text-sm text-muted-foreground">
-        Game mode selection and matchmaking will live here.
-      </P>
+    <section className="mx-auto flex w-full max-w-xl flex-col gap-8 px-4 pb-12 pt-10">
+      <header className="flex items-center justify-center">
+        <H3 className="text-sm font-semibold uppercase tracking-[0.2em]">
+          Select Mode
+        </H3>
+      </header>
+      <div className="flex flex-col gap-2 text-center py-4">
+        <H3 className="text-xl">Choose your challenge</H3>
+        <Muted className="text-sm text-muted-foreground">
+          Pick a mode to jump into a match with unique rules and stakes.
+        </Muted>
+      </div>
+      <ItemGroup className="gap-4">
+        {modes.map((mode) => {
+          const Icon = mode.icon;
+          return (
+            <Item
+              key={mode.id}
+              asChild
+              variant="outline"
+              className={"bg-card hover:bg-card/70 cursor-pointer min-h-20"}
+            >
+              <button type="button">
+                <ItemMedia
+                  variant="icon"
+                  className={cn("size-10 rounded-xl bg-secondary", mode.accent)}
+                >
+                  <Icon className="size-4" />
+                </ItemMedia>
+                <ItemContent>
+                  <H6 className="text-sm font-semibold">{mode.title}</H6>
+                  <Muted className="text-xs text-muted-foreground">
+                    {mode.description}
+                  </Muted>
+                </ItemContent>
+                <ItemActions>
+                  <span
+                    className={
+                      "grid size-8 place-items-center rounded-full bg-secondary/70 text-muted-foreground transition-colors"
+                    }
+                  >
+                    <ChevronRight className="size-4" />
+                  </span>
+                </ItemActions>
+              </button>
+            </Item>
+          );
+        })}
+      </ItemGroup>
     </section>
   );
 };
