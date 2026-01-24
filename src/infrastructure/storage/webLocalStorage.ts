@@ -1,14 +1,8 @@
-import { isThemePreference, type ThemePreference } from "@/ui/web/theme/theme";
-
 export const localStorageKeys = {
-  themePreference: "theme",
+  userPreferences: "userPreferences",
 } as const;
 
-type LocalStorageSchema = {
-  [localStorageKeys.themePreference]: ThemePreference;
-};
-
-type LocalStorageKey = keyof LocalStorageSchema;
+type LocalStorageKey = (typeof localStorageKeys)[keyof typeof localStorageKeys];
 
 const parseJson = (value: string): unknown => {
   try {
@@ -18,34 +12,21 @@ const parseJson = (value: string): unknown => {
   }
 };
 
-const decoders: {
-  [K in LocalStorageKey]: (value: unknown) => LocalStorageSchema[K] | null;
-} = {
-  [localStorageKeys.themePreference]: (value) =>
-    isThemePreference(value) ? value : null,
-};
-
-export const readLocalStorage = <K extends LocalStorageKey>(
-  key: K,
-): LocalStorageSchema[K] | null => {
+export const readLocalStorage = (key: LocalStorageKey): unknown | null => {
   if (typeof window === "undefined") return null;
 
   const rawValue = localStorage.getItem(key);
   if (!rawValue) return null;
 
-  const parsed = parseJson(rawValue);
-  return decoders[key](parsed);
+  return parseJson(rawValue);
 };
 
-export const writeLocalStorage = <K extends LocalStorageKey>(
-  key: K,
-  value: LocalStorageSchema[K],
-) => {
+export const writeLocalStorage = (key: LocalStorageKey, value: unknown) => {
   if (typeof window === "undefined") return;
   localStorage.setItem(key, JSON.stringify(value));
 };
 
-export const removeLocalStorage = <K extends LocalStorageKey>(key: K) => {
+export const removeLocalStorage = (key: LocalStorageKey) => {
   if (typeof window === "undefined") return;
   localStorage.removeItem(key);
 };

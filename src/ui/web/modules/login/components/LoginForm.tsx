@@ -118,7 +118,7 @@ export const LoginForm = () => {
           }}
         >
           {(field) => (
-            <InputGroup className="h-12 border-border/60 bg-card/40">
+            <InputGroup className="h-12 border-border bg-card">
               <InputGroupInput
                 id="login-email"
                 type="email"
@@ -140,9 +140,9 @@ export const LoginForm = () => {
                 aria-label="Edit codename"
               >
                 {isChecking ? (
-                  <Loader className={"animate-spin"} />
+                  <Loader className={"animate-spin size-4"} />
                 ) : (
-                  <Pencil />
+                  <Pencil className={"size-4"} />
                 )}
               </InputGroupButton>
             </InputGroup>
@@ -165,7 +165,7 @@ export const LoginForm = () => {
             }}
           >
             {(field) => (
-              <InputGroup className="h-12 border-border/60 bg-card/40">
+              <InputGroup className="h-12 border-border bg-card">
                 <InputGroupInput
                   id="login-password"
                   type="password"
