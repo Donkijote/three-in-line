@@ -25,7 +25,7 @@ export const NavBar = () => {
     select: (state) => state.location.pathname,
   });
 
-  if (isLoading || !isAuthenticated) return null;
+  if (isLoading || !isAuthenticated || pathname === "/match") return null;
 
   return (
     <nav

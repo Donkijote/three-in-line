@@ -1,4 +1,4 @@
-import { H3 } from "@/ui/web/components/Typography";
+import { Header } from "@/ui/web/components/Header";
 import { AvatarSection } from "@/ui/web/modules/settings/components/AvatarSection";
 import { DisplayNameSection } from "@/ui/web/modules/settings/components/DisplayNameSection";
 import { LogoutButton } from "@/ui/web/modules/settings/components/LogoutButton";
@@ -8,12 +8,8 @@ import { VersionInfo } from "@/ui/web/modules/settings/components/VersionInfo";
 
 export const SettingsScreen = () => {
   return (
-    <section className="mx-auto flex w-full h-full max-w-xl flex-col gap-10 pb-12 pt-10">
-      <header className="flex items-center justify-center">
-        <H3 className="text-sm font-semibold uppercase tracking-[0.2em] ">
-          Settings
-        </H3>
-      </header>
+    <section className="mx-auto flex w-full h-full max-w-xl flex-col gap-10 pb-12">
+      <Header title="Settings" />
 
       <AvatarSection />
 
