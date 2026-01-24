@@ -8,6 +8,8 @@ import {
   Trophy,
 } from "lucide-react";
 
+import { Link } from "@tanstack/react-router";
+
 import { H3, H6, Muted } from "@/ui/web/components/Typography";
 import {
   Item,
@@ -25,6 +27,7 @@ const modes = [
     description: "Standard rules. The original game.",
     icon: Hash,
     accent: "text-emerald-500",
+    bg: "bg-emerald-500/15",
   },
   {
     id: "best-of-three",
@@ -32,6 +35,7 @@ const modes = [
     description: "First to 2 wins takes the crown.",
     icon: Trophy,
     accent: "text-yellow-500",
+    bg: "bg-yellow-500/15",
   },
   {
     id: "best-of-five",
@@ -39,6 +43,7 @@ const modes = [
     description: "An extended battle for dominance.",
     icon: Medal,
     accent: "text-fuchsia-500",
+    bg: "bg-fuchsia-500/15",
   },
   {
     id: "time-challenge",
@@ -46,6 +51,7 @@ const modes = [
     description: "Make your move before time runs out.",
     icon: Clock,
     accent: "text-orange-500",
+    bg: "bg-orange-500/15",
   },
   {
     id: "grid-4x4",
@@ -53,6 +59,7 @@ const modes = [
     description: "Connect 4 to win on a bigger board.",
     icon: Grid2x2,
     accent: "text-sky-500",
+    bg: "bg-sky-500/15",
   },
   {
     id: "grid-6x6",
@@ -60,6 +67,7 @@ const modes = [
     description: "Complex strategy on a massive field.",
     icon: Grid3x3,
     accent: "text-purple-500",
+    bg: "bg-purple-500/15",
   },
 ] as const;
 
@@ -87,10 +95,10 @@ export const PlayScreen = () => {
               variant="outline"
               className={"bg-card hover:bg-card/70 cursor-pointer min-h-20"}
             >
-              <button type="button">
+              <Link to="/match">
                 <ItemMedia
                   variant="icon"
-                  className={cn("size-10 rounded-xl bg-secondary", mode.accent)}
+                  className={cn("size-10 rounded-xl", mode.accent, mode.bg)}
                 >
                   <Icon className="size-4" />
                 </ItemMedia>
@@ -109,7 +117,7 @@ export const PlayScreen = () => {
                     <ChevronRight className="size-4" />
                   </span>
                 </ItemActions>
-              </button>
+              </Link>
             </Item>
           );
         })}
