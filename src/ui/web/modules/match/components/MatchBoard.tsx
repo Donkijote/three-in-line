@@ -22,7 +22,7 @@ export const MatchBoard = ({ board, className }: MatchBoardProps) => {
               <button
                 type="button"
                 key={key}
-                className="grid aspect-square place-items-center rounded-2xl border border-border/70 bg-secondary text-6xl font-semibold md:text-8xl xl:text-9xl cursor-pointer"
+                className="grid aspect-square place-items-center rounded-2xl border border-border/70 bg-secondary text-6xl font-semibold md:text-8xl xl:text-9xl cursor-pointer transition hover:border-primary/60 hover:bg-primary/10"
               >
                 <span
                   className={cn(
