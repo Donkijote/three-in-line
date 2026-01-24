@@ -1,6 +1,15 @@
-import { type LucideIcon, Moon, Sun, Vibrate, Volume2 } from "lucide-react";
+import {
+  type LucideIcon,
+  Moon,
+  Sun,
+  Vibrate,
+  VibrateOff,
+  Volume2,
+  VolumeOff,
+} from "lucide-react";
 
 import { useTheme } from "@/ui/web/application/providers/ThemeProvider";
+import { useUserPreferences } from "@/ui/web/application/providers/UserPreferencesProvider";
 import { Small } from "@/ui/web/components/Typography";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
 import {
@@ -17,27 +26,29 @@ type Preference = {
   id: string;
   label: string;
   icon: LucideIcon;
-  defaultChecked?: boolean;
-  checked?: boolean;
-  onCheckedChange?: (checked: boolean) => void;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
 };
 
 export const PreferencesSection = () => {
   const { resolvedTheme, setTheme } = useTheme();
+  const { preferences, updatePreferences } = useUserPreferences();
   const isDarkTheme = resolvedTheme === "dark";
 
-  const preferences: Preference[] = [
+  const preferenceItems: Preference[] = [
     {
       id: "game-sounds",
       label: "Game Sounds",
-      icon: Volume2,
-      defaultChecked: true,
+      icon: preferences.gameSounds ? Volume2 : VolumeOff,
+      checked: preferences.gameSounds,
+      onCheckedChange: (checked) => updatePreferences({ gameSounds: checked }),
     },
     {
       id: "haptic-feedback",
       label: "Haptic Feedback",
-      icon: Vibrate,
-      defaultChecked: true,
+      icon: preferences.haptics ? Vibrate : VibrateOff,
+      checked: preferences.haptics,
+      onCheckedChange: (checked) => updatePreferences({ haptics: checked }),
     },
     {
       id: "dark-theme",
@@ -55,9 +66,8 @@ export const PreferencesSection = () => {
       </Small>
       <Card className={"py-0"}>
         <CardContent className={"px-0"}>
-          {preferences.map((preference, index) => {
+          {preferenceItems.map((preference, index) => {
             const Icon = preference.icon;
-            const isControlled = typeof preference.checked === "boolean";
             return (
               <div key={preference.id}>
                 <Item>
@@ -73,16 +83,12 @@ export const PreferencesSection = () => {
                   <ItemActions>
                     <Switch
                       id={`switch-${preference.id}`}
-                      {...(isControlled
-                        ? {
-                            checked: preference.checked,
-                            onCheckedChange: preference.onCheckedChange,
-                          }
-                        : { defaultChecked: preference.defaultChecked })}
+                      checked={preference.checked}
+                      onCheckedChange={preference.onCheckedChange}
                     />
                   </ItemActions>
                 </Item>
-                {index < preferences.length - 1 && <ItemSeparator />}
+                {index < preferenceItems.length - 1 && <ItemSeparator />}
               </div>
             );
           })}
