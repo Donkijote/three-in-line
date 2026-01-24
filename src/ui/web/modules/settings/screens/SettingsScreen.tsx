@@ -8,6 +8,7 @@ import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
 import { cn } from "@/ui/web/lib/utils";
 import { LogoutButton } from "@/ui/web/modules/settings/screens/components/LogoutButton";
 import { PreferencesSection } from "@/ui/web/modules/settings/screens/components/PreferencesSection";
+import { VersionInfo } from "@/ui/web/modules/settings/screens/components/VersionInfo";
 
 export const SettingsScreen = () => {
   const avatars = pickRandomPresetAvatars(10);
@@ -88,9 +89,7 @@ export const SettingsScreen = () => {
 
       <LogoutButton />
 
-      <p className="text-center text-xs uppercase tracking-[0.2em] text-muted-foreground/60">
-        Version 2.4.0 (Build 8892)
-      </p>
+      <VersionInfo />
     </section>
   );
 };
