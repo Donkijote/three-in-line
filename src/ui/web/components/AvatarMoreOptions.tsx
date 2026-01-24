@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { type PropsWithChildren, useState } from "react";
 
 import { X } from "lucide-react";
 
 import { type AvatarPreset, PRESET_AVATARS } from "@/ui/shared/avatars";
-import { Small } from "@/ui/web/components/Typography";
 import { Button } from "@/ui/web/components/ui/button";
 import {
   Drawer,
@@ -22,7 +21,10 @@ type AvatarMoreOptionsProps = {
   onAccept: (avatar: AvatarPreset) => void;
 };
 
-export const AvatarMoreOptions = ({ onAccept }: AvatarMoreOptionsProps) => {
+export const AvatarMoreOptions = ({
+  onAccept,
+  children,
+}: PropsWithChildren<AvatarMoreOptionsProps>) => {
   const { isMobile } = useMediaQuery();
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarPreset | null>(
     null,
@@ -36,11 +38,7 @@ export const AvatarMoreOptions = ({ onAccept }: AvatarMoreOptionsProps) => {
 
   return (
     <Drawer direction={isMobile ? "bottom" : "right"}>
-      <DrawerTrigger>
-        <Small className="cursor-pointer text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
-          see more
-        </Small>
-      </DrawerTrigger>
+      <DrawerTrigger>{children}</DrawerTrigger>
       <DrawerContent
         className={
           "data-[vaul-drawer-direction=bottom]:h-screen data-[vaul-drawer-direction=bottom]:max-h-[95vh] sm:data-[vaul-drawer-direction=right]:max-w-[70vh] lg:data-[vaul-drawer-direction=right]:w-[70vh] md:data-[vaul-drawer-direction=right]:w-[50vh]"
@@ -61,7 +59,7 @@ export const AvatarMoreOptions = ({ onAccept }: AvatarMoreOptionsProps) => {
               <AvatarOptionItem
                 key={avatar.id}
                 isSelected={avatar.id === selectedAvatar?.id}
-                onSelect={(avatar) => setSelectedAvatar(avatar as AvatarPreset)}
+                onSelect={(avatar) => setSelectedAvatar(avatar)}
                 avatar={avatar}
               />
             ))}
