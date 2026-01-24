@@ -1,6 +1,6 @@
-import { Gamepad2, LogOut, Pencil, Settings, User } from "lucide-react";
+import { Gamepad2, LogOut, Pencil, Plus, Settings, User } from "lucide-react";
 
-import { PRESET_AVATARS } from "@/ui/shared/avatars";
+import { PRESET_AVATARS, pickRandomPresetAvatars } from "@/ui/shared/avatars";
 import { H3, Small } from "@/ui/web/components/Typography";
 import { Avatar, AvatarImage } from "@/ui/web/components/ui/avatar";
 import { Button } from "@/ui/web/components/ui/button";
@@ -14,11 +14,12 @@ import {
   ItemSeparator,
   ItemTitle,
 } from "@/ui/web/components/ui/item";
+import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
 import { Switch } from "@/ui/web/components/ui/switch";
 import { cn } from "@/ui/web/lib/utils";
 
 export const SettingsScreen = () => {
-  const avatars = PRESET_AVATARS.slice(0, 4);
+  const avatars = pickRandomPresetAvatars(10);
   const preferences = [
     { label: "Game Sounds", icon: Gamepad2, enabled: true },
     { label: "Haptic Feedback", icon: User, enabled: true },
@@ -37,11 +38,11 @@ export const SettingsScreen = () => {
         <div className="relative">
           <Avatar
             size="lg"
-            className="relative size-24! ring-3 ring-black/90 shadow-[0_0_15px_0px_var(--chart-1)]"
+            className="relative size-24! ring-3 ring-black/90 shadow-[0_0_15px_0px_var(--chart-1)] cursor-pointer"
           >
             <AvatarImage src={PRESET_AVATARS[0].src} />
           </Avatar>
-          <span className="absolute bottom-1 right-1 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground">
+          <span className="absolute bottom-1 right-1 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground cursor-pointer">
             <Pencil className="size-3" />
           </span>
         </div>
@@ -59,7 +60,7 @@ export const SettingsScreen = () => {
         </div>
       </div>
 
-      <div className="flex flex-col justify-center gap-4">
+      <div className="flex flex-col justify-center gap-2">
         <div className="flex items-center justify-between">
           <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Choose Avatar
@@ -68,27 +69,33 @@ export const SettingsScreen = () => {
             View All
           </Small>
         </div>
-        <div className="flex items-center gap-3">
-          {avatars.map((avatar, index) => (
-            <Avatar
-              key={avatar.id}
-              size={"lg"}
-              className={cn("size-16! rounded-xl", {
-                "ring-1 ring-primary shadow-[0_0_10px_0_var(--chart-1)]":
-                  index === 0,
-              })}
+        <ScrollArea className={"w-full"}>
+          <div className="flex gap-4 overflow-x-auto p-3 md:flex-wrap md:overflow-visible md:pb-0">
+            {avatars.map((avatar, index) => (
+              <Avatar
+                key={avatar.id}
+                size={"lg"}
+                className={cn(
+                  "size-16! rounded-xl after:content-none cursor-pointer",
+                  {
+                    "ring-1 ring-primary shadow-[0_0_10px_0_var(--chart-1)]":
+                      index === 0,
+                  },
+                )}
+              >
+                <AvatarImage src={avatar.src} className={"rounded-xl"} />
+              </Avatar>
+            ))}
+            <button
+              type="button"
+              className="grid size-16 place-items-center rounded-xl border border-dashed border-border/70 text-muted-foreground cursor-pointer"
+              aria-label="Add custom avatar"
             >
-              <AvatarImage src={avatar.src} className={"rounded-xl"} />
-            </Avatar>
-          ))}
-          <button
-            type="button"
-            className="grid size-14 place-items-center rounded-xl border border-dashed border-border/70 text-muted-foreground"
-            aria-label="Add custom avatar"
-          >
-            +
-          </button>
-        </div>
+              <Plus className="size-4" />
+            </button>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </div>
 
       <div className="flex flex-col justify-center gap-4">
