@@ -61,7 +61,7 @@ export const PreviousAvatarsSection = () => {
         </Small>
       </div>
       <ScrollArea className={"w-full"}>
-        <div className="flex gap-4 overflow-x-auto p-3 md:flex-wrap md:overflow-visible md:pb-0">
+        <div className="flex gap-4 overflow-x-auto p-3 md:flex-wrap md:overflow-visible">
           {avatars.map((avatar, index) => {
             const preset =
               avatar.type === "preset" && isPresetAvatarId(avatar.value)
