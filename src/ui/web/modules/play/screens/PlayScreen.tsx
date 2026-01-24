@@ -10,6 +10,7 @@ import {
 
 import { Link } from "@tanstack/react-router";
 
+import { Header } from "@/ui/web/components/Header";
 import { H3, H6, Muted } from "@/ui/web/components/Typography";
 import {
   Item,
@@ -73,19 +74,15 @@ const modes = [
 
 export const PlayScreen = () => {
   return (
-    <section className="mx-auto flex w-full max-w-xl flex-col gap-8 px-4 pb-12 pt-10">
-      <header className="flex items-center justify-center">
-        <H3 className="text-sm font-semibold uppercase tracking-[0.2em]">
-          Select Mode
-        </H3>
-      </header>
-      <div className="flex flex-col gap-2 text-center py-4">
+    <section className="mx-auto flex w-full max-w-xl flex-col gap-8 md:gap-20 pb-12 h-full">
+      <Header title="Select Mode" eyebrow="New Game" />
+      <div className="flex flex-col gap-2 text-center">
         <H3 className="text-xl">Choose your challenge</H3>
         <Muted className="text-sm text-muted-foreground">
           Pick a mode to jump into a match with unique rules and stakes.
         </Muted>
       </div>
-      <ItemGroup className="gap-4">
+      <ItemGroup className="gap-4 md:grid md:grid-cols-2">
         {modes.map((mode) => {
           const Icon = mode.icon;
           return (
@@ -93,7 +90,9 @@ export const PlayScreen = () => {
               key={mode.id}
               asChild
               variant="outline"
-              className={"bg-card hover:bg-card/70 cursor-pointer min-h-20"}
+              className={
+                "bg-card hover:bg-card/70 cursor-pointer min-h-20 md:min-h-38 md:flex-col md:items-center md:gap-0 rounded-4xl"
+              }
             >
               <Link to="/match">
                 <ItemMedia
@@ -102,13 +101,13 @@ export const PlayScreen = () => {
                 >
                   <Icon className="size-4" />
                 </ItemMedia>
-                <ItemContent>
+                <ItemContent className={"md:text-center md:justify-center"}>
                   <H6 className="text-sm font-semibold">{mode.title}</H6>
                   <Muted className="text-xs text-muted-foreground">
                     {mode.description}
                   </Muted>
                 </ItemContent>
-                <ItemActions>
+                <ItemActions className={"md:hidden"}>
                   <span
                     className={
                       "grid size-8 place-items-center rounded-full bg-secondary/70 text-muted-foreground transition-colors"
