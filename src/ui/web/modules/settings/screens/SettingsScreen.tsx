@@ -1,4 +1,4 @@
-import { Gamepad2, LogOut, Pencil, Plus, Settings, User } from "lucide-react";
+import { LogOut, Moon, Pencil, Plus, Vibrate, Volume2 } from "lucide-react";
 
 import { PRESET_AVATARS, pickRandomPresetAvatars } from "@/ui/shared/avatars";
 import { H3, Small } from "@/ui/web/components/Typography";
@@ -21,9 +21,9 @@ import { cn } from "@/ui/web/lib/utils";
 export const SettingsScreen = () => {
   const avatars = pickRandomPresetAvatars(10);
   const preferences = [
-    { label: "Game Sounds", icon: Gamepad2, enabled: true },
-    { label: "Haptic Feedback", icon: User, enabled: true },
-    { label: "Dark Theme", icon: Settings, enabled: true },
+    { label: "Game Sounds", icon: Volume2, enabled: true },
+    { label: "Haptic Feedback", icon: Vibrate, enabled: true },
+    { label: "Dark Theme", icon: Moon, enabled: true },
   ];
 
   return (
@@ -109,7 +109,10 @@ export const SettingsScreen = () => {
               return (
                 <div key={preference.label}>
                   <Item>
-                    <ItemMedia variant="icon">
+                    <ItemMedia
+                      variant="icon"
+                      className={"bg-secondary p-2 rounded-lg"}
+                    >
                       <Icon />
                     </ItemMedia>
                     <ItemContent>
