@@ -5,3 +5,4 @@
 - `bun run test` runs a single pass with coverage.
 - `bun run test -- --run` runs a single pass without coverage flags.
 - Prefer direct React type/value imports (e.g., `import type { ComponentPropsWithoutRef } from "react"`) over `import * as React`.
+- Don't import anything from `vitest` (e.g., `import { describe, expect, it, vi } from "vitest";`) because it's configured to work without it as globals

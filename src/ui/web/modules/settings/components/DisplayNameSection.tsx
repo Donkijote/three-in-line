@@ -84,10 +84,6 @@ export const DisplayNameSection = () => {
   };
 
   const handleAccept = async () => {
-    if (!trimmedDisplayName || trimmedDisplayName === currentUsername) {
-      return;
-    }
-
     setIsUpdating(true);
     try {
       await updateUsername({ username: trimmedDisplayName });
