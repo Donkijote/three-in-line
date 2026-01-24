@@ -11,6 +11,7 @@ describe("loadUserPreferences", () => {
       save: vi.fn(),
     };
 
+    // @ts-expect-error: only for testing mock
     const result = loadUserPreferences(repository);
 
     expect(result).toEqual({

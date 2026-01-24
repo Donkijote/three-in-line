@@ -13,6 +13,7 @@ describe("updateUserPreferences", () => {
       save: vi.fn(),
     };
 
+    // @ts-expect-error: only for testing mock
     const result = updateUserPreferences(repository, { gameSounds: false });
 
     expect(repository.load).toHaveBeenCalledTimes(1);
@@ -44,6 +45,7 @@ describe("updateUserPreferences", () => {
     };
 
     const result = updateUserPreferences(
+      // @ts-expect-error: only for testing mock
       repository,
       { theme: "nope" as UserPreferences["theme"] },
       current,
