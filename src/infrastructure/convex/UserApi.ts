@@ -22,3 +22,22 @@ export function useCheckEmailExists() {
 
   return { checkEmailExists, isChecking };
 }
+
+export function useCheckUsernameExists() {
+  const convex = useConvex();
+  const [isChecking, setIsChecking] = useState(false);
+
+  const checkUsernameExists = useCallback(
+    async (username: string) => {
+      setIsChecking(true);
+      try {
+        return await convex.query(api.users.checkUsernameExists, { username });
+      } finally {
+        setIsChecking(false);
+      }
+    },
+    [convex],
+  );
+
+  return { checkUsernameExists, isChecking };
+}

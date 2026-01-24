@@ -3,9 +3,9 @@ import { Pencil, Plus } from "lucide-react";
 import { PRESET_AVATARS, pickRandomPresetAvatars } from "@/ui/shared/avatars";
 import { H3, Small } from "@/ui/web/components/Typography";
 import { Avatar, AvatarImage } from "@/ui/web/components/ui/avatar";
-import { Input } from "@/ui/web/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
 import { cn } from "@/ui/web/lib/utils";
+import { DisplayNameSection } from "@/ui/web/modules/settings/screens/components/DisplayNameSection";
 import { LogoutButton } from "@/ui/web/modules/settings/screens/components/LogoutButton";
 import { PreferencesSection } from "@/ui/web/modules/settings/screens/components/PreferencesSection";
 import { VersionInfo } from "@/ui/web/modules/settings/screens/components/VersionInfo";
@@ -35,17 +35,7 @@ export const SettingsScreen = () => {
         </div>
       </div>
 
-      <div className="flex flex-col justify-center gap-4">
-        <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Display Name
-        </Small>
-        <div className="flex items-center gap-3 rounded-4xl border border-border/70 bg-card px-4 py-2">
-          <Input
-            className="border-none bg-transparent px-0"
-            defaultValue="PixelMaster_99"
-          />
-        </div>
-      </div>
+      <DisplayNameSection />
 
       <div className="flex flex-col justify-center gap-2">
         <div className="flex items-center justify-between">
