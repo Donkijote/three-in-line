@@ -160,7 +160,7 @@ export const DisplayNameSection = () => {
         />
         <InputGroupButton
           type="button"
-          className="mr-1"
+          className={"mr-1 hover:bg-transparent!"}
           aria-label="Edit username"
           disabled={isUpdating}
         >
