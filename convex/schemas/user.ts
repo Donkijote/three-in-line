@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server";
 import { type Infer, v } from "convex/values";
 
-const avatar = v.object({
+export const avatar = v.object({
   type: v.union(
     v.literal("custom"),
     v.literal("preset"),

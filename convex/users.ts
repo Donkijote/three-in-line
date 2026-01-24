@@ -2,6 +2,8 @@ import { v } from "convex/values";
 
 import { getAuthUserId } from "@convex-dev/auth/server";
 
+import { avatar } from "@/convex/schemas/user";
+
 import { mutation, query } from "./_generated/server";
 
 export const checkEmailExists = query({
@@ -73,6 +75,21 @@ export const updateUsername = mutation({
     }
 
     await ctx.db.patch(userId, { username: trimmed });
+    return await ctx.db.get(userId);
+  },
+});
+
+export const updateAvatar = mutation({
+  args: {
+    avatar,
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    await ctx.db.patch(userId, { avatar: args.avatar });
     return await ctx.db.get(userId);
   },
 });

@@ -49,3 +49,7 @@ export function useCurrentUser() {
 export function useUpdateUsername() {
   return useMutation(api.users.updateUsername);
 }
+
+export function useUpdateAvatar() {
+  return useMutation(api.users.updateAvatar);
+}
