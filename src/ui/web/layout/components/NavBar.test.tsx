@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { render, screen } from "@testing-library/react";
 
 const { useConvexAuthMock, useRouterStateMock, LinkMock } = vi.hoisted(() => ({

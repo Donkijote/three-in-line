@@ -1,5 +1,3 @@
-import { describe, expect, it } from "vitest";
-
 import { userPreferencesLocalStorageRepository } from "@/infrastructure/storage/userPreferencesLocalStorage";
 
 describe("userPreferencesLocalStorageRepository", () => {

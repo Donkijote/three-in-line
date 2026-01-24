@@ -1,6 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-
 import { SettingsScreen } from "./SettingsScreen";
 
 vi.mock("@/ui/web/modules/settings/components/AvatarSection", () => ({

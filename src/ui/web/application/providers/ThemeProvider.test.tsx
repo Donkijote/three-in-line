@@ -7,7 +7,6 @@ import {
 } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { renderToString } from "react-dom/server";
-import { vi } from "vitest";
 
 import { ThemeProvider, useTheme } from "./ThemeProvider";
 import { UserPreferencesProvider } from "./UserPreferencesProvider";

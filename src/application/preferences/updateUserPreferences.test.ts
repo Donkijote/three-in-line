@@ -1,5 +1,3 @@
-import { describe, expect, it, vi } from "vitest";
-
 import type { UserPreferences } from "@/domain/entities/UserPreferences";
 
 import { updateUserPreferences } from "./updateUserPreferences";

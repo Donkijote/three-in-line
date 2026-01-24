@@ -1,5 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import type { PresetAvatarId } from "@/domain/entities/Avatar";
 
 import {
