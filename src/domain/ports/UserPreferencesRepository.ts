@@ -1,6 +1,6 @@
 import type { UserPreferences } from "@/domain/entities/UserPreferences";
 
-export type UserPreferencesRepository = {
+export interface UserPreferencesRepository {
   /**
    * Load preferences from the configured storage.
    */
@@ -9,4 +9,4 @@ export type UserPreferencesRepository = {
    * Persist preferences to the configured storage.
    */
   save: (preferences: UserPreferences) => void;
-};
+}

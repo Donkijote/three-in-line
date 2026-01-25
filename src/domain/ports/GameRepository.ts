@@ -11,7 +11,7 @@ export type CursorPage<T> = {
   nextCursor: string | null;
 };
 
-export type GameRepository = {
+export interface GameRepository {
   /**
    * Find an existing waiting game for the config or create a new one.
    */
@@ -46,4 +46,4 @@ export type GameRepository = {
     limit?: number;
     cursor?: string | null;
   }) => Promise<CursorPage<Game>>;
-};
+}
