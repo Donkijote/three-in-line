@@ -4,10 +4,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
 export function useGame(gameId: Id<"games"> | undefined) {
-  return useQuery(
-    api.games.getGame,
-    gameId ? { gameId } : "skip",
-  );
+  return useQuery(api.games.getGame, gameId ? { gameId } : "skip");
 }
 
 export function useWaitingGames() {
