@@ -5,12 +5,18 @@ import { MatchBoard } from "./MatchBoard";
 describe("MatchBoard", () => {
   it("renders a 3x3 board", () => {
     const board = [
-      ["X", "O", ""],
-      ["", "X", ""],
-      ["O", "", ""],
-    ];
+      "P1",
+      "P2",
+      null,
+      null,
+      "P1",
+      null,
+      "P2",
+      null,
+      null,
+    ] as const;
 
-    render(<MatchBoard board={board} />);
+    render(<MatchBoard board={[...board]} gridSize={3} />);
 
     const buttons = screen.getAllByRole("button");
     expect(buttons).toHaveLength(9);

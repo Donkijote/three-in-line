@@ -1,49 +1,28 @@
-import type { UserAvatar } from "@/domain/entities/Avatar";
-import { isPresetAvatarId } from "@/domain/entities/Avatar";
-import { getPresetAvatarById } from "@/ui/shared/avatars";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
 import { useGame } from "@/ui/web/hooks/useGame";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
-import { getFallbackInitials } from "@/ui/web/lib/utils";
 import { MatchActions } from "@/ui/web/modules/match/components/MatchActions";
 import { MatchBoard } from "@/ui/web/modules/match/components/MatchBoard";
-import { PlayerCard } from "@/ui/web/modules/match/components/PlayerCard";
-
-const resolveAvatarSrc = (avatar?: UserAvatar) => {
-  if (!avatar) {
-    return undefined;
-  }
-  if (avatar.type === "preset" && isPresetAvatarId(avatar.value)) {
-    return getPresetAvatarById(avatar.value).src;
-  }
-  return avatar.value;
-};
+import { MatchPlayers } from "@/ui/web/modules/match/components/MatchPlayers";
 
 type MatchScreenProps = {
   gameId: string;
 };
 
-const toDisplayBoard = (board: Array<"P1" | "P2" | null>, gridSize: number) => {
-  return Array.from({ length: gridSize }, (_, row) =>
-    board
-      .slice(row * gridSize, (row + 1) * gridSize)
-      .map((cell) => (cell === "P1" ? "X" : cell === "P2" ? "O" : "")),
-  );
-};
+type Game = ReturnType<typeof useGame>;
 
 export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const { isDesktop } = useMediaQuery();
   const game = useGame(gameId);
   const currentUser = useCurrentUser();
-  const currentUserId = currentUser?.id as unknown as string | undefined;
-  const isP1 = game ? !currentUserId || game.p1UserId === currentUserId : true;
-  const opponentId = game ? (isP1 ? game.p2UserId : game.p1UserId) : undefined;
-  const opponentUser = useUserById(opponentId as string | undefined);
+  const currentUserId = currentUser?.id;
+  const opponentId = getOpponentId(game, currentUserId);
+  const opponentUser = useUserById(opponentId);
 
-  if (!game) {
+  if (!game || !currentUser) {
     return (
       <FullPageLoader
         label="Match"
@@ -53,7 +32,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     );
   }
 
-  if (game.status === "waiting" && !game.p2UserId) {
+  if ((game.status === "waiting" && !game.p2UserId) || !opponentUser) {
     return (
       <FullPageLoader
         label="Match"
@@ -64,41 +43,11 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   }
 
   const gridSize = game.gridSize ?? 3;
-  const board = toDisplayBoard(game.board, gridSize);
-  const mySymbol: "X" | "O" = isP1 ? "X" : "O";
-  const opponentSymbol: "X" | "O" = isP1 ? "O" : "X";
-  const myTurnSlot = isP1 ? "P1" : "P2";
-  const opponentTurnSlot = isP1 ? "P2" : "P1";
-  const myName = resolvePlayerName(currentUser);
-  const opponentName = resolvePlayerName(opponentUser);
-  const myInitials = getFallbackInitials({
-    name: currentUser?.name,
-    username: currentUser?.username,
-    email: currentUser?.email,
-  });
-  const opponentInitials = getFallbackInitials({
-    name: opponentUser?.name,
-    username: opponentUser?.username,
-    email: opponentUser?.email,
-  });
-  const players = [
-    {
-      id: "player-me",
-      name: myName || myInitials,
-      symbol: mySymbol,
-      wins: 0,
-      isTurn: game.currentTurn === myTurnSlot,
-      avatar: resolveAvatarSrc(currentUser?.avatar),
-    },
-    {
-      id: "player-opponent",
-      name: opponentName || opponentInitials || "P2",
-      symbol: opponentSymbol,
-      wins: 0,
-      isTurn: game.currentTurn === opponentTurnSlot,
-      avatar: resolveAvatarSrc(opponentUser?.avatar),
-    },
-  ];
+  const matchPlayersProps = {
+    game,
+    currentUser,
+    opponentUser,
+  };
 
   return (
     <section className="mx-auto flex w-full max-w-xl flex-col no-offset lg:max-w-5xl">
@@ -107,26 +56,18 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
         <div className="grid grid-cols-[minmax(0,16rem)_minmax(0,1fr)] items-start gap-10 h-[calc(100vh-80px)] content-center">
           <Card className="bg-card shadow-sm h-full py-0">
             <CardContent className="flex h-full flex-col gap-6 px-5 py-6">
-              <div className="grid gap-6">
-                {players.map((player) => (
-                  <PlayerCard key={player.id} {...player} />
-                ))}
-              </div>
+              <MatchPlayers {...matchPlayersProps} layout="desktop" />
               <MatchActions variant="hud" className="mt-auto" />
             </CardContent>
           </Card>
 
-          <MatchBoard board={board} />
+          <MatchBoard board={game.board} gridSize={gridSize} />
         </div>
       ) : (
         <div className="flex flex-col h-[calc(100vh-80px)] justify-evenly">
-          <div className="grid grid-cols-2 gap-6">
-            {players.map((player) => (
-              <PlayerCard key={player.id} {...player} />
-            ))}
-          </div>
+          <MatchPlayers {...matchPlayersProps} layout="mobile" />
 
-          <MatchBoard board={board} />
+          <MatchBoard board={game.board} gridSize={gridSize} />
 
           <MatchActions />
         </div>
@@ -134,21 +75,10 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     </section>
   );
 };
-const resolvePlayerName = (
-  value?: {
-    username?: string | null;
-    name?: string | null;
-    email?: string | null;
-  } | null,
-) => {
-  if (value?.username) {
-    return value.username;
-  }
-  if (value?.name) {
-    return value.name;
-  }
-  if (value?.email) {
-    return value.email.split("@")[0] ?? value.email;
-  }
-  return "";
+
+const getOpponentId = (game: Game, currentUserId?: string) => {
+  if (!game) return undefined;
+
+  const isP1 = !currentUserId || game.p1UserId === currentUserId;
+  return isP1 ? game.p2UserId : game.p1UserId;
 };

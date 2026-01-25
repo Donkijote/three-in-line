@@ -2,11 +2,27 @@ import { Card } from "@/ui/web/components/ui/card";
 import { cn } from "@/ui/web/lib/utils";
 
 type MatchBoardProps = {
-  board: string[][];
+  board: Array<"P1" | "P2" | null>;
+  gridSize: number;
   className?: string;
 };
 
-export const MatchBoard = ({ board, className }: MatchBoardProps) => {
+const toDisplayBoard = (board: Array<"P1" | "P2" | null>, gridSize: number) => {
+  return Array.from({ length: gridSize }, (_, row) => {
+    return board.slice(row * gridSize, (row + 1) * gridSize).map((cell) => {
+      if (cell === "P1") {
+        return "X";
+      }
+      if (cell === "P2") {
+        return "O";
+      }
+      return "";
+    });
+  });
+};
+
+export const MatchBoard = ({ board, gridSize, className }: MatchBoardProps) => {
+  const displayBoard = toDisplayBoard(board, gridSize);
   return (
     <Card
       className={cn(
@@ -16,7 +32,7 @@ export const MatchBoard = ({ board, className }: MatchBoardProps) => {
     >
       <div className="mx-auto w-full max-w-[min(100vw,80vh)]">
         <div className="grid aspect-square grid-cols-3 gap-2 sm:gap-3">
-          {board.flatMap((row, rowIndex) =>
+          {displayBoard.flatMap((row, rowIndex) =>
             row.map((cell, colIndex) => {
               const key = `${rowIndex}-${colIndex}`;
               return (
