@@ -1,11 +1,8 @@
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import type { UserAvatar } from "@/domain/entities/Avatar";
-import type {
-  User,
-  UserId,
-  UserRepository,
-} from "@/domain/ports/UserRepository";
+import type { User, UserId } from "@/domain/entities/User";
+import type { UserRepository } from "@/domain/ports/UserRepository";
 import { convexClient } from "@/infrastructure/convex/client";
 
 const toUserId = (id: string) => id as UserId;
