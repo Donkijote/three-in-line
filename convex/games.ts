@@ -11,22 +11,75 @@ export const DISCONNECT_THRESHOLD_MS = 60000;
 export const HEARTBEAT_FRESH_MS = 30000;
 export const PAUSE_TIMEOUT_MS = 5 * 60_000;
 
-const winningLines = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-] as const;
+const DEFAULT_GRID_SIZE = 3;
+const DEFAULT_WIN_LENGTH = 3;
 
-const getWinner = (board: Array<"P1" | "P2" | null>) => {
+const generateWinLines = (gridSize: number, winLength: number) => {
+  const lines: number[][] = [];
+  const maxStart = gridSize - winLength;
+
+  for (let row = 0; row < gridSize; row += 1) {
+    for (let col = 0; col <= maxStart; col += 1) {
+      const line: number[] = [];
+      for (let offset = 0; offset < winLength; offset += 1) {
+        line.push(row * gridSize + col + offset);
+      }
+      lines.push(line);
+    }
+  }
+
+  for (let col = 0; col < gridSize; col += 1) {
+    for (let row = 0; row <= maxStart; row += 1) {
+      const line: number[] = [];
+      for (let offset = 0; offset < winLength; offset += 1) {
+        line.push((row + offset) * gridSize + col);
+      }
+      lines.push(line);
+    }
+  }
+
+  for (let row = 0; row <= maxStart; row += 1) {
+    for (let col = 0; col <= maxStart; col += 1) {
+      const line: number[] = [];
+      for (let offset = 0; offset < winLength; offset += 1) {
+        line.push((row + offset) * gridSize + (col + offset));
+      }
+      lines.push(line);
+    }
+  }
+
+  for (let row = winLength - 1; row < gridSize; row += 1) {
+    for (let col = 0; col <= maxStart; col += 1) {
+      const line: number[] = [];
+      for (let offset = 0; offset < winLength; offset += 1) {
+        line.push((row - offset) * gridSize + (col + offset));
+      }
+      lines.push(line);
+    }
+  }
+
+  return lines;
+};
+
+const evaluateWinner = (
+  board: Array<"P1" | "P2" | null>,
+  gridSize: number,
+  winLength: number,
+) => {
+  const winningLines = generateWinLines(gridSize, winLength);
   for (const line of winningLines) {
-    const [a, b, c] = line;
-    const slot = board[a];
-    if (slot && slot === board[b] && slot === board[c]) {
+    const slot = board[line[0]];
+    if (!slot) {
+      continue;
+    }
+    let isWinner = true;
+    for (let index = 1; index < line.length; index += 1) {
+      if (board[line[index]] !== slot) {
+        isWinner = false;
+        break;
+      }
+    }
+    if (isWinner) {
       return { winner: slot, line: [...line] };
     }
   }
@@ -35,6 +88,41 @@ const getWinner = (board: Array<"P1" | "P2" | null>) => {
 
 type Ctx = MutationCtx | QueryCtx;
 type GameDoc = Doc<"games">;
+
+const getGridSize = (game: GameDoc) => game.gridSize ?? DEFAULT_GRID_SIZE;
+
+const getWinLength = (game: GameDoc) => game.winLength ?? DEFAULT_WIN_LENGTH;
+
+const requireBoardShape = (game: GameDoc) => {
+  const gridSize = getGridSize(game);
+  const winLength = getWinLength(game);
+  if (!Number.isInteger(gridSize) || gridSize <= 0) {
+    throw new Error("Grid size must be a positive integer");
+  }
+  if (!Number.isInteger(winLength) || winLength <= 0 || winLength > gridSize) {
+    throw new Error("Win length must be a positive integer within grid size");
+  }
+  const expectedLength = gridSize * gridSize;
+  if (game.board.length !== expectedLength) {
+    throw new Error("Board length does not match grid size");
+  }
+  return { gridSize, winLength, expectedLength };
+};
+
+const resolveGameSettings = (args?: {
+  gridSize?: number;
+  winLength?: number;
+}) => {
+  const gridSize = args?.gridSize ?? DEFAULT_GRID_SIZE;
+  const winLength = args?.winLength ?? DEFAULT_WIN_LENGTH;
+  if (!Number.isInteger(gridSize) || gridSize <= 0) {
+    throw new Error("Grid size must be a positive integer");
+  }
+  if (!Number.isInteger(winLength) || winLength <= 0 || winLength > gridSize) {
+    throw new Error("Win length must be a positive integer within grid size");
+  }
+  return { gridSize, winLength };
+};
 
 const requireUserId = async (ctx: Ctx) => {
   const userId = await getAuthUserId(ctx);
@@ -132,13 +220,18 @@ export const myActiveGames = query({
 });
 
 export const createGame = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    gridSize: v.optional(v.number()),
+    winLength: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
-
+    const { gridSize, winLength } = resolveGameSettings(args);
     return await ctx.db.insert("games", {
       status: "waiting",
-      board: Array.from({ length: 9 }, () => null),
+      board: new Array(gridSize * gridSize).fill(null),
+      gridSize,
+      winLength,
       p1UserId: userId,
       p2UserId: null,
       currentTurn: "P1",
@@ -157,6 +250,79 @@ export const createGame = mutation({
       lastMove: null,
       updatedTime: Date.now(),
     });
+  },
+});
+
+export const findOrCreateGame = mutation({
+  args: { gridSize: v.number(), winLength: v.number() },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const { gridSize, winLength } = resolveGameSettings(args);
+    const now = Date.now();
+
+    const waitingGames = await ctx.db
+      .query("games")
+      .withIndex("by_status_p2_createdTime", (q) =>
+        q.eq("status", "waiting").eq("p2UserId", null),
+      )
+      .order("asc")
+      .collect();
+
+    const matchingGame = waitingGames.find((game) => {
+      if (game.p1UserId === userId) {
+        return false;
+      }
+      const gameGridSize = game.gridSize ?? DEFAULT_GRID_SIZE;
+      const gameWinLength = game.winLength ?? DEFAULT_WIN_LENGTH;
+      return gameGridSize === gridSize && gameWinLength === winLength;
+    });
+
+    if (matchingGame) {
+      const nextPresence = {
+        ...matchingGame.presence,
+        P2: { lastSeenTime: now },
+        ...(matchingGame.presence.P1.lastSeenTime
+          ? {}
+          : { P1: { lastSeenTime: now } }),
+      };
+
+      await ctx.db.patch(matchingGame._id, {
+        p2UserId: userId,
+        status: "playing",
+        pausedTime: null,
+        presence: nextPresence,
+        updatedTime: now,
+        version: matchingGame.version + 1,
+      });
+
+      return { gameId: matchingGame._id };
+    }
+
+    const gameId = await ctx.db.insert("games", {
+      status: "waiting",
+      board: new Array(gridSize * gridSize).fill(null),
+      gridSize,
+      winLength,
+      p1UserId: userId,
+      p2UserId: null,
+      currentTurn: "P1",
+      winner: null,
+      winningLine: null,
+      endedReason: null,
+      endedTime: null,
+      pausedTime: null,
+      abandonedBy: null,
+      presence: {
+        P1: { lastSeenTime: now },
+        P2: { lastSeenTime: null },
+      },
+      movesCount: 0,
+      version: 0,
+      lastMove: null,
+      updatedTime: now,
+    });
+
+    return { gameId };
   },
 });
 
@@ -209,6 +375,7 @@ export const placeMark = mutation({
     const game = await requireGame(ctx, args.gameId);
     const now = Date.now();
     await enforceTimeoutOrThrow(ctx, game, now, "Game timed out");
+    const { gridSize, winLength, expectedLength } = requireBoardShape(game);
 
     if (game.status === "paused") {
       throw new Error("Game paused; waiting for reconnection");
@@ -218,8 +385,14 @@ export const placeMark = mutation({
       throw new Error("Game is not in progress");
     }
 
-    if (!Number.isInteger(args.index) || args.index < 0 || args.index > 8) {
-      throw new Error("Move index must be an integer between 0 and 8");
+    if (
+      !Number.isInteger(args.index) ||
+      args.index < 0 ||
+      args.index >= expectedLength
+    ) {
+      throw new Error(
+        `Move index must be an integer between 0 and ${expectedLength - 1}`,
+      );
     }
 
     if (game.board[args.index] !== null) {
@@ -250,7 +423,7 @@ export const placeMark = mutation({
     const nextBoard = [...game.board];
     nextBoard[args.index] = callerSlot;
     const nextMovesCount = game.movesCount + 1;
-    const winnerResult = getWinner(nextBoard);
+    const winnerResult = evaluateWinner(nextBoard, gridSize, winLength);
 
     let status: GameStatus = game.status;
     let winner: "P1" | "P2" | null = null;
@@ -266,7 +439,7 @@ export const placeMark = mutation({
       winningLine = winnerResult.line;
       endedReason = "win";
       endedTime = Date.now();
-    } else if (nextMovesCount >= 9) {
+    } else if (nextMovesCount >= expectedLength) {
       status = "ended";
       winner = null;
       winningLine = null;
@@ -306,11 +479,12 @@ export const restartGame = mutation({
     const userId = await requireUserId(ctx);
     const game = await requireGame(ctx, args.gameId);
     const callerSlot = requireParticipantSlot(game, userId);
+    const { gridSize, winLength, expectedLength } = requireBoardShape(game);
 
     const status = game.p2UserId ? "playing" : "waiting";
 
     await ctx.db.patch(game._id, {
-      board: Array.from({ length: 9 }, () => null),
+      board: Array.from({ length: expectedLength }, () => null),
       winner: null,
       winningLine: null,
       endedReason: null,
@@ -325,6 +499,8 @@ export const restartGame = mutation({
         ...game.presence,
         [callerSlot]: { lastSeenTime: Date.now() },
       },
+      gridSize,
+      winLength,
       version: game.version + 1,
       updatedTime: Date.now(),
     });

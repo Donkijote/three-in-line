@@ -16,6 +16,8 @@ export type GameStatus = Infer<typeof status>;
 export const GameSchema = defineTable({
   status,
   board: v.array(v.union(player, v.null())),
+  gridSize: v.optional(v.number()),
+  winLength: v.optional(v.number()),
   p1UserId: v.id("users"),
   p2UserId: v.union(v.id("users"), v.null()),
   currentTurn: player,
@@ -46,4 +48,6 @@ export const GameSchema = defineTable({
     v.null(),
   ),
   updatedTime: v.number(),
-}).index("by_updatedTime", ["updatedTime"]);
+})
+  .index("by_updatedTime", ["updatedTime"])
+  .index("by_status_p2_createdTime", ["status", "p2UserId"]);
