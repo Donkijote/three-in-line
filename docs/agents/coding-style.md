@@ -12,5 +12,7 @@
 - Use typography components for text; add new typography variants only when reused multiple times, otherwise use the closest typography component and override via `className`.
 - When adding Tailwind color classes, use the custom theme tokens from `src/ui/web/styles/globals.css` (e.g., `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`) instead of hard-coded colors.
 - Keep architecture boundaries: repositories live in infrastructure, use cases in application, UI hooks in `src/ui/web/hooks`.
+- Use case files and exports must end with `UseCase`.
+- Keep reactive Convex queries in UI hooks; repositories should focus on mutations.
 - Always run `bun run lint` (Biome) after code changes to keep formatting consistent.
 - Define domain ports as `interface` declarations so implementations are discoverable in IDEs.
