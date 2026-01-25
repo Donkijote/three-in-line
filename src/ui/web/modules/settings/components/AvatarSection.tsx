@@ -3,10 +3,6 @@ import { useMemo, useState } from "react";
 import { Loader, Pencil } from "lucide-react";
 
 import { isPresetAvatarId } from "@/domain/entities/Avatar";
-import {
-  useCurrentUser,
-  useUpdateAvatar,
-} from "@/infrastructure/convex/UserApi";
 import { type AvatarPreset, getPresetAvatarById } from "@/ui/shared/avatars";
 import { AvatarMoreOptions } from "@/ui/web/components/AvatarMoreOptions";
 import {
@@ -14,6 +10,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
+import { useCurrentUser, useUpdateAvatar } from "@/ui/web/hooks/useUser";
 import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
 
 export const AvatarSection = () => {

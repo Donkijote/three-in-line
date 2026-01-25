@@ -10,7 +10,6 @@ import {
   getRandomPresetAvatarId,
   type UserAvatar,
 } from "@/domain/entities/Avatar";
-import { useCheckEmailExists } from "@/infrastructure/convex/UserApi";
 import { toUserAvatar } from "@/ui/shared/avatars/presets";
 import { Small } from "@/ui/web/components/Typography";
 import { Button } from "@/ui/web/components/ui/button";
@@ -19,6 +18,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/ui/web/components/ui/input-group";
+import { useCheckEmailExists } from "@/ui/web/hooks/useUser";
 import { isValidEmail } from "@/ui/web/lib/utils";
 import { AvatarOptions } from "@/ui/web/modules/login/components/AvatarOptions";
 
