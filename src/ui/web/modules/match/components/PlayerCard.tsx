@@ -14,7 +14,7 @@ type PlayerCardProps = {
   symbol: "X" | "O";
   wins: number;
   isTurn: boolean;
-  avatar: string;
+  avatar?: string;
 };
 
 export const PlayerCard = ({
