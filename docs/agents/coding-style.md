@@ -11,6 +11,6 @@
 - Prefer direct React type/value imports (e.g., `import type { ComponentPropsWithoutRef } from "react"`) over `import * as React`.
 - Use typography components for text; add new typography variants only when reused multiple times, otherwise use the closest typography component and override via `className`.
 - When adding Tailwind color classes, use the custom theme tokens from `src/ui/web/styles/globals.css` (e.g., `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`) instead of hard-coded colors.
-- Expose Convex queries/mutations via hooks in `src/infrastructure/convex/*Api.ts` and consume those hooks from UI modules/screens.
+- Keep architecture boundaries: repositories live in infrastructure, use cases in application, UI hooks in `src/ui/web/hooks`.
 - Always run `bun run lint` (Biome) after code changes to keep formatting consistent.
 - Define domain ports as `interface` declarations so implementations are discoverable in IDEs.

@@ -476,6 +476,7 @@ This keeps UI clean, testable, and transport-agnostic.
 - **Domain types are imported by backend; clients mostly consume DTOs.**
 - Keep “generated” Convex code in `_generated/` only.
 - Matchmaking uses Convex `_creationTime` for oldest-waiting ordering; no custom `createdTime`.
+- Repositories live in infrastructure, use cases in application, UI hooks in `src/ui/web/hooks`.
 
 ---
 
