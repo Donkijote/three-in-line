@@ -475,6 +475,7 @@ This keeps UI clean, testable, and transport-agnostic.
 - **DTOs live in `packages/shared-types`.**
 - **Domain types are imported by backend; clients mostly consume DTOs.**
 - Keep “generated” Convex code in `_generated/` only.
+- Matchmaking uses Convex `_creationTime` for oldest-waiting ordering; no custom `createdTime`.
 
 ---
 
