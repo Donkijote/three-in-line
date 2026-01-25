@@ -2,6 +2,12 @@ import { v } from "convex/values";
 
 import { getAuthUserId } from "@convex-dev/auth/server";
 
+import {
+  DEFAULT_GRID_SIZE,
+  DEFAULT_WIN_LENGTH,
+  evaluateWinner,
+  resolveConfig,
+} from "../src/domain/entities/Game";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
@@ -10,81 +16,6 @@ import type { GameStatus } from "./schemas/game";
 export const DISCONNECT_THRESHOLD_MS = 60000;
 export const HEARTBEAT_FRESH_MS = 30000;
 export const PAUSE_TIMEOUT_MS = 5 * 60_000;
-
-const DEFAULT_GRID_SIZE = 3;
-const DEFAULT_WIN_LENGTH = 3;
-
-const generateWinLines = (gridSize: number, winLength: number) => {
-  const lines: number[][] = [];
-  const maxStart = gridSize - winLength;
-
-  for (let row = 0; row < gridSize; row += 1) {
-    for (let col = 0; col <= maxStart; col += 1) {
-      const line: number[] = [];
-      for (let offset = 0; offset < winLength; offset += 1) {
-        line.push(row * gridSize + col + offset);
-      }
-      lines.push(line);
-    }
-  }
-
-  for (let col = 0; col < gridSize; col += 1) {
-    for (let row = 0; row <= maxStart; row += 1) {
-      const line: number[] = [];
-      for (let offset = 0; offset < winLength; offset += 1) {
-        line.push((row + offset) * gridSize + col);
-      }
-      lines.push(line);
-    }
-  }
-
-  for (let row = 0; row <= maxStart; row += 1) {
-    for (let col = 0; col <= maxStart; col += 1) {
-      const line: number[] = [];
-      for (let offset = 0; offset < winLength; offset += 1) {
-        line.push((row + offset) * gridSize + (col + offset));
-      }
-      lines.push(line);
-    }
-  }
-
-  for (let row = winLength - 1; row < gridSize; row += 1) {
-    for (let col = 0; col <= maxStart; col += 1) {
-      const line: number[] = [];
-      for (let offset = 0; offset < winLength; offset += 1) {
-        line.push((row - offset) * gridSize + (col + offset));
-      }
-      lines.push(line);
-    }
-  }
-
-  return lines;
-};
-
-const evaluateWinner = (
-  board: Array<"P1" | "P2" | null>,
-  gridSize: number,
-  winLength: number,
-) => {
-  const winningLines = generateWinLines(gridSize, winLength);
-  for (const line of winningLines) {
-    const slot = board[line[0]];
-    if (!slot) {
-      continue;
-    }
-    let isWinner = true;
-    for (let index = 1; index < line.length; index += 1) {
-      if (board[line[index]] !== slot) {
-        isWinner = false;
-        break;
-      }
-    }
-    if (isWinner) {
-      return { winner: slot, line: [...line] };
-    }
-  }
-  return null;
-};
 
 type Ctx = MutationCtx | QueryCtx;
 type GameDoc = Doc<"games">;
@@ -107,21 +38,6 @@ const requireBoardShape = (game: GameDoc) => {
     throw new Error("Board length does not match grid size");
   }
   return { gridSize, winLength, expectedLength };
-};
-
-const resolveGameSettings = (args?: {
-  gridSize?: number;
-  winLength?: number;
-}) => {
-  const gridSize = args?.gridSize ?? DEFAULT_GRID_SIZE;
-  const winLength = args?.winLength ?? DEFAULT_WIN_LENGTH;
-  if (!Number.isInteger(gridSize) || gridSize <= 0) {
-    throw new Error("Grid size must be a positive integer");
-  }
-  if (!Number.isInteger(winLength) || winLength <= 0 || winLength > gridSize) {
-    throw new Error("Win length must be a positive integer within grid size");
-  }
-  return { gridSize, winLength };
 };
 
 const requireUserId = async (ctx: Ctx) => {
@@ -226,7 +142,7 @@ export const createGame = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
-    const { gridSize, winLength } = resolveGameSettings(args);
+    const { gridSize, winLength } = resolveConfig(args);
     return await ctx.db.insert("games", {
       status: "waiting",
       board: new Array(gridSize * gridSize).fill(null),
@@ -257,7 +173,7 @@ export const findOrCreateGame = mutation({
   args: { gridSize: v.number(), winLength: v.number() },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
-    const { gridSize, winLength } = resolveGameSettings(args);
+    const { gridSize, winLength } = resolveConfig(args);
     const now = Date.now();
 
     const waitingGames = await ctx.db
@@ -423,7 +339,7 @@ export const placeMark = mutation({
     const nextBoard = [...game.board];
     nextBoard[args.index] = callerSlot;
     const nextMovesCount = game.movesCount + 1;
-    const winnerResult = evaluateWinner(nextBoard, gridSize, winLength);
+    const winnerResult = evaluateWinner(nextBoard, { gridSize, winLength });
 
     let status: GameStatus = game.status;
     let winner: "P1" | "P2" | null = null;
