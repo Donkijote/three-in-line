@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+
 import { PreferencesSection } from "./PreferencesSection";
 
 const updatePreferences = vi.fn();
@@ -25,7 +26,11 @@ vi.mock("@/ui/web/components/ui/switch", () => ({
     onCheckedChange: (value: boolean) => void;
     id?: string;
   }) => (
-    <button type="button" data-testid={id} onClick={() => onCheckedChange(!checked)}>
+    <button
+      type="button"
+      data-testid={id}
+      onClick={() => onCheckedChange(!checked)}
+    >
       {checked ? "on" : "off"}
     </button>
   ),

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+
 import { LogoutButton } from "./LogoutButton";
 
 const signOut = vi.fn();

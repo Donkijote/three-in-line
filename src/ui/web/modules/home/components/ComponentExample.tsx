@@ -31,6 +31,7 @@ import {
   UserIcon,
 } from "lucide-react";
 
+import { isThemePreference } from "@/domain/entities/UserPreferences";
 import { useTheme } from "@/ui/web/application/providers/ThemeProvider";
 import {
   AlertDialog,
@@ -95,7 +96,6 @@ import {
   Example,
   ExampleWrapper,
 } from "@/ui/web/modules/home/components/Example";
-import { isThemePreference } from "@/domain/entities/UserPreferences";
 
 export const ComponentExample = () => (
   <ExampleWrapper>

@@ -5,13 +5,9 @@ import { render, screen } from "@testing-library/react";
 import { MatchActions } from "./MatchActions";
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({
-    children,
-    ...props
-  }: {
-    children: ReactNode;
-    to: string;
-  }) => <a {...props}>{children}</a>,
+  Link: ({ children, ...props }: { children: ReactNode; to: string }) => (
+    <a {...props}>{children}</a>
+  ),
 }));
 
 describe("MatchActions", () => {

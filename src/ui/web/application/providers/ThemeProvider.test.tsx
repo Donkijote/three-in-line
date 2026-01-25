@@ -1,3 +1,7 @@
+import type { ReactNode } from "react";
+
+import { renderToString } from "react-dom/server";
+
 import {
   act,
   render,
@@ -5,8 +9,6 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import type { ReactNode } from "react";
-import { renderToString } from "react-dom/server";
 
 import { ThemeProvider, useTheme } from "./ThemeProvider";
 import { UserPreferencesProvider } from "./UserPreferencesProvider";
@@ -143,13 +145,13 @@ describe("ThemeProvider", () => {
     vi.stubGlobal("window", undefined);
 
     try {
-    const markup = renderToString(
-      <UserPreferencesProvider>
-        <ThemeProvider>
-          <ThemeConsumer />
-        </ThemeProvider>
-      </UserPreferencesProvider>,
-    );
+      const markup = renderToString(
+        <UserPreferencesProvider>
+          <ThemeProvider>
+            <ThemeConsumer />
+          </ThemeProvider>
+        </UserPreferencesProvider>,
+      );
 
       expect(markup).toContain('data-resolved="light"');
       expect(markup).toContain('data-theme="system"');
