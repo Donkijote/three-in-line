@@ -1,22 +1,14 @@
-import type { GameId, GameState } from "@/domain/entities/Game";
+import type { GameId } from "@/domain/entities/Game";
 import type { GameConfig } from "@/domain/entities/GameConfig";
 
-export type Game = GameState &
-  GameConfig & {
-    id: GameId;
-  };
-
-export type CursorPage<T> = {
-  items: T[];
-  nextCursor: string | null;
-};
-
+/**
+ * Game repository focuses on mutations; reactive queries belong in UI hooks.
+ */
 export interface GameRepository {
   /**
    * Find an existing waiting game for the config or create a new one.
    */
   findOrCreateGame: (config: GameConfig) => Promise<GameId>;
-  getGame: (gameId: GameId) => Promise<Game | null>;
 
   /**
    * Apply a move for the current user; rejects invalid turns or indices.
@@ -35,15 +27,4 @@ export interface GameRepository {
    * Record presence/heartbeat; may resume paused games when both are online.
    */
   heartbeat: (params: { gameId: GameId }) => Promise<void>;
-
-  listWaitingGames: (params?: {
-    config?: GameConfig;
-    limit?: number;
-  }) => Promise<Game[]>;
-  listMyActiveGames: (params?: { limit?: number }) => Promise<Game[]>;
-
-  listMyMatchHistory: (params?: {
-    limit?: number;
-    cursor?: string | null;
-  }) => Promise<CursorPage<Game>>;
 }
