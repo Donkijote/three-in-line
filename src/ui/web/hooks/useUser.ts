@@ -7,6 +7,7 @@ import { checkUsernameExistsUseCase } from "@/application/users/checkUsernameExi
 import { updateAvatarUseCase } from "@/application/users/updateAvatarUseCase";
 import { updateUsernameUseCase } from "@/application/users/updateUsernameUseCase";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import {
   toDomainUser,
@@ -46,6 +47,15 @@ export function useCheckUsernameExists() {
 export function useCurrentUser() {
   const currentUser = useQuery(api.users.getCurrentUser);
   return currentUser ? toDomainUser(currentUser) : currentUser;
+}
+
+export function useUserById(userId?: string | null) {
+  const resolvedId = userId ? (userId as unknown as Id<"users">) : undefined;
+  const user = useQuery(
+    api.users.getUserById,
+    resolvedId ? { userId: resolvedId } : "skip",
+  );
+  return user ? toDomainUser(user) : user;
 }
 
 export function useUpdateUsername() {
