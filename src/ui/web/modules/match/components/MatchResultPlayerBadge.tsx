@@ -32,9 +32,13 @@ export const MatchResultPlayerBadge = ({
       <div className="relative">
         <Avatar
           size="lg"
-          className={cn("size-12 ring-2 ring-destructive/60", {
-            "ring-primary/60": accent === "primary",
-          })}
+          className={cn(
+            "size-12! ring-2 ring-destructive/80 shadow-[0_0_12px_0px_var(--destructive)]",
+            {
+              "ring-primary/80": accent === "primary",
+              "shadow-[0_0_12px_0px_var(--chart-1)]": accent === "primary",
+            },
+          )}
         >
           <AvatarImage src={resolvedAvatar} alt={name} />
           <AvatarFallback>{initials}</AvatarFallback>
