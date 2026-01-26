@@ -15,6 +15,7 @@ type PlayerCardProps = {
   wins: number;
   isTurn: boolean;
   avatar?: string;
+  accent: "primary" | "opponent";
 };
 
 export const PlayerCard = ({
@@ -23,29 +24,60 @@ export const PlayerCard = ({
   wins,
   isTurn,
   avatar,
+  accent,
 }: PlayerCardProps) => {
+  const accentClasses =
+    accent === "opponent"
+      ? {
+          badge: "bg-opponent text-opponent-foreground",
+          ring: "ring-opponent/60",
+          avatarRing: "ring-opponent",
+          symbol: "text-opponent",
+          shadow: "shadow-[0_0_18px_-6px_var(--opponent)]",
+        }
+      : {
+          badge: "bg-primary text-primary-foreground",
+          ring: "ring-primary/60",
+          avatarRing: "ring-primary",
+          symbol: "text-primary",
+          shadow: "shadow-[0_0_18px_-6px_var(--chart-1)]",
+        };
+
   return (
     <div className={"relative"}>
       <Activity name={"turn-label"} mode={isTurn ? "visible" : "hidden"}>
-        <Small className="absolute -top-2 left-1/2 -translate-x-1/2 z-20 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em]">
+        <Small
+          className={cn(
+            "absolute -top-2 left-1/2 -translate-x-1/2 z-20 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em]",
+            accentClasses.badge,
+          )}
+        >
           Turn
         </Small>
       </Activity>
 
       <Card
-        className={cn("transition pt-4 pb-3", {
-          "ring-2 ring-primary/60 shadow-[0_0_18px_-6px_var(--chart-1)] relative":
-            isTurn,
-          "opacity-60": !isTurn,
-        })}
+        className={cn(
+          "transition pt-4 pb-3",
+          {
+            "ring-2 relative": isTurn,
+            "opacity-60": !isTurn,
+          },
+          isTurn && accentClasses.ring,
+          isTurn && accentClasses.shadow,
+        )}
       >
         <CardContent className="flex flex-col items-center gap-2 pt-1">
           <Avatar
             size={"lg"}
-            className={cn("size-16!", {
-              "ring-4 ring-primary": isTurn,
-              grayscale: !isTurn,
-            })}
+            className={cn(
+              "size-16!",
+              {
+                "ring-4": isTurn,
+                grayscale: !isTurn,
+              },
+              isTurn && accentClasses.avatarRing,
+            )}
           >
             <AvatarImage
               src={avatar}
@@ -61,7 +93,7 @@ export const PlayerCard = ({
               <H6 className="text-base font-semibold">{name}</H6>
               <H6
                 className={cn("text-muted-foreground", {
-                  "text-primary": isTurn,
+                  [accentClasses.symbol]: isTurn,
                 })}
               >
                 ({symbol})

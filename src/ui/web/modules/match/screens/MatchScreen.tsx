@@ -1,4 +1,8 @@
+import { useState } from "react";
+
+import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import type { GameId } from "@/domain/entities/Game";
+import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
@@ -22,6 +26,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const currentUserId = currentUser?.id;
   const opponentId = getOpponentId(game, currentUserId);
   const opponentUser = useUserById(opponentId);
+  const [isPlacing, setIsPlacing] = useState(false);
 
   if (!game || !currentUser) {
     return (
@@ -44,10 +49,27 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   }
 
   const gridSize = game.gridSize ?? 3;
+  const isMyTurn =
+    game.status === "playing" &&
+    isCurrentUserTurn(game, currentUserId) &&
+    !isPlacing;
   const matchPlayersProps = {
     game,
     currentUser,
     opponentUser,
+  };
+  const playerColors = getPlayerColors(game, currentUserId);
+
+  const handleCellClick = async (index: number) => {
+    if (!isMyTurn || isPlacing) {
+      return;
+    }
+    setIsPlacing(true);
+    try {
+      await placeMarkUseCase(gameRepository, { gameId, index });
+    } finally {
+      setIsPlacing(false);
+    }
   };
 
   return (
@@ -62,13 +84,25 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             </CardContent>
           </Card>
 
-          <MatchBoard board={game.board} gridSize={gridSize} />
+          <MatchBoard
+            board={game.board}
+            gridSize={gridSize}
+            isInteractive={isMyTurn}
+            onCellClick={handleCellClick}
+            playerColors={playerColors}
+          />
         </div>
       ) : (
         <div className="flex flex-col h-[calc(100vh-80px)] justify-evenly">
           <MatchPlayers {...matchPlayersProps} layout="mobile" />
 
-          <MatchBoard board={game.board} gridSize={gridSize} />
+          <MatchBoard
+            board={game.board}
+            gridSize={gridSize}
+            isInteractive={isMyTurn}
+            onCellClick={handleCellClick}
+            playerColors={playerColors}
+          />
 
           <MatchActions gameId={gameId} />
         </div>
@@ -85,4 +119,17 @@ const getOpponentId = (game: Game, currentUserId?: string) => {
   }
 
   return game.p1UserId === currentUserId ? game.p2UserId : game.p1UserId;
+};
+
+const isCurrentUserTurn = (game: Game, currentUserId?: string) => {
+  if (!currentUserId || !game) return false;
+  const currentSlot = game.p1UserId === currentUserId ? "P1" : "P2";
+  return game.currentTurn === currentSlot;
+};
+
+const getPlayerColors = (game: Game, currentUserId?: string) => {
+  const isP1 = !currentUserId || game.p1UserId === currentUserId;
+  return isP1
+    ? { P1: "text-primary", P2: "text-opponent" }
+    : { P1: "text-opponent", P2: "text-primary" };
 };

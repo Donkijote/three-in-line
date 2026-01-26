@@ -26,6 +26,7 @@ type MatchPlayer = {
   wins: number;
   isTurn: boolean;
   avatar?: string;
+  accent: "primary" | "opponent";
 };
 
 type MatchPlayersProps = {
@@ -102,6 +103,7 @@ const buildMatchPlayers = (
       symbol: mySymbol,
       wins: 0,
       isTurn: game.currentTurn === myTurnSlot,
+      accent: "primary",
       avatar: resolvePlayerAvatar(currentUser),
     },
     {
@@ -110,6 +112,7 @@ const buildMatchPlayers = (
       symbol: opponentSymbol,
       wins: 0,
       isTurn: game.currentTurn === opponentTurnSlot,
+      accent: "opponent",
       avatar: resolvePlayerAvatar(opponentUser),
     },
   ];
