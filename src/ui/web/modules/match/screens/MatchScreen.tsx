@@ -12,6 +12,7 @@ import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
 import { MatchActions } from "@/ui/web/modules/match/components/MatchActions";
 import { MatchBoard } from "@/ui/web/modules/match/components/MatchBoard";
 import { MatchPlayers } from "@/ui/web/modules/match/components/MatchPlayers";
+import { MatchResultModal } from "@/ui/web/modules/match/components/MatchResultModal";
 
 type MatchScreenProps = {
   gameId: GameId;
@@ -59,6 +60,8 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     opponentUser,
   };
   const playerColors = getPlayerColors(game, currentUserId);
+  const isWinResult = game.status === "ended" && game.endedReason === "win";
+  const isWinner = isWinResult && isCurrentUserWinner(game, currentUserId);
 
   const handleCellClick = async (index: number) => {
     if (!isMyTurn || isPlacing) {
@@ -107,6 +110,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
           <MatchActions gameId={gameId} />
         </div>
       )}
+      <MatchResultModal isOpen={isWinResult} isWinner={isWinner} />
     </section>
   );
 };
@@ -127,8 +131,14 @@ const isCurrentUserTurn = (game: Game, currentUserId?: string) => {
   return game.currentTurn === currentSlot;
 };
 
+const isCurrentUserWinner = (game: Game, currentUserId?: string) => {
+  if (!currentUserId || !game?.winner) return false;
+  const currentSlot = game.p1UserId === currentUserId ? "P1" : "P2";
+  return game.winner === currentSlot;
+};
+
 const getPlayerColors = (game: Game, currentUserId?: string) => {
-  const isP1 = !currentUserId || game.p1UserId === currentUserId;
+  const isP1 = !currentUserId || game?.p1UserId === currentUserId;
   return isP1
     ? { P1: "text-primary", P2: "text-opponent" }
     : { P1: "text-opponent", P2: "text-primary" };
