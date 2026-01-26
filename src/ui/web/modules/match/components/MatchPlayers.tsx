@@ -1,6 +1,6 @@
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import { resolveAvatarSrc } from "@/domain/entities/Avatar";
-import { getFallbackInitials } from "@/ui/web/lib/utils";
+import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { PlayerCard } from "@/ui/web/modules/match/components/PlayerCard";
 
 type MatchPlayersLayout = "desktop" | "mobile";
@@ -68,19 +68,6 @@ const resolvePlayerName = (value: MatchUser) => {
   return "";
 };
 
-const resolvePlayerLabel = (value: MatchUser, fallback: string) => {
-  const name = resolvePlayerName(value);
-  if (name) {
-    return name;
-  }
-  const initials = getFallbackInitials({
-    name: value?.name,
-    username: value?.username,
-    email: value?.email,
-  });
-  return initials || fallback;
-};
-
 const resolvePlayerAvatar = (value: MatchUser) =>
   resolveAvatarSrc(value?.avatar);
 
@@ -99,7 +86,9 @@ const buildMatchPlayers = (
   return [
     {
       id: "player-me",
-      name: resolvePlayerLabel(currentUser, "You"),
+      name: resolvePlayerLabel(currentUser, "You", {
+        useInitialsFallback: true,
+      }),
       symbol: mySymbol,
       wins: 0,
       isTurn: game.currentTurn === myTurnSlot,
@@ -108,7 +97,9 @@ const buildMatchPlayers = (
     },
     {
       id: "player-opponent",
-      name: resolvePlayerLabel(opponentUser, "P2"),
+      name: resolvePlayerLabel(opponentUser, "P2", {
+        useInitialsFallback: true,
+      }),
       symbol: opponentSymbol,
       wins: 0,
       isTurn: game.currentTurn === opponentTurnSlot,

@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/ui/web/components/ui/card";
 import { useGame } from "@/ui/web/hooks/useGame";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
+import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { MatchActions } from "@/ui/web/modules/match/components/MatchActions";
 import { MatchBoard } from "@/ui/web/modules/match/components/MatchBoard";
 import { MatchPlayers } from "@/ui/web/modules/match/components/MatchPlayers";
@@ -136,19 +137,6 @@ const getOpponentId = (game: Game, currentUserId?: string) => {
   return game.p1UserId === currentUserId ? game.p2UserId : game.p1UserId;
 };
 
-const resolvePlayerLabel = (
-  player: {
-    username?: string | null;
-    name?: string | null;
-    email?: string | null;
-  },
-  fallback: string,
-) => {
-  if (player?.username) return player.username;
-  if (player?.name) return player.name;
-  if (player?.email) return player.email.split("@")[0] ?? player.email;
-  return fallback;
-};
 
 const isCurrentUserTurn = (game: Game, currentUserId?: string) => {
   if (!currentUserId || !game) return false;
