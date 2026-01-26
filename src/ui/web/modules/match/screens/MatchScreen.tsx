@@ -6,21 +6,20 @@ import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
 import { MatchActions } from "@/ui/web/modules/match/components/MatchActions";
 import { MatchBoard } from "@/ui/web/modules/match/components/MatchBoard";
-import {
-  getOpponentId,
-  MatchPlayers,
-} from "@/ui/web/modules/match/components/MatchPlayers";
+import { MatchPlayers } from "@/ui/web/modules/match/components/MatchPlayers";
 
 type MatchScreenProps = {
   gameId: string;
 };
+
+type Game = ReturnType<typeof useGame>;
 
 export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const { isDesktop } = useMediaQuery();
   const game = useGame(gameId);
   const currentUser = useCurrentUser();
   const currentUserId = currentUser?.id;
-  const opponentId = game ? getOpponentId(game, currentUserId) : undefined;
+  const opponentId = getOpponentId(game, currentUserId);
   const opponentUser = useUserById(opponentId);
 
   if (!game || !currentUser) {
@@ -75,4 +74,14 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
       )}
     </section>
   );
+};
+
+const getOpponentId = (game: Game, currentUserId?: string) => {
+  if (!game) return undefined;
+
+  if (!currentUserId) {
+    return game.p2UserId ?? game.p1UserId;
+  }
+
+  return game.p1UserId === currentUserId ? game.p2UserId : game.p1UserId;
 };
