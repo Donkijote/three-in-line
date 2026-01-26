@@ -326,14 +326,26 @@ export const placeMark = mutation({
     const isOpponentPresent =
       opponentLastSeen && now - opponentLastSeen <= HEARTBEAT_FRESH_MS;
     if (!isOpponentPresent) {
+      const nextBoard = [...game.board];
+      nextBoard[args.index] = callerSlot;
+      const nextMovesCount = game.movesCount + 1;
+
       await ctx.db.patch(game._id, {
+        board: nextBoard,
+        movesCount: nextMovesCount,
         status: "paused",
         endedReason: "disconnect",
         pausedTime: now,
+        currentTurn: opponentSlot,
+        presence: {
+          ...game.presence,
+          [callerSlot]: { lastSeenTime: now },
+        },
+        lastMove: { index: args.index, by: callerSlot, at: now },
         updatedTime: now,
         version: game.version + 1,
       });
-      throw new Error("Opponent disconnected; game paused");
+      return await ctx.db.get(game._id);
     }
 
     const nextBoard = [...game.board];
