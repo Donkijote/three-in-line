@@ -1,3 +1,4 @@
+import type { GameId } from "@/domain/entities/Game";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
@@ -9,7 +10,7 @@ import { MatchBoard } from "@/ui/web/modules/match/components/MatchBoard";
 import { MatchPlayers } from "@/ui/web/modules/match/components/MatchPlayers";
 
 type MatchScreenProps = {
-  gameId: string;
+  gameId: GameId;
 };
 
 type Game = ReturnType<typeof useGame>;
@@ -57,7 +58,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
           <Card className="bg-card shadow-sm h-full py-0">
             <CardContent className="flex h-full flex-col gap-6 px-5 py-6">
               <MatchPlayers {...matchPlayersProps} layout="desktop" />
-              <MatchActions variant="hud" className="mt-auto" />
+              <MatchActions gameId={gameId} variant="hud" className="mt-auto" />
             </CardContent>
           </Card>
 
@@ -69,7 +70,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
 
           <MatchBoard board={game.board} gridSize={gridSize} />
 
-          <MatchActions />
+          <MatchActions gameId={gameId} />
         </div>
       )}
     </section>

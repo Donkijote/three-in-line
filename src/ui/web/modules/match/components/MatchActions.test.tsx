@@ -1,18 +1,20 @@
-import type { ReactNode } from "react";
-
 import { render, screen } from "@testing-library/react";
 
 import { MatchActions } from "./MatchActions";
 
+const navigate = vi.fn();
+
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children, ...props }: { children: ReactNode; to: string }) => (
-    <a {...props}>{children}</a>
-  ),
+  useNavigate: () => navigate,
 }));
+
+beforeEach(() => {
+  navigate.mockClear();
+});
 
 describe("MatchActions", () => {
   it("renders action buttons and round info", () => {
-    render(<MatchActions />);
+    render(<MatchActions gameId="game-123" />);
 
     expect(screen.getByText("Reset Round")).toBeInTheDocument();
     expect(screen.getByText("Abandon Match")).toBeInTheDocument();
@@ -21,7 +23,7 @@ describe("MatchActions", () => {
   });
 
   it("renders HUD variant without errors", () => {
-    render(<MatchActions variant="hud" />);
+    render(<MatchActions gameId="game-456" variant="hud" />);
 
     expect(screen.getByText("Reset Round")).toBeInTheDocument();
   });
