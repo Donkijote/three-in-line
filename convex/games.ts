@@ -14,7 +14,7 @@ import { mutation, query } from "./_generated/server";
 import type { GameStatus } from "./schemas/game";
 
 export const DISCONNECT_THRESHOLD_MS = 60000;
-export const HEARTBEAT_FRESH_MS = 30000;
+export const HEARTBEAT_FRESH_MS = 60000;
 export const PAUSE_TIMEOUT_MS = 5 * 60_000;
 
 type Ctx = MutationCtx | QueryCtx;
