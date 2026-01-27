@@ -6,7 +6,7 @@ import { gameRepository } from "@/infrastructure/convex/repository/gameRepositor
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
-import { useGame } from "@/ui/web/hooks/useGame";
+import { useGame, useGameHeartbeat } from "@/ui/web/hooks/useGame";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
@@ -22,6 +22,7 @@ type MatchScreenProps = {
 type Game = ReturnType<typeof useGame>;
 
 export const MatchScreen = ({ gameId }: MatchScreenProps) => {
+  useGameHeartbeat({ gameId });
   const { isDesktop } = useMediaQuery();
   const game = useGame(gameId);
   const currentUser = useCurrentUser();
@@ -136,7 +137,6 @@ const getOpponentId = (game: Game, currentUserId?: string) => {
 
   return game.p1UserId === currentUserId ? game.p2UserId : game.p1UserId;
 };
-
 
 const isCurrentUserTurn = (game: Game, currentUserId?: string) => {
   if (!currentUserId || !game) return false;
