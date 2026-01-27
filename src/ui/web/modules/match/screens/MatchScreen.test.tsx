@@ -7,14 +7,15 @@ import { gameRepository } from "@/infrastructure/convex/repository/gameRepositor
 import { MatchScreen } from "./MatchScreen";
 
 type MatchGame = {
-  status: "waiting" | "playing" | "ended";
+  status: "waiting" | "playing" | "paused" | "ended";
   p1UserId: string;
   p2UserId: string | null;
   currentTurn: "P1" | "P2";
   gridSize?: number;
   board: Array<"P1" | "P2" | null>;
   winner?: "P1" | "P2" | null;
-  endedReason?: "win" | "draw" | "abandoned";
+  endedReason?: "win" | "draw" | "abandoned" | "disconnect";
+  abandonedBy?: "P1" | "P2" | null;
 };
 
 type MatchUser = {
@@ -44,6 +45,7 @@ vi.mock("@/ui/web/hooks/useUser", () => ({
 
 vi.mock("@/ui/web/hooks/useGame", () => ({
   useGame: () => game,
+  useGameHeartbeat: vi.fn(),
 }));
 
 vi.mock("@/application/games/placeMarkUseCase", () => ({
@@ -57,27 +59,58 @@ vi.mock("@/ui/web/modules/match/components/PlayerCard", () => ({
 vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
   MatchBoard: ({
     onCellClick,
-    isInteractive,
-    playerColors,
+    status,
+    currentTurn,
+    currentUserId,
+    p1UserId,
+    isPlacing,
     gridSize,
   }: {
     onCellClick?: (index: number) => void;
-    isInteractive?: boolean;
-    playerColors?: { P1: string; P2: string };
-    gridSize: number;
-  }) => (
-    <div
-      data-testid="match-board"
-      data-interactive={String(isInteractive)}
-      data-p1-color={playerColors?.P1 ?? ""}
-      data-p2-color={playerColors?.P2 ?? ""}
-      data-grid-size={String(gridSize)}
-    >
-      <button type="button" onClick={() => onCellClick?.(4)}>
-        Place
-      </button>
-    </div>
-  ),
+    status: "waiting" | "playing" | "paused" | "ended";
+    currentTurn: "P1" | "P2";
+    currentUserId?: string;
+    p1UserId: string;
+    isPlacing?: boolean;
+    gridSize?: number;
+  }) => {
+    let currentSlot: "P1" | "P2" | undefined;
+    if (currentUserId) {
+      currentSlot = currentUserId === p1UserId ? "P1" : "P2";
+    }
+    const isInteractive =
+      status === "playing" &&
+      Boolean(currentSlot) &&
+      currentTurn === currentSlot &&
+      !isPlacing;
+
+    return (
+      <div
+        data-testid="match-board"
+        data-status={status}
+        data-current-turn={currentTurn}
+        data-current-user-id={currentUserId ?? ""}
+        data-p1-user-id={p1UserId}
+        data-is-placing={String(isPlacing ?? false)}
+        data-interactive={String(isInteractive)}
+        data-grid-size={String(gridSize)}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            if (isInteractive) {
+              onCellClick?.(4);
+            }
+          }}
+        >
+          Place
+        </button>
+        <button type="button" onClick={() => onCellClick?.(4)}>
+          Force
+        </button>
+      </div>
+    );
+  },
 }));
 
 vi.mock("@/ui/web/modules/match/components/MatchActions", () => ({
@@ -90,26 +123,32 @@ vi.mock(
   "@/ui/web/modules/match/components/match-result/MatchResultOverlay",
   () => ({
     MatchResultOverlay: ({
-      isOpen,
-      result,
-      isWinner,
-      isAbandonedByCurrentUser,
+      status,
+      endedReason,
+      winner,
+      abandonedBy,
+      p1UserId,
+      currentUserId,
       currentUser,
       opponentUser,
     }: {
-      isOpen: boolean;
-      result: "win" | "disconnect";
-      isWinner: boolean;
-      isAbandonedByCurrentUser?: boolean;
+      status: string;
+      endedReason: string | null;
+      winner: string | null;
+      abandonedBy: string | null;
+      p1UserId: string;
+      currentUserId?: string;
       currentUser: { name: string };
       opponentUser: { name: string };
     }) => (
       <div
         data-testid="match-result-overlay"
-        data-open={String(isOpen)}
-        data-result={result}
-        data-winner={String(isWinner)}
-        data-abandoned={String(isAbandonedByCurrentUser ?? false)}
+        data-status={status}
+        data-ended-reason={endedReason ?? ""}
+        data-winner={winner ?? ""}
+        data-abandoned={abandonedBy ?? ""}
+        data-p1-user-id={p1UserId}
+        data-current-user-id={currentUserId ?? ""}
         data-current={currentUser.name}
         data-opponent={opponentUser.name}
       />
@@ -262,6 +301,33 @@ describe("MatchScreen", () => {
     });
   });
 
+  it("ignores clicks while placing a move", async () => {
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P1",
+    };
+    const pending = new Promise<void>(() => undefined);
+    vi.mocked(placeMarkUseCase).mockReturnValueOnce(pending);
+
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("match-board")).toHaveAttribute(
+        "data-is-placing",
+        "true",
+      );
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Force" }));
+
+    await waitFor(() => {
+      expect(placeMarkUseCase).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("uses opponent colors when the current user is player two", () => {
     currentUser = {
       id: "user-2",
@@ -271,12 +337,12 @@ describe("MatchScreen", () => {
     render(<MatchScreen gameId={gameId} />);
 
     expect(screen.getByTestId("match-board")).toHaveAttribute(
-      "data-p1-color",
-      "text-opponent",
+      "data-p1-user-id",
+      "user-1",
     );
     expect(screen.getByTestId("match-board")).toHaveAttribute(
-      "data-p2-color",
-      "text-primary",
+      "data-current-user-id",
+      "user-2",
     );
   });
 
@@ -308,12 +374,8 @@ describe("MatchScreen", () => {
     render(<MatchScreen gameId={gameId} />);
 
     expect(screen.getByTestId("match-result-overlay")).toHaveAttribute(
-      "data-open",
-      "true",
-    );
-    expect(screen.getByTestId("match-result-overlay")).toHaveAttribute(
-      "data-winner",
-      "true",
+      "data-ended-reason",
+      "win",
     );
     expect(screen.getByTestId("match-result-overlay")).toHaveAttribute(
       "data-current",

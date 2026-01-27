@@ -18,9 +18,12 @@ describe("MatchResultOverlay", () => {
   it("renders nothing when closed", () => {
     const { container } = render(
       <MatchResultOverlay
-        isOpen={false}
-        result="win"
-        isWinner={true}
+        status="playing"
+        endedReason={null}
+        winner={null}
+        abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId="user-1"
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
       />,
@@ -32,9 +35,12 @@ describe("MatchResultOverlay", () => {
   it("renders winner state and navigates on actions", () => {
     render(
       <MatchResultOverlay
-        isOpen={true}
-        result="win"
-        isWinner={true}
+        status="ended"
+        endedReason="win"
+        winner="P1"
+        abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId="user-1"
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
       />,
@@ -58,9 +64,12 @@ describe("MatchResultOverlay", () => {
   it("renders defeat state labels", () => {
     render(
       <MatchResultOverlay
-        isOpen={true}
-        result="win"
-        isWinner={false}
+        status="ended"
+        endedReason="win"
+        winner="P2"
+        abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId="user-1"
         currentUser={{
           name: "Nova",
           avatar: { type: "preset", value: "avatar-1" } as UserAvatar,
@@ -80,9 +89,12 @@ describe("MatchResultOverlay", () => {
   it("renders disconnect messaging when opponent leaves", () => {
     render(
       <MatchResultOverlay
-        isOpen={true}
-        result="disconnect"
-        isWinner={true}
+        status="ended"
+        endedReason="disconnect"
+        winner={null}
+        abandonedBy="P2"
+        p1UserId="user-1"
+        currentUserId="user-1"
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
       />,
@@ -93,5 +105,59 @@ describe("MatchResultOverlay", () => {
     expect(
       screen.getByRole("button", { name: /find new match/i }),
     ).toBeInTheDocument();
+  });
+
+  it("renders disconnect messaging when current user disconnected", () => {
+    render(
+      <MatchResultOverlay
+        status="ended"
+        endedReason="disconnect"
+        winner={null}
+        abandonedBy="P2"
+        p1UserId="user-1"
+        currentUserId="user-2"
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(screen.getByText(/you left the match/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /find new match/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders nothing for non-win end reasons", () => {
+    const { container } = render(
+      <MatchResultOverlay
+        status="ended"
+        endedReason="draw"
+        winner={null}
+        abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId="user-1"
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders defeat when current user is unknown", () => {
+    render(
+      <MatchResultOverlay
+        status="ended"
+        endedReason="win"
+        winner="P1"
+        abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId={undefined}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(screen.getByText("Defeat")).toBeInTheDocument();
   });
 });

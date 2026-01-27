@@ -16,7 +16,16 @@ describe("MatchBoard", () => {
       null,
     ] as const;
 
-    render(<MatchBoard board={[...board]} gridSize={3} />);
+    render(
+      <MatchBoard
+        board={[...board]}
+        gridSize={3}
+        status="playing"
+        currentTurn="P1"
+        currentUserId="user-1"
+        p1UserId="user-1"
+      />,
+    );
 
     const buttons = screen.getAllByRole("button");
     expect(buttons).toHaveLength(9);
@@ -30,11 +39,40 @@ describe("MatchBoard", () => {
       "P1" | "P2" | null
     >;
 
-    render(<MatchBoard board={board} gridSize={3} onCellClick={onCellClick} />);
+    render(
+      <MatchBoard
+        board={board}
+        gridSize={3}
+        status="playing"
+        currentTurn="P1"
+        currentUserId="user-1"
+        p1UserId="user-1"
+        onCellClick={onCellClick}
+      />,
+    );
 
     const [firstCell] = screen.getAllByRole("button");
     fireEvent.click(firstCell);
 
     expect(onCellClick).toHaveBeenCalledWith(0);
+  });
+
+  it("disables the board when the current user is unknown", () => {
+    const board = Array.from({ length: 9 }, () => null) as Array<
+      "P1" | "P2" | null
+    >;
+
+    render(
+      <MatchBoard
+        board={board}
+        gridSize={3}
+        status="playing"
+        currentTurn="P1"
+        p1UserId="user-1"
+      />,
+    );
+
+    const [firstCell] = screen.getAllByRole("button");
+    expect(firstCell).toBeDisabled();
   });
 });

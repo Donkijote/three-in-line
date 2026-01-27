@@ -18,11 +18,8 @@ describe("MatchPlayers", () => {
   });
 
   it("builds player cards for the current user as P1", () => {
-    const game = {
-      p1UserId: "user-1",
-      p2UserId: "user-2",
-      currentTurn: "P1" as const,
-    };
+    const p1UserId = "user-1";
+    const currentTurn = "P1" as const;
     const currentUser = {
       id: "user-1",
       username: "nova",
@@ -42,7 +39,8 @@ describe("MatchPlayers", () => {
 
     const { container } = render(
       <MatchPlayers
-        game={game}
+        p1UserId={p1UserId}
+        currentTurn={currentTurn}
         currentUser={currentUser}
         opponentUser={opponentUser}
         layout="desktop"
@@ -77,11 +75,8 @@ describe("MatchPlayers", () => {
   });
 
   it("swaps symbols when the current user is P2 and uses mobile layout", () => {
-    const game = {
-      p1UserId: "user-1",
-      p2UserId: "user-2",
-      currentTurn: "P2" as const,
-    };
+    const p1UserId = "user-1";
+    const currentTurn = "P2" as const;
     const currentUser = {
       id: "user-2",
       name: "Alex",
@@ -93,7 +88,8 @@ describe("MatchPlayers", () => {
 
     const { container } = render(
       <MatchPlayers
-        game={game}
+        p1UserId={p1UserId}
+        currentTurn={currentTurn}
         currentUser={currentUser}
         opponentUser={opponentUser}
         layout="mobile"

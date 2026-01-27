@@ -19,6 +19,12 @@ vi.mock("@/convex/_generated/api", () => ({
   api: apiMock,
 }));
 
+vi.mock("@/infrastructure/convex/repository/gameRepository", () => ({
+  gameRepository: {
+    heartbeat: vi.fn(),
+  },
+}));
+
 describe("useGame", () => {
   beforeEach(() => {
     useQueryMock.mockReset();
