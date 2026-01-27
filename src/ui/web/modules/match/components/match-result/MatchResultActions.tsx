@@ -18,17 +18,16 @@ export const MatchResultActions = ({
   secondaryLabel,
   onNavigate,
 }: MatchResultActionsProps) => {
-  const primaryClassName =
-    accent === "primary"
-      ? "bg-primary text-primary-foreground"
-      : "bg-destructive text-destructive-foreground";
-
   return (
     <div className="grid w-full gap-3">
       <Button
         className={cn(
           "h-12 rounded-full text-sm font-semibold uppercase tracking-widest",
-          primaryClassName,
+          {
+            "bg-primary text-primary-foreground": accent === "primary",
+            "bg-destructive text-destructive-foreground":
+              accent === "destructive",
+          },
         )}
         onClick={onNavigate}
       >

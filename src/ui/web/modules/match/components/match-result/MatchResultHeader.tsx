@@ -31,13 +31,11 @@ export const MatchResultHeader = ({
       >
         {title}
       </H3>
-      {subtitle ? (
-        <Activity name={"subtitle"} mode="visible">
-          <Muted className="text-sm text-muted-foreground whitespace-pre-line tracking-wide leading-relaxed">
-            {subtitle}
-          </Muted>
-        </Activity>
-      ) : null}
+      <Activity name={"subtitle"} mode={subtitle ? "visible" : "hidden"}>
+        <Muted className="text-sm text-muted-foreground whitespace-pre-line tracking-wide leading-relaxed">
+          {subtitle}
+        </Muted>
+      </Activity>
     </div>
   );
 };

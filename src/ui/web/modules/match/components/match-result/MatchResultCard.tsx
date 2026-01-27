@@ -58,7 +58,7 @@ export const MatchResultCard = ({
           <Small className="text-[10px]">{middleLabel}</Small>
           <Activity
             name={"middle-subLabel"}
-            mode={middleLabel ? "visible" : "hidden"}
+            mode={middleSubLabel ? "visible" : "hidden"}
           >
             <Small className="text-[10px]">{middleSubLabel}</Small>
           </Activity>

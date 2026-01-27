@@ -66,11 +66,11 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const isWinResult = game.status === "ended" && game.endedReason === "win";
   const isDisconnectResult =
     game.status === "ended" && game.endedReason === "disconnect";
-  const currentSlot = currentUserId
-    ? (game.p1UserId as unknown as UserId) === currentUserId
-      ? "P1"
-      : "P2"
-    : undefined;
+  let currentSlot: "P1" | "P2" | undefined;
+  if (currentUserId) {
+    currentSlot =
+      (game.p1UserId as unknown as UserId) === currentUserId ? "P1" : "P2";
+  }
   const isDisconnectLoser =
     isDisconnectResult &&
     currentSlot !== undefined &&
