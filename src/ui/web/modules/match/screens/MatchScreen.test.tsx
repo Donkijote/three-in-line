@@ -86,27 +86,36 @@ vi.mock("@/ui/web/modules/match/components/MatchActions", () => ({
   ),
 }));
 
-vi.mock("@/ui/web/modules/match/components/MatchResultOverlay", () => ({
-  MatchResultOverlay: ({
-    isOpen,
-    isWinner,
-    currentUser,
-    opponentUser,
-  }: {
-    isOpen: boolean;
-    isWinner: boolean;
-    currentUser: { name: string };
-    opponentUser: { name: string };
-  }) => (
-    <div
-      data-testid="match-result-overlay"
-      data-open={String(isOpen)}
-      data-winner={String(isWinner)}
-      data-current={currentUser.name}
-      data-opponent={opponentUser.name}
-    />
-  ),
-}));
+vi.mock(
+  "@/ui/web/modules/match/components/match-result/MatchResultOverlay",
+  () => ({
+    MatchResultOverlay: ({
+      isOpen,
+      result,
+      isWinner,
+      isAbandonedByCurrentUser,
+      currentUser,
+      opponentUser,
+    }: {
+      isOpen: boolean;
+      result: "win" | "disconnect";
+      isWinner: boolean;
+      isAbandonedByCurrentUser?: boolean;
+      currentUser: { name: string };
+      opponentUser: { name: string };
+    }) => (
+      <div
+        data-testid="match-result-overlay"
+        data-open={String(isOpen)}
+        data-result={result}
+        data-winner={String(isWinner)}
+        data-abandoned={String(isAbandonedByCurrentUser ?? false)}
+        data-current={currentUser.name}
+        data-opponent={opponentUser.name}
+      />
+    ),
+  }),
+);
 
 const gameId = "gameId" as GameId;
 

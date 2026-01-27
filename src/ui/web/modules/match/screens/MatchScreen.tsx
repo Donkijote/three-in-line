@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import type { GameId } from "@/domain/entities/Game";
+import type { UserId } from "@/domain/entities/User";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
@@ -13,7 +14,7 @@ import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { MatchActions } from "@/ui/web/modules/match/components/MatchActions";
 import { MatchBoard } from "@/ui/web/modules/match/components/MatchBoard";
 import { MatchPlayers } from "@/ui/web/modules/match/components/MatchPlayers";
-import { MatchResultOverlay } from "@/ui/web/modules/match/components/MatchResultOverlay";
+import { MatchResultOverlay } from "@/ui/web/modules/match/components/match-result/MatchResultOverlay";
 
 type MatchScreenProps = {
   gameId: GameId;
@@ -63,7 +64,21 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   };
   const playerColors = getPlayerColors(game, currentUserId);
   const isWinResult = game.status === "ended" && game.endedReason === "win";
-  const isWinner = isWinResult && isCurrentUserWinner(game, currentUserId);
+  const isDisconnectResult =
+    game.status === "ended" && game.endedReason === "disconnect";
+  const currentSlot = currentUserId
+    ? (game.p1UserId as unknown as UserId) === currentUserId
+      ? "P1"
+      : "P2"
+    : undefined;
+  const isDisconnectLoser =
+    isDisconnectResult &&
+    currentSlot !== undefined &&
+    game.abandonedBy === currentSlot;
+  const isWinner = isWinResult
+    ? isCurrentUserWinner(game, currentUserId)
+    : !isDisconnectLoser;
+  const shouldShowResult = isWinResult || isDisconnectResult;
 
   const handleCellClick = async (index: number) => {
     if (!isMyTurn || isPlacing) {
@@ -113,8 +128,10 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
         </div>
       )}
       <MatchResultOverlay
-        isOpen={isWinResult}
+        isOpen={shouldShowResult}
+        result={isDisconnectResult ? "disconnect" : "win"}
         isWinner={isWinner}
+        isAbandonedByCurrentUser={Boolean(isDisconnectLoser)}
         currentUser={{
           name: resolvePlayerLabel(currentUser, "You"),
           avatar: currentUser.avatar,

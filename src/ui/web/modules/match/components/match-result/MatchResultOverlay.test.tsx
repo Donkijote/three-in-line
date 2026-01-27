@@ -19,6 +19,7 @@ describe("MatchResultOverlay", () => {
     const { container } = render(
       <MatchResultOverlay
         isOpen={false}
+        result="win"
         isWinner={true}
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
@@ -32,6 +33,7 @@ describe("MatchResultOverlay", () => {
     render(
       <MatchResultOverlay
         isOpen={true}
+        result="win"
         isWinner={true}
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
@@ -39,7 +41,9 @@ describe("MatchResultOverlay", () => {
     );
 
     expect(screen.getByText("You win!")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /play again/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /play again/i }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /back to home/i }),
     ).toBeInTheDocument();
@@ -55,15 +59,39 @@ describe("MatchResultOverlay", () => {
     render(
       <MatchResultOverlay
         isOpen={true}
+        result="win"
         isWinner={false}
-        currentUser={{ name: "Nova", avatar: { type: "preset", value: "avatar-1" } as UserAvatar }}
+        currentUser={{
+          name: "Nova",
+          avatar: { type: "preset", value: "avatar-1" } as UserAvatar,
+        }}
         opponentUser={{ name: "Rex" }}
       />,
     );
 
     expect(screen.getByText("Defeat")).toBeInTheDocument();
     expect(screen.getByText(/Don't give up!/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /rematch/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /rematch/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /exit/i })).toBeInTheDocument();
+  });
+
+  it("renders disconnect messaging when opponent leaves", () => {
+    render(
+      <MatchResultOverlay
+        isOpen={true}
+        result="disconnect"
+        isWinner={true}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(screen.getByText("Match Ended")).toBeInTheDocument();
+    expect(screen.getByText(/opponent has left/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /find new match/i }),
+    ).toBeInTheDocument();
   });
 });

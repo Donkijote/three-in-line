@@ -30,9 +30,7 @@ describe("MatchBoard", () => {
       "P1" | "P2" | null
     >;
 
-    render(
-      <MatchBoard board={board} gridSize={3} onCellClick={onCellClick} />,
-    );
+    render(<MatchBoard board={board} gridSize={3} onCellClick={onCellClick} />);
 
     const [firstCell] = screen.getAllByRole("button");
     fireEvent.click(firstCell);
