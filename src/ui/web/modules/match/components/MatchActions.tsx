@@ -28,7 +28,7 @@ export const MatchActions = ({
   const [isAbandoning, setIsAbandoning] = useState(false);
 
   const handleAbandonMatch = useCallback(async () => {
-    if (!gameId || isAbandoning) {
+    if (isAbandoning) {
       return;
     }
     setIsAbandoning(true);
