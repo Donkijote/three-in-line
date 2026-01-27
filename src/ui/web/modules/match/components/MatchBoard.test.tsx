@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { MatchBoard } from "./MatchBoard";
 
@@ -22,5 +22,21 @@ describe("MatchBoard", () => {
     expect(buttons).toHaveLength(9);
     expect(screen.getAllByText("X")).toHaveLength(2);
     expect(screen.getAllByText("O")).toHaveLength(2);
+  });
+
+  it("calls onCellClick when selecting an empty cell", () => {
+    const onCellClick = vi.fn();
+    const board = Array.from({ length: 9 }, () => null) as Array<
+      "P1" | "P2" | null
+    >;
+
+    render(
+      <MatchBoard board={board} gridSize={3} onCellClick={onCellClick} />,
+    );
+
+    const [firstCell] = screen.getAllByRole("button");
+    fireEvent.click(firstCell);
+
+    expect(onCellClick).toHaveBeenCalledWith(0);
   });
 });
