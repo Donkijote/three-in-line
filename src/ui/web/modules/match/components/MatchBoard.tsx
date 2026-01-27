@@ -1,41 +1,43 @@
+import type { GameStatus } from "@/domain/entities/Game";
 import { Card } from "@/ui/web/components/ui/card";
 import { cn } from "@/ui/web/lib/utils";
 
 type MatchBoardProps = {
   board: Array<"P1" | "P2" | null>;
-  gridSize: number;
-  isInteractive?: boolean;
+  gridSize?: number;
+  status: GameStatus;
+  currentTurn: "P1" | "P2";
+  currentUserId?: string;
+  p1UserId: string;
+  isPlacing?: boolean;
   onCellClick?: (index: number) => void;
-  playerColors?: {
-    P1: string;
-    P2: string;
-  };
   className?: string;
-};
-
-const toDisplayBoard = (board: Array<"P1" | "P2" | null>, gridSize: number) => {
-  return Array.from({ length: gridSize }, (_, row) => {
-    return board.slice(row * gridSize, (row + 1) * gridSize).map((cell) => {
-      if (cell === "P1") {
-        return "X";
-      }
-      if (cell === "P2") {
-        return "O";
-      }
-      return "";
-    });
-  });
 };
 
 export const MatchBoard = ({
   board,
   gridSize,
-  isInteractive = true,
+  status,
+  currentTurn,
+  currentUserId,
+  p1UserId,
+  isPlacing,
   onCellClick,
-  playerColors,
   className,
 }: MatchBoardProps) => {
-  const displayBoard = toDisplayBoard(board, gridSize);
+  const resolvedGridSize = gridSize ?? 3;
+  const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+  const isInteractive =
+    status === "playing" &&
+    Boolean(currentSlot) &&
+    currentTurn === currentSlot &&
+    !isPlacing;
+  const isCurrentUserP1 = currentSlot ? currentSlot === "P1" : true;
+  const playerColors = {
+    P1: isCurrentUserP1 ? "text-primary" : "text-opponent",
+    P2: isCurrentUserP1 ? "text-opponent" : "text-primary",
+  };
+  const displayBoard = toDisplayBoard(board, resolvedGridSize);
   return (
     <Card
       className={cn(
@@ -49,7 +51,7 @@ export const MatchBoard = ({
             row.map((cell, colIndex) => {
               const key = `${rowIndex}-${colIndex}`;
               const isDisabled = !isInteractive || cell !== "";
-              const index = rowIndex * gridSize + colIndex;
+              const index = rowIndex * resolvedGridSize + colIndex;
               return (
                 <button
                   type="button"
@@ -66,11 +68,10 @@ export const MatchBoard = ({
                   onClick={() => onCellClick?.(index)}
                 >
                   <span
-                    className={cn(
-                      cell === "X" && (playerColors?.P1 ?? "text-primary"),
-                      cell === "O" &&
-                        (playerColors?.P2 ?? "text-foreground/90"),
-                    )}
+                    className={cn({
+                      [playerColors.P1]: cell === "X",
+                      [playerColors.P2]: cell === "O",
+                    })}
                   >
                     {cell || ""}
                   </span>
@@ -82,4 +83,29 @@ export const MatchBoard = ({
       </div>
     </Card>
   );
+};
+
+const toDisplayBoard = (board: Array<"P1" | "P2" | null>, gridSize: number) => {
+  return Array.from({ length: gridSize }, (_, row) => {
+    return board.slice(row * gridSize, (row + 1) * gridSize).map((cell) => {
+      if (cell === "P1") {
+        return "X";
+      }
+      if (cell === "P2") {
+        return "O";
+      }
+      return "";
+    });
+  });
+};
+
+const resolveCurrentSlot = (
+  currentUserId: string | undefined,
+  p1UserId: string,
+) => {
+  if (!currentUserId) {
+    return undefined;
+  }
+
+  return currentUserId === p1UserId ? "P1" : "P2";
 };

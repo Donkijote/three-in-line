@@ -5,22 +5,31 @@ import type {
 import { MatchResultOverlayBase } from "./MatchResultOverlayBase";
 
 export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
-  if (!props.isOpen) {
+  if (props.status !== "ended") {
     return null;
   }
 
-  if (props.result === "disconnect") {
+  if (props.endedReason === "disconnect") {
     return <MatchResultOverlayBase {...toDisconnectModel(props)} />;
   }
 
-  return <MatchResultOverlayBase {...toWinLossModel(props)} />;
+  if (props.endedReason === "win") {
+    return <MatchResultOverlayBase {...toWinLossModel(props)} />;
+  }
+
+  return null;
 };
 
 const toWinLossModel = ({
-  isWinner,
+  winner,
+  currentUserId,
+  p1UserId,
   currentUser,
   opponentUser,
 }: MatchResultOverlayProps): MatchResultViewModel => {
+  const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+  const isWinner = currentSlot ? winner === currentSlot : false;
+
   if (isWinner) {
     return {
       title: "You win!",
@@ -48,11 +57,14 @@ const toWinLossModel = ({
 };
 
 const toDisconnectModel = ({
-  isAbandonedByCurrentUser,
+  abandonedBy,
+  currentUserId,
+  p1UserId,
   currentUser,
   opponentUser,
 }: MatchResultOverlayProps): MatchResultViewModel => {
-  const isDisconnectLoser = Boolean(isAbandonedByCurrentUser);
+  const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+  const isDisconnectLoser = Boolean(currentSlot) && abandonedBy === currentSlot;
   const subtitle = isDisconnectLoser
     ? "You left the match and ended the game."
     : "Your opponent has left the game.";
@@ -72,6 +84,17 @@ const toDisconnectModel = ({
     currentUser,
     opponentUser,
     isCurrentWinner: !isDisconnectLoser,
-    isAbandonedByCurrentUser,
+    isAbandonedByCurrentUser: isDisconnectLoser,
   };
+};
+
+const resolveCurrentSlot = (
+  currentUserId: string | undefined,
+  p1UserId: string,
+) => {
+  if (!currentUserId) {
+    return undefined;
+  }
+
+  return currentUserId === p1UserId ? "P1" : "P2";
 };

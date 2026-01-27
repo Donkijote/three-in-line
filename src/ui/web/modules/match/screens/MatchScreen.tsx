@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import type { GameId } from "@/domain/entities/Game";
-import type { UserId } from "@/domain/entities/User";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
@@ -52,36 +51,15 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     );
   }
 
-  const gridSize = game.gridSize ?? 3;
-  const isMyTurn =
-    game.status === "playing" &&
-    isCurrentUserTurn(game, currentUserId) &&
-    !isPlacing;
   const matchPlayersProps = {
-    game,
+    p1UserId: game.p1UserId,
+    currentTurn: game.currentTurn,
     currentUser,
     opponentUser,
   };
-  const playerColors = getPlayerColors(game, currentUserId);
-  const isWinResult = game.status === "ended" && game.endedReason === "win";
-  const isDisconnectResult =
-    game.status === "ended" && game.endedReason === "disconnect";
-  let currentSlot: "P1" | "P2" | undefined;
-  if (currentUserId) {
-    currentSlot =
-      (game.p1UserId as unknown as UserId) === currentUserId ? "P1" : "P2";
-  }
-  const isDisconnectLoser =
-    isDisconnectResult &&
-    currentSlot !== undefined &&
-    game.abandonedBy === currentSlot;
-  const isWinner = isWinResult
-    ? isCurrentUserWinner(game, currentUserId)
-    : !isDisconnectLoser;
-  const shouldShowResult = isWinResult || isDisconnectResult;
 
   const handleCellClick = async (index: number) => {
-    if (!isMyTurn || isPlacing) {
+    if (isPlacing) {
       return;
     }
     setIsPlacing(true);
@@ -106,10 +84,13 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
 
           <MatchBoard
             board={game.board}
-            gridSize={gridSize}
-            isInteractive={isMyTurn}
+            gridSize={game.gridSize}
+            status={game.status}
+            currentTurn={game.currentTurn}
+            currentUserId={currentUserId}
+            p1UserId={game.p1UserId}
+            isPlacing={isPlacing}
             onCellClick={handleCellClick}
-            playerColors={playerColors}
           />
         </div>
       ) : (
@@ -118,20 +99,25 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
 
           <MatchBoard
             board={game.board}
-            gridSize={gridSize}
-            isInteractive={isMyTurn}
+            gridSize={game.gridSize}
+            status={game.status}
+            currentTurn={game.currentTurn}
+            currentUserId={currentUserId}
+            p1UserId={game.p1UserId}
+            isPlacing={isPlacing}
             onCellClick={handleCellClick}
-            playerColors={playerColors}
           />
 
           <MatchActions gameId={gameId} />
         </div>
       )}
       <MatchResultOverlay
-        isOpen={shouldShowResult}
-        result={isDisconnectResult ? "disconnect" : "win"}
-        isWinner={isWinner}
-        isAbandonedByCurrentUser={Boolean(isDisconnectLoser)}
+        status={game.status}
+        endedReason={game.endedReason}
+        winner={game.winner}
+        abandonedBy={game.abandonedBy}
+        p1UserId={game.p1UserId}
+        currentUserId={currentUserId}
         currentUser={{
           name: resolvePlayerLabel(currentUser, "You"),
           avatar: currentUser.avatar,
@@ -153,23 +139,4 @@ const getOpponentId = (game: Game, currentUserId?: string) => {
   }
 
   return game.p1UserId === currentUserId ? game.p2UserId : game.p1UserId;
-};
-
-const isCurrentUserTurn = (game: Game, currentUserId?: string) => {
-  if (!currentUserId || !game) return false;
-  const currentSlot = game.p1UserId === currentUserId ? "P1" : "P2";
-  return game.currentTurn === currentSlot;
-};
-
-const isCurrentUserWinner = (game: Game, currentUserId?: string) => {
-  if (!currentUserId || !game?.winner) return false;
-  const currentSlot = game.p1UserId === currentUserId ? "P1" : "P2";
-  return game.winner === currentSlot;
-};
-
-const getPlayerColors = (game: Game, currentUserId?: string) => {
-  const isP1 = !currentUserId || game?.p1UserId === currentUserId;
-  return isP1
-    ? { P1: "text-primary", P2: "text-opponent" }
-    : { P1: "text-opponent", P2: "text-primary" };
 };
