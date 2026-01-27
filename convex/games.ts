@@ -20,19 +20,8 @@ export const PAUSE_TIMEOUT_MS = 5 * 60_000;
 type Ctx = MutationCtx | QueryCtx;
 type GameDoc = Doc<"games">;
 
-const getGridSize = (game: GameDoc) => game.gridSize ?? DEFAULT_GRID_SIZE;
-
-const getWinLength = (game: GameDoc) => game.winLength ?? DEFAULT_WIN_LENGTH;
-
 const requireBoardShape = (game: GameDoc) => {
-  const gridSize = getGridSize(game);
-  const winLength = getWinLength(game);
-  if (!Number.isInteger(gridSize) || gridSize <= 0) {
-    throw new Error("Grid size must be a positive integer");
-  }
-  if (!Number.isInteger(winLength) || winLength <= 0 || winLength > gridSize) {
-    throw new Error("Win length must be a positive integer within grid size");
-  }
+  const { gridSize, winLength } = resolveConfig(game);
   const expectedLength = gridSize * gridSize;
   if (game.board.length !== expectedLength) {
     throw new Error("Board length does not match grid size");
@@ -76,8 +65,10 @@ const getTimeoutPatch = (game: GameDoc, now: number) => {
     const p2Seen = game.presence.P2.lastSeenTime;
     const isP1Fresh = p1Seen !== null && now - p1Seen <= HEARTBEAT_FRESH_MS;
     const isP2Fresh = p2Seen !== null && now - p2Seen <= HEARTBEAT_FRESH_MS;
-    const abandonedBy: GameDoc["abandonedBy"] =
-      isP1Fresh === isP2Fresh ? null : isP1Fresh ? "P2" : "P1";
+    let abandonedBy: GameDoc["abandonedBy"] = null;
+    if (isP1Fresh !== isP2Fresh) {
+      abandonedBy = isP1Fresh ? "P2" : "P1";
+    }
 
     return {
       status: "ended" as const,
