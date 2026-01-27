@@ -72,10 +72,18 @@ const getTimeoutPatch = (game: GameDoc, now: number) => {
     game.pausedTime &&
     now - game.pausedTime > PAUSE_TIMEOUT_MS
   ) {
+    const p1Seen = game.presence.P1.lastSeenTime;
+    const p2Seen = game.presence.P2.lastSeenTime;
+    const isP1Fresh = p1Seen !== null && now - p1Seen <= HEARTBEAT_FRESH_MS;
+    const isP2Fresh = p2Seen !== null && now - p2Seen <= HEARTBEAT_FRESH_MS;
+    const abandonedBy: GameDoc["abandonedBy"] =
+      isP1Fresh === isP2Fresh ? null : isP1Fresh ? "P2" : "P1";
+
     return {
       status: "ended" as const,
       endedReason: "disconnect" as const,
       endedTime: now,
+      abandonedBy,
       updatedTime: now,
       version: game.version + 1,
     };
@@ -87,13 +95,14 @@ const enforceTimeoutOrThrow = async (
   ctx: MutationCtx,
   game: GameDoc,
   now: number,
-  message: string,
 ) => {
   const timeoutPatch = getTimeoutPatch(game, now);
-  if (timeoutPatch) {
-    await ctx.db.patch(game._id, timeoutPatch);
-    throw new Error(message);
+  if (!timeoutPatch) {
+    return false;
   }
+
+  await ctx.db.patch(game._id, timeoutPatch);
+  return true;
 };
 
 export const getGame = query({
@@ -248,7 +257,10 @@ export const joinGame = mutation({
     const userId = await requireUserId(ctx);
     const game = await requireGame(ctx, args.gameId);
     const now = Date.now();
-    await enforceTimeoutOrThrow(ctx, game, now, "Game timed out");
+    const didTimeout = await enforceTimeoutOrThrow(ctx, game, now);
+    if (didTimeout) {
+      return await ctx.db.get(game._id);
+    }
 
     if (game.p1UserId === userId) {
       if (game.status === "waiting" && game.p2UserId) {
@@ -290,7 +302,10 @@ export const placeMark = mutation({
     const userId = await requireUserId(ctx);
     const game = await requireGame(ctx, args.gameId);
     const now = Date.now();
-    await enforceTimeoutOrThrow(ctx, game, now, "Game timed out");
+    const didTimeout = await enforceTimeoutOrThrow(ctx, game, now);
+    if (didTimeout) {
+      return await ctx.db.get(game._id);
+    }
     const { gridSize, winLength, expectedLength } = requireBoardShape(game);
 
     if (game.status === "paused") {
@@ -457,11 +472,29 @@ export const heartbeat = mutation({
     const callerSlot = requireParticipantSlot(game, userId);
 
     const now = Date.now();
-    await enforceTimeoutOrThrow(ctx, game, now, "Game timed out");
+    const didTimeout = await enforceTimeoutOrThrow(ctx, game, now);
+    if (didTimeout) {
+      return { ok: true, status: "ended" };
+    }
     const nextPresence = {
       ...game.presence,
       [callerSlot]: { lastSeenTime: now },
     };
+    const opponentSlot = callerSlot === "P1" ? "P2" : "P1";
+    const opponentLastSeen = nextPresence[opponentSlot].lastSeenTime;
+    const isOpponentFresh =
+      opponentLastSeen !== null && now - opponentLastSeen <= HEARTBEAT_FRESH_MS;
+
+    if (game.status === "playing" && !isOpponentFresh) {
+      await ctx.db.patch(game._id, {
+        presence: nextPresence,
+        status: "paused",
+        pausedTime: now,
+        updatedTime: now,
+        version: game.version + 1,
+      });
+      return { ok: true, status: "paused" };
+    }
 
     const patch: {
       presence: typeof nextPresence;
