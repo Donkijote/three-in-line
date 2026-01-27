@@ -55,19 +55,6 @@ export const MatchPlayers = ({
   );
 };
 
-const resolvePlayerName = (value: MatchUser) => {
-  if (value?.username) {
-    return value.username;
-  }
-  if (value?.name) {
-    return value.name;
-  }
-  if (value?.email) {
-    return value.email.split("@")[0] ?? value.email;
-  }
-  return "";
-};
-
 const resolvePlayerAvatar = (value: MatchUser) =>
   resolveAvatarSrc(value?.avatar);
 
