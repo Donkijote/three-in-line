@@ -21,21 +21,23 @@ export const MatchResultHeader = ({
   icon,
 }: MatchResultHeaderProps) => {
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-20">
       <MatchResultHeaderIcon accent={accent} icon={icon} />
-      <H3
-        className={cn("font-semibold tracking-widest uppercase", {
-          "text-5xl text-primary": accent === "primary",
-          "text-4xl text-destructive": accent === "destructive",
-        })}
-      >
-        {title}
-      </H3>
-      <Activity name={"subtitle"} mode={subtitle ? "visible" : "hidden"}>
-        <Muted className="text-sm text-muted-foreground whitespace-pre-line tracking-wide leading-relaxed">
-          {subtitle}
-        </Muted>
-      </Activity>
+      <div className={"flex flex-col gap-6"}>
+        <H3
+          className={cn("font-semibold tracking-widest uppercase", {
+            "text-5xl text-primary": accent === "primary",
+            "text-4xl text-destructive": accent === "destructive",
+          })}
+        >
+          {title}
+        </H3>
+        <Activity name={"subtitle"} mode={subtitle ? "visible" : "hidden"}>
+          <Muted className="text-sm text-muted-foreground whitespace-pre-line tracking-wide leading-relaxed">
+            {subtitle}
+          </Muted>
+        </Activity>
+      </div>
     </div>
   );
 };

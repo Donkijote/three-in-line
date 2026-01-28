@@ -33,6 +33,7 @@ let game: MatchGame | undefined;
 let currentUser: MatchUser | undefined;
 let opponentUser: MatchUser | undefined;
 let lastOpponentId: string | undefined;
+const navigate = vi.fn();
 
 vi.mock("@/ui/web/hooks/useMediaQuery", () => ({
   useMediaQuery: () => ({ isDesktop }),
@@ -50,6 +51,10 @@ vi.mock("@/ui/web/hooks/useGame", () => ({
 
 vi.mock("@/application/games/placeMarkUseCase", () => ({
   placeMarkUseCase: vi.fn(),
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => navigate,
 }));
 
 vi.mock("@/ui/web/modules/match/components/PlayerCard", () => ({
