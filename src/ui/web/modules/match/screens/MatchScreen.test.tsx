@@ -134,7 +134,6 @@ vi.mock(
       abandonedBy,
       p1UserId,
       currentUserId,
-      onPrimaryAction,
       currentUser,
       opponentUser,
     }: {
@@ -144,7 +143,6 @@ vi.mock(
       abandonedBy: string | null;
       p1UserId: string;
       currentUserId?: string;
-      onPrimaryAction: () => void;
       currentUser: { name: string };
       opponentUser: { name: string };
     }) => (
