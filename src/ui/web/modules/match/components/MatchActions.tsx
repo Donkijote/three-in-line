@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { Activity, useCallback, useState } from "react";
 
-import { Dot, Flag, RotateCcw } from "lucide-react";
+import { Dot, Flag } from "lucide-react";
 
 import { useNavigate } from "@tanstack/react-router";
 
@@ -48,10 +48,6 @@ export const MatchActions = ({
           !isHud && "md:flex-row md:justify-center",
         )}
       >
-        <Button className="h-12 text-sm font-semibold">
-          <RotateCcw className="size-4" />
-          Reset Round
-        </Button>
         <Button
           type="button"
           variant="outline"
@@ -65,13 +61,16 @@ export const MatchActions = ({
           </span>
         </Button>
       </div>
-      <div className={"flex justify-center"}>
-        <Badge variant={"secondary"} className={"text-muted-foreground"}>
-          <Muted className="text-xs">Round 6</Muted>
-          <Dot />
-          <Muted className="text-xs">Best of 10</Muted>
-        </Badge>
-      </div>
+      {/* TODO implement the correct counter when other game modes are added to the game */}
+      <Activity name={"round-counter"} mode={"hidden"}>
+        <div className={"flex justify-center"}>
+          <Badge variant={"secondary"} className={"text-muted-foreground"}>
+            <Muted className="text-xs">Round 6</Muted>
+            <Dot />
+            <Muted className="text-xs">Best of 10</Muted>
+          </Badge>
+        </div>
+      </Activity>
     </div>
   );
 };

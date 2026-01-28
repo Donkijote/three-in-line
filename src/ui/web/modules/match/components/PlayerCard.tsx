@@ -99,13 +99,16 @@ export const PlayerCard = ({
                 ({symbol})
               </H6>
             </div>
-            <Muted
-              className={cn("text-xs text-muted-foreground/50", {
-                "text-muted-foreground/70": isTurn,
-              })}
-            >
-              Wins: {wins}
-            </Muted>
+            {/* TODO implement the correct counter when other game modes are added to the game */}
+            <Activity name={"current-wins"} mode={"hidden"}>
+              <Muted
+                className={cn("text-xs text-muted-foreground/50", {
+                  "text-muted-foreground/70": isTurn,
+                })}
+              >
+                Wins: {wins}
+              </Muted>
+            </Activity>
           </div>
         </CardContent>
       </Card>
