@@ -1,6 +1,6 @@
 import {
-  PRESET_AVATARS,
   getPresetAvatarById,
+  PRESET_AVATARS,
   pickRandomPresetAvatars,
 } from "./index";
 

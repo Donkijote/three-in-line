@@ -17,10 +17,7 @@ describe("Header", () => {
 
   it("renders the left slot when provided", () => {
     render(
-      <Header
-        title="Match"
-        leftSlot={<button type="button">Back</button>}
-      />,
+      <Header title="Match" leftSlot={<button type="button">Back</button>} />,
     );
 
     expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();

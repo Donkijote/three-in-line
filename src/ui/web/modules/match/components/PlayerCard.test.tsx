@@ -11,6 +11,7 @@ describe("PlayerCard", () => {
         wins={3}
         isTurn={true}
         avatar="/avatars/avatar-3.svg"
+        accent={"primary"}
       />,
     );
 
@@ -27,6 +28,7 @@ describe("PlayerCard", () => {
         wins={2}
         isTurn={true}
         avatar="/avatars/avatar-8.svg"
+        accent={"primary"}
       />,
     );
 
@@ -41,6 +43,7 @@ describe("PlayerCard", () => {
         wins={2}
         isTurn={false}
         avatar="/avatars/avatar-8.svg"
+        accent={"opponent"}
       />,
     );
 

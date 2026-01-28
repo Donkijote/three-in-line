@@ -106,3 +106,16 @@ export const isPresetAvatarId = (value: string): value is PresetAvatarId =>
  */
 export const getRandomPresetAvatarId = (): PresetAvatarId =>
   PRESET_AVATAR_IDS[Math.floor(Math.random() * PRESET_AVATAR_IDS.length)];
+
+/**
+ * Resolve a usable avatar image source, if any.
+ */
+export const resolveAvatarSrc = (avatar?: UserAvatar) => {
+  if (!avatar) {
+    return undefined;
+  }
+  if (avatar.type === "preset" && isPresetAvatarId(avatar.value)) {
+    return `/avatars/${avatar.value}.svg`;
+  }
+  return avatar.value;
+};

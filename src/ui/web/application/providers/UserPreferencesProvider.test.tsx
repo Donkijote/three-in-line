@@ -1,6 +1,9 @@
 import { act, renderHook } from "@testing-library/react";
 
-import { UserPreferencesProvider, useUserPreferences } from "./UserPreferencesProvider";
+import {
+  UserPreferencesProvider,
+  useUserPreferences,
+} from "./UserPreferencesProvider";
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <UserPreferencesProvider>{children}</UserPreferencesProvider>

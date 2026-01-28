@@ -8,8 +8,8 @@ import { cn } from "@/ui/web/lib/utils";
 
 function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: self-generated
     <div
-      // biome-ignore lint/a11y/useSemanticElements: self-generated
       role="list"
       data-slot="item-group"
       className={cn(

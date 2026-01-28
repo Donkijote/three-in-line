@@ -29,9 +29,9 @@ vi.mock("@/ui/web/components/ui/drawer", () => ({
   }: {
     children: ReactNode;
     onClick?: () => void;
+  }) => (
     // biome-ignore lint/a11y/noStaticElementInteractions: only for testing purposes
     // biome-ignore lint/a11y/useKeyWithClickEvents: only for testing purposes
-  }) => (
     <div data-testid="drawer-close" onClick={onClick}>
       {children}
     </div>
