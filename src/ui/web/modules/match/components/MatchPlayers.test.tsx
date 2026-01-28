@@ -1,11 +1,18 @@
+import type { ComponentPropsWithoutRef } from "react";
+
 import { render } from "@testing-library/react";
 
 import type { UserAvatar } from "@/domain/entities/Avatar";
 
 import { MatchPlayers } from "./MatchPlayers";
+import type { PlayerCard } from "./PlayerCard";
+
+type PlayerCardProps = ComponentPropsWithoutRef<typeof PlayerCard>;
 
 const { PlayerCardMock } = vi.hoisted(() => ({
-  PlayerCardMock: vi.fn(() => <div data-testid="player-card" />),
+  PlayerCardMock: vi.fn((_: PlayerCardProps) => (
+    <div data-testid="player-card" />
+  )),
 }));
 
 vi.mock("@/ui/web/modules/match/components/PlayerCard", () => ({
