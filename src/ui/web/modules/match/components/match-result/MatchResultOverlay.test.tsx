@@ -24,6 +24,7 @@ describe("MatchResultOverlay", () => {
         abandonedBy={null}
         p1UserId="user-1"
         currentUserId="user-1"
+        onPrimaryAction={vi.fn()}
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
       />,
@@ -32,7 +33,8 @@ describe("MatchResultOverlay", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders winner state and navigates on actions", () => {
+  it("renders winner state and triggers actions", () => {
+    const onPrimaryAction = vi.fn();
     render(
       <MatchResultOverlay
         status="ended"
@@ -41,6 +43,7 @@ describe("MatchResultOverlay", () => {
         abandonedBy={null}
         p1UserId="user-1"
         currentUserId="user-1"
+        onPrimaryAction={onPrimaryAction}
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
       />,
@@ -51,14 +54,20 @@ describe("MatchResultOverlay", () => {
       screen.getByRole("button", { name: /play again/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /back to home/i }),
+      screen.getByRole("button", { name: /back home/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /change mode/i }),
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /play again/i }));
-    fireEvent.click(screen.getByRole("button", { name: /back to home/i }));
+    fireEvent.click(screen.getByRole("button", { name: /back home/i }));
+    fireEvent.click(screen.getByRole("button", { name: /change mode/i }));
 
+    expect(onPrimaryAction).toHaveBeenCalledTimes(1);
     expect(navigate).toHaveBeenCalledTimes(2);
-    expect(navigate).toHaveBeenLastCalledWith({ to: "/play" });
+    expect(navigate).toHaveBeenNthCalledWith(1, { to: "/" });
+    expect(navigate).toHaveBeenNthCalledWith(2, { to: "/play" });
   });
 
   it("renders defeat state labels", () => {
@@ -70,6 +79,7 @@ describe("MatchResultOverlay", () => {
         abandonedBy={null}
         p1UserId="user-1"
         currentUserId="user-1"
+        onPrimaryAction={vi.fn()}
         currentUser={{
           name: "Nova",
           avatar: { type: "preset", value: "avatar-1" } as UserAvatar,
@@ -83,7 +93,12 @@ describe("MatchResultOverlay", () => {
     expect(
       screen.getByRole("button", { name: /rematch/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /exit/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /back home/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /change mode/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders disconnect messaging when opponent leaves", () => {
@@ -95,6 +110,7 @@ describe("MatchResultOverlay", () => {
         abandonedBy="P2"
         p1UserId="user-1"
         currentUserId="user-1"
+        onPrimaryAction={vi.fn()}
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
       />,
@@ -116,6 +132,7 @@ describe("MatchResultOverlay", () => {
         abandonedBy="P2"
         p1UserId="user-1"
         currentUserId="user-2"
+        onPrimaryAction={vi.fn()}
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
       />,
@@ -136,6 +153,7 @@ describe("MatchResultOverlay", () => {
         abandonedBy={null}
         p1UserId="user-1"
         currentUserId="user-1"
+        onPrimaryAction={vi.fn()}
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
       />,
@@ -153,6 +171,7 @@ describe("MatchResultOverlay", () => {
         abandonedBy={null}
         p1UserId="user-1"
         currentUserId={undefined}
+        onPrimaryAction={vi.fn()}
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
       />,

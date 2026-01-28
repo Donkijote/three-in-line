@@ -10,11 +10,21 @@ export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
   }
 
   if (props.endedReason === "disconnect") {
-    return <MatchResultOverlayBase {...toDisconnectModel(props)} />;
+    return (
+      <MatchResultOverlayBase
+        {...toDisconnectModel(props)}
+        onPrimaryAction={props.onPrimaryAction}
+      />
+    );
   }
 
   if (props.endedReason === "win") {
-    return <MatchResultOverlayBase {...toWinLossModel(props)} />;
+    return (
+      <MatchResultOverlayBase
+        {...toWinLossModel(props)}
+        onPrimaryAction={props.onPrimaryAction}
+      />
+    );
   }
 
   return null;
@@ -36,7 +46,8 @@ const toWinLossModel = ({
       accent: "primary",
       icon: "trophy",
       primaryLabel: "Play Again",
-      secondaryLabel: "Back to Home",
+      secondaryLabel: "Back Home",
+      changeModeLabel: "Change Mode",
       currentUser,
       opponentUser,
       isCurrentWinner: true,
@@ -49,7 +60,8 @@ const toWinLossModel = ({
     accent: "destructive",
     icon: "heart",
     primaryLabel: "Rematch",
-    secondaryLabel: "EXIT",
+    secondaryLabel: "Back Home",
+    changeModeLabel: "Change Mode",
     currentUser,
     opponentUser,
     isCurrentWinner: false,
@@ -80,7 +92,8 @@ const toDisconnectModel = ({
     pill: "Match Incomplete",
     footer,
     primaryLabel: "Find New Match",
-    secondaryLabel: "Back to Home",
+    secondaryLabel: "Back Home",
+    changeModeLabel: "Change Mode",
     currentUser,
     opponentUser,
     isCurrentWinner: !isDisconnectLoser,

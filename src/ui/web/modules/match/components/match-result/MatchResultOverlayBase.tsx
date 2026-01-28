@@ -1,5 +1,3 @@
-import { useNavigate } from "@tanstack/react-router";
-
 import { MatchResultActions } from "./MatchResultActions";
 import { MatchResultCard } from "./MatchResultCard";
 import { MatchResultHeader } from "./MatchResultHeader";
@@ -14,17 +12,13 @@ export const MatchResultOverlayBase = ({
   footer,
   primaryLabel,
   secondaryLabel,
+  changeModeLabel,
   currentUser,
   opponentUser,
   isCurrentWinner,
   isAbandonedByCurrentUser,
-}: MatchResultViewModel) => {
-  const navigate = useNavigate();
-
-  const handleNavigate = () => {
-    void navigate({ to: "/play" });
-  };
-
+  onPrimaryAction,
+}: MatchResultViewModel & { onPrimaryAction: () => Promise<void> }) => {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-background/95 px-6 py-8">
       <div className="relative w-full max-w-sm">
@@ -51,7 +45,8 @@ export const MatchResultOverlayBase = ({
             accent={accent}
             primaryLabel={primaryLabel}
             secondaryLabel={secondaryLabel}
-            onNavigate={handleNavigate}
+            changeModeLabel={changeModeLabel}
+            onPrimaryAction={onPrimaryAction}
           />
         </div>
       </div>
