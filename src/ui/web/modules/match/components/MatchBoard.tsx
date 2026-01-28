@@ -1,4 +1,4 @@
-import type { GameStatus } from "@/domain/entities/Game";
+import { DEFAULT_GRID_SIZE, type GameStatus } from "@/domain/entities/Game";
 import { Card } from "@/ui/web/components/ui/card";
 import { cn } from "@/ui/web/lib/utils";
 
@@ -25,7 +25,7 @@ export const MatchBoard = ({
   onCellClick,
   className,
 }: MatchBoardProps) => {
-  const resolvedGridSize = gridSize ?? 3;
+  const resolvedGridSize = gridSize ?? DEFAULT_GRID_SIZE;
   const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
   const isInteractive =
     status === "playing" &&
@@ -38,6 +38,15 @@ export const MatchBoard = ({
     P2: isCurrentUserP1 ? "text-opponent" : "text-primary",
   };
   const displayBoard = toDisplayBoard(board, resolvedGridSize);
+  const gridStyle = {
+    gridTemplateColumns: `repeat(${resolvedGridSize}, minmax(0, 1fr))`,
+  };
+  const cellFontSize =
+    resolvedGridSize <= 4
+      ? `clamp(4rem, ${50 / resolvedGridSize}vw, 6rem)`
+      : `clamp(3rem, ${30 / resolvedGridSize}vw, 5rem)`;
+  const gridGapClasses =
+    resolvedGridSize > 4 ? "gap-1 sm:gap-2" : "gap-2 sm:gap-3";
   return (
     <Card
       className={cn(
@@ -45,8 +54,11 @@ export const MatchBoard = ({
         className,
       )}
     >
-      <div className="mx-auto w-full max-w-[min(100vw,80vh)]">
-        <div className="grid aspect-square grid-cols-3 gap-2 sm:gap-3">
+      <div className="mx-auto w-full max-w-[min(100vw,85vh)]">
+        <div
+          className={cn("grid aspect-square", gridGapClasses)}
+          style={gridStyle}
+        >
           {displayBoard.flatMap((row, rowIndex) =>
             row.map((cell, colIndex) => {
               const key = `${rowIndex}-${colIndex}`;
@@ -58,13 +70,14 @@ export const MatchBoard = ({
                   key={key}
                   disabled={isDisabled}
                   className={cn(
-                    "grid aspect-square place-items-center rounded-2xl border border-border/70 bg-secondary text-[clamp(1.75rem,12vw,4.5rem)] font-semibold transition md:text-[clamp(2.5rem,8vw,5.5rem)] xl:text-9xl",
+                    "grid aspect-square place-items-center rounded-2xl border border-border/70 bg-secondary font-semibold transition",
                     {
                       "cursor-pointer hover:border-primary/60 hover:bg-primary/10":
                         !isDisabled,
                       "cursor-not-allowed opacity-60": isDisabled,
                     },
                   )}
+                  style={{ fontSize: cellFontSize }}
                   onClick={() => onCellClick?.(index)}
                 >
                   <span
