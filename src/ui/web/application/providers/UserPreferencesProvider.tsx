@@ -25,18 +25,15 @@ export const UserPreferencesProvider = ({ children }: PropsWithChildren) => {
     loadUserPreferences(userPreferencesLocalStorageRepository),
   );
 
-  const updatePreferences = useCallback(
-    (updates: Partial<UserPreferences>) => {
-      setPreferences((current) =>
-        updateUserPreferences(
-          userPreferencesLocalStorageRepository,
-          updates,
-          current,
-        ),
-      );
-    },
-    [],
-  );
+  const updatePreferences = useCallback((updates: Partial<UserPreferences>) => {
+    setPreferences((current) =>
+      updateUserPreferences(
+        userPreferencesLocalStorageRepository,
+        updates,
+        current,
+      ),
+    );
+  }, []);
 
   const value = useMemo(
     () => ({ preferences, updatePreferences }),
@@ -53,7 +50,9 @@ export const UserPreferencesProvider = ({ children }: PropsWithChildren) => {
 export const useUserPreferences = () => {
   const context = useContext(UserPreferencesContext);
   if (!context) {
-    throw new Error("useUserPreferences must be used within UserPreferencesProvider");
+    throw new Error(
+      "useUserPreferences must be used within UserPreferencesProvider",
+    );
   }
 
   return context;

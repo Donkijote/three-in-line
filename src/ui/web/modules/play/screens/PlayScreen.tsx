@@ -1,3 +1,5 @@
+import { useCallback, useState } from "react";
+
 import {
   ChevronRight,
   Clock,
@@ -8,8 +10,10 @@ import {
   Trophy,
 } from "lucide-react";
 
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
+import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
+import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { Header } from "@/ui/web/components/Header";
 import { H3, H6, Muted } from "@/ui/web/components/Typography";
 import {
@@ -29,6 +33,7 @@ const modes = [
     icon: Hash,
     accent: "text-emerald-500",
     bg: "bg-emerald-500/15",
+    config: { gridSize: 3, winLength: 3 },
   },
   {
     id: "best-of-three",
@@ -37,6 +42,7 @@ const modes = [
     icon: Trophy,
     accent: "text-yellow-500",
     bg: "bg-yellow-500/15",
+    config: { gridSize: 3, winLength: 3 },
   },
   {
     id: "best-of-five",
@@ -45,6 +51,7 @@ const modes = [
     icon: Medal,
     accent: "text-fuchsia-500",
     bg: "bg-fuchsia-500/15",
+    config: { gridSize: 3, winLength: 3 },
   },
   {
     id: "time-challenge",
@@ -53,6 +60,7 @@ const modes = [
     icon: Clock,
     accent: "text-orange-500",
     bg: "bg-orange-500/15",
+    config: { gridSize: 3, winLength: 3 },
   },
   {
     id: "grid-4x4",
@@ -61,6 +69,7 @@ const modes = [
     icon: Grid2x2,
     accent: "text-sky-500",
     bg: "bg-sky-500/15",
+    config: { gridSize: 4, winLength: 3 },
   },
   {
     id: "grid-6x6",
@@ -69,10 +78,36 @@ const modes = [
     icon: Grid3x3,
     accent: "text-purple-500",
     bg: "bg-purple-500/15",
+    config: { gridSize: 6, winLength: 3 },
   },
 ] as const;
 
 export const PlayScreen = () => {
+  const navigate = useNavigate();
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleSelectMode = useCallback(
+    async (mode: (typeof modes)[number]) => {
+      if (isCreating) {
+        return;
+      }
+      setIsCreating(true);
+      try {
+        const gameId = await findOrCreateGameUseCase(
+          gameRepository,
+          mode.config,
+        );
+        await navigate({
+          to: "/match",
+          search: { gameId },
+        });
+      } finally {
+        setIsCreating(false);
+      }
+    },
+    [isCreating, navigate],
+  );
+
   return (
     <section className="mx-auto flex w-full max-w-xl flex-col gap-8 md:gap-20 pb-12 h-full">
       <Header title="Select Mode" eyebrow="New Game" />
@@ -91,10 +126,14 @@ export const PlayScreen = () => {
               asChild
               variant="outline"
               className={
-                "bg-card hover:bg-card/70 cursor-pointer min-h-20 md:min-h-38 md:flex-col md:items-center md:gap-0 rounded-4xl"
+                "bg-card hover:bg-card/70 cursor-pointer min-h-20 md:min-h-38 md:flex-col md:items-center md:gap-0 rounded-4xl disabled:cursor-not-allowed disabled:opacity-70"
               }
             >
-              <Link to="/match">
+              <button
+                type="button"
+                onClick={() => handleSelectMode(mode)}
+                disabled={isCreating}
+              >
                 <ItemMedia
                   variant="icon"
                   className={cn("size-10 rounded-xl", mode.accent, mode.bg)}
@@ -116,7 +155,7 @@ export const PlayScreen = () => {
                     <ChevronRight className="size-4" />
                   </span>
                 </ItemActions>
-              </Link>
+              </button>
             </Item>
           );
         })}

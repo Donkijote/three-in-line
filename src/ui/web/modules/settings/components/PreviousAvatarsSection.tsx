@@ -2,11 +2,7 @@ import { useMemo, useState } from "react";
 
 import { Plus } from "lucide-react";
 
-import { isPresetAvatarId } from "@/domain/entities/Avatar";
-import {
-  useCurrentUser,
-  useUpdateAvatar,
-} from "@/infrastructure/convex/UserApi";
+import { isPresetAvatarId, type UserAvatar } from "@/domain/entities/Avatar";
 import { getPresetAvatarById } from "@/ui/shared/avatars";
 import { Small } from "@/ui/web/components/Typography";
 import {
@@ -15,18 +11,14 @@ import {
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
+import { useCurrentUser, useUpdateAvatar } from "@/ui/web/hooks/useUser";
 import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
-
-type AvatarEntry = {
-  type: "custom" | "preset" | "generated";
-  value: string;
-};
 
 export const PreviousAvatarsSection = () => {
   const currentUser = useCurrentUser();
   const updateAvatar = useUpdateAvatar();
   const [isUpdating, setIsUpdating] = useState(false);
-  const avatars = (currentUser?.avatars ?? []) as AvatarEntry[];
+  const avatars = currentUser?.avatars ?? [];
 
   const fallbackInitials = useMemo(
     () =>
@@ -38,7 +30,7 @@ export const PreviousAvatarsSection = () => {
     [currentUser?.email, currentUser?.name, currentUser?.username],
   );
 
-  const handleSelectAvatar = async (avatar: AvatarEntry) => {
+  const handleSelectAvatar = async (avatar: UserAvatar) => {
     if (isUpdating) {
       return;
     }

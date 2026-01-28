@@ -9,7 +9,9 @@
     "ignoreUnknown": false,
     "includes": [
       "**/src/**/*",
+      "!!**/src/ui/web/routeTree.gen.ts",
       "**/convex/**/*",
+      "!!**/convex/_generated",
       "**/index.html",
       "**/vite.config.ts",
       "**/vitest.config.ts"

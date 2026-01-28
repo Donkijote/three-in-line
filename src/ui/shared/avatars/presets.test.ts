@@ -1,8 +1,8 @@
 import type { PresetAvatarId } from "@/domain/entities/Avatar";
 
 import {
-  PRESET_AVATARS,
   getPresetAvatarById,
+  PRESET_AVATARS,
   pickRandomPresetAvatars,
 } from "./presets";
 

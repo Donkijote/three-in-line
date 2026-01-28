@@ -1,22 +1,54 @@
 import type { ReactNode } from "react";
 
-import { render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+
+import { abandonGameUseCase } from "@/application/games/abandonGameUseCase";
+import type { GameId } from "@/domain/entities/Game";
+import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 
 import { MatchActions } from "./MatchActions";
 
+const navigate = vi.fn();
+
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({
-    children,
-    ...props
-  }: {
-    children: ReactNode;
-    to: string;
-  }) => <a {...props}>{children}</a>,
+  useNavigate: () => navigate,
 }));
+
+vi.mock("@/ui/web/components/ui/button", () => ({
+  Button: ({
+    onClick,
+    children,
+  }: {
+    onClick?: () => void;
+    children: ReactNode;
+  }) => (
+    <button type="button" onClick={onClick}>
+      {children}
+    </button>
+  ),
+}));
+
+vi.mock("@/application/games/abandonGameUseCase", () => ({
+  abandonGameUseCase: vi.fn(),
+}));
+
+beforeEach(() => {
+  navigate.mockClear();
+  vi.mocked(abandonGameUseCase).mockClear();
+  vi.mocked(abandonGameUseCase).mockResolvedValue(undefined);
+});
+
+const gameId = "gameId" as GameId;
 
 describe("MatchActions", () => {
   it("renders action buttons and round info", () => {
-    render(<MatchActions />);
+    render(<MatchActions gameId={gameId} />);
 
     expect(screen.getByText("Reset Round")).toBeInTheDocument();
     expect(screen.getByText("Abandon Match")).toBeInTheDocument();
@@ -25,8 +57,46 @@ describe("MatchActions", () => {
   });
 
   it("renders HUD variant without errors", () => {
-    render(<MatchActions variant="hud" />);
+    render(<MatchActions gameId={gameId} variant="hud" />);
 
     expect(screen.getByText("Reset Round")).toBeInTheDocument();
+  });
+
+  it("abandons the match and navigates back to the lobby", async () => {
+    render(<MatchActions gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /abandon match/i }));
+
+    await waitFor(() => {
+      expect(abandonGameUseCase).toHaveBeenCalledWith(gameRepository, {
+        gameId,
+      });
+      expect(navigate).toHaveBeenCalledWith({ to: "/play" });
+    });
+  });
+
+  it("ignores abandon action while already abandoning", async () => {
+    let resolveAbandon: (() => void) | undefined;
+    const abandonPromise = new Promise<void>((resolve) => {
+      resolveAbandon = resolve;
+    });
+    vi.mocked(abandonGameUseCase).mockReturnValueOnce(abandonPromise);
+
+    render(<MatchActions gameId={gameId} />);
+
+    const abandonButton = screen.getByRole("button", {
+      name: /abandon match/i,
+    });
+    fireEvent.click(abandonButton);
+    fireEvent.click(abandonButton);
+
+    await waitFor(() => {
+      expect(abandonGameUseCase).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      resolveAbandon?.();
+      await abandonPromise;
+    });
   });
 });

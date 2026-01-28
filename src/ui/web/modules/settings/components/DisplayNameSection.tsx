@@ -3,11 +3,6 @@ import { type ChangeEvent, useEffect, useMemo, useState } from "react";
 import { CircleCheck, CircleX, Loader } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce";
 
-import {
-  useCheckUsernameExists,
-  useCurrentUser,
-  useUpdateUsername,
-} from "@/infrastructure/convex/UserApi";
 import { Small } from "@/ui/web/components/Typography";
 import { Button } from "@/ui/web/components/ui/button";
 import {
@@ -15,6 +10,11 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/ui/web/components/ui/input-group";
+import {
+  useCheckUsernameExists,
+  useCurrentUser,
+  useUpdateUsername,
+} from "@/ui/web/hooks/useUser";
 
 export const DisplayNameSection = () => {
   const currentUser = useCurrentUser();
