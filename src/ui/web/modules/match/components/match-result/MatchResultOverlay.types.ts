@@ -11,6 +11,7 @@ export type MatchResultOverlayProps = {
   abandonedBy: "P1" | "P2" | null;
   p1UserId: string;
   currentUserId?: string;
+  onPrimaryAction: () => Promise<void>;
   currentUser: {
     name: string;
     avatar?: UserAvatar;
@@ -30,6 +31,7 @@ export type MatchResultViewModel = {
   footer?: string;
   primaryLabel: string;
   secondaryLabel: string;
+  changeModeLabel: string;
   currentUser: MatchResultOverlayProps["currentUser"];
   opponentUser: MatchResultOverlayProps["opponentUser"];
   isCurrentWinner: boolean;

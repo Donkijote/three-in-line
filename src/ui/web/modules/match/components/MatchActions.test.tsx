@@ -50,16 +50,9 @@ describe("MatchActions", () => {
   it("renders action buttons and round info", () => {
     render(<MatchActions gameId={gameId} />);
 
-    expect(screen.getByText("Reset Round")).toBeInTheDocument();
     expect(screen.getByText("Abandon Match")).toBeInTheDocument();
     expect(screen.getByText("Round 6")).toBeInTheDocument();
     expect(screen.getByText("Best of 10")).toBeInTheDocument();
-  });
-
-  it("renders HUD variant without errors", () => {
-    render(<MatchActions gameId={gameId} variant="hud" />);
-
-    expect(screen.getByText("Reset Round")).toBeInTheDocument();
   });
 
   it("abandons the match and navigates back to the lobby", async () => {

@@ -1,5 +1,8 @@
 import { useState } from "react";
 
+import { useNavigate } from "@tanstack/react-router";
+
+import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
 import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import type { GameId } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
@@ -26,9 +29,12 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const { isDesktop } = useMediaQuery();
   const game = useGame(gameId);
   const currentUser = useCurrentUser();
+  const navigate = useNavigate();
   const currentUserId = currentUser?.id;
   const opponentId = getOpponentId(game, currentUserId);
   const opponentUser = useUserById(opponentId);
+  const gridSize = game?.gridSize;
+  const winLength = game?.winLength;
   const [isPlacing, setIsPlacing] = useState(false);
 
   if (!game || !currentUser) {
@@ -67,6 +73,24 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
       await placeMarkUseCase(gameRepository, { gameId, index });
     } finally {
       setIsPlacing(false);
+    }
+  };
+
+  const handleCreateNewGame = async () => {
+    if (gridSize == null || winLength == null) {
+      return;
+    }
+    try {
+      const nextGameId = await findOrCreateGameUseCase(gameRepository, {
+        gridSize,
+        winLength,
+      });
+      await navigate({
+        to: "/match",
+        search: { gameId: nextGameId },
+      });
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -118,6 +142,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
         abandonedBy={game.abandonedBy}
         p1UserId={game.p1UserId}
         currentUserId={currentUserId}
+        onPrimaryAction={handleCreateNewGame}
         currentUser={{
           name: resolvePlayerLabel(currentUser, "You"),
           avatar: currentUser.avatar,
