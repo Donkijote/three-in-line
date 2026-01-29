@@ -5,7 +5,7 @@ import { Dot, Flag } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { abandonGameUseCase } from "@/application/games/abandonGameUseCase";
-import type { GameId } from "@/domain/entities/Game";
+import type { GameId, MatchState } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { Muted } from "@/ui/web/components/Typography";
 import { Badge } from "@/ui/web/components/ui/badge";
@@ -14,18 +14,22 @@ import { cn } from "@/ui/web/lib/utils";
 
 type MatchActionsProps = {
   gameId: GameId;
+  match: MatchState | null;
   variant?: "default" | "hud";
   className?: string;
 };
 
 export const MatchActions = ({
   gameId,
+  match,
   variant = "default",
   className,
 }: MatchActionsProps) => {
   const isHud = variant === "hud";
   const navigate = useNavigate();
   const [isAbandoning, setIsAbandoning] = useState(false);
+  const showRoundCounter = Boolean(match && match.format !== "single");
+  const bestOf = match ? match.targetWins * 2 - 1 : 1;
 
   const handleAbandonMatch = useCallback(async () => {
     if (isAbandoning) {
@@ -61,13 +65,15 @@ export const MatchActions = ({
           </span>
         </Button>
       </div>
-      {/* TODO implement the correct counter when other game modes are added to the game */}
-      <Activity name={"round-counter"} mode={"hidden"}>
+      <Activity
+        name={"round-counter"}
+        mode={showRoundCounter ? "visible" : "hidden"}
+      >
         <div className={"flex justify-center"}>
           <Badge variant={"secondary"} className={"text-muted-foreground"}>
-            <Muted className="text-xs">Round 6</Muted>
+            <Muted className="text-xs">Round {match?.roundIndex ?? 1}</Muted>
             <Dot />
-            <Muted className="text-xs">Best of 10</Muted>
+            <Muted className="text-xs">Best of {bestOf}</Muted>
           </Badge>
         </div>
       </Activity>

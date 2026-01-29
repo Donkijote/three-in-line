@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 
 import { abandonGameUseCase } from "@/application/games/abandonGameUseCase";
-import type { GameId } from "@/domain/entities/Game";
+import type { GameId, MatchState } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 
 import { MatchActions } from "./MatchActions";
@@ -48,11 +48,20 @@ const gameId = "gameId" as GameId;
 
 describe("MatchActions", () => {
   it("renders action buttons and round info", () => {
-    render(<MatchActions gameId={gameId} />);
+    const match: MatchState = {
+      format: "bo3",
+      targetWins: 2,
+      roundIndex: 2,
+      score: { P1: 1, P2: 0 },
+      matchWinner: null,
+      rounds: [],
+    };
+
+    render(<MatchActions gameId={gameId} match={match} />);
 
     expect(screen.getByText("Abandon Match")).toBeInTheDocument();
-    expect(screen.getByText("Round 6")).toBeInTheDocument();
-    expect(screen.getByText("Best of 10")).toBeInTheDocument();
+    expect(screen.getByText("Round 2")).toBeInTheDocument();
+    expect(screen.getByText("Best of 3")).toBeInTheDocument();
   });
 
   it("abandons the match and navigates back to the lobby", async () => {

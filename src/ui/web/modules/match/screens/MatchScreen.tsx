@@ -104,7 +104,12 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
           <Card className="bg-card shadow-sm h-full py-0">
             <CardContent className="flex h-full flex-col gap-6 px-5 py-6">
               <MatchPlayers {...matchPlayersProps} layout="desktop" />
-              <MatchActions gameId={gameId} variant="hud" className="mt-auto" />
+              <MatchActions
+                gameId={gameId}
+                match={game.match}
+                variant="hud"
+                className="mt-auto"
+              />
             </CardContent>
           </Card>
 
@@ -134,7 +139,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             onCellClick={handleCellClick}
           />
 
-          <MatchActions gameId={gameId} />
+          <MatchActions gameId={gameId} match={game.match} />
         </div>
       )}
       <MatchResultOverlay

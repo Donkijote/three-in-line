@@ -119,8 +119,18 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
 }));
 
 vi.mock("@/ui/web/modules/match/components/MatchActions", () => ({
-  MatchActions: ({ variant }: { variant?: string }) => (
-    <div data-testid="match-actions" data-variant={variant ?? "default"} />
+  MatchActions: ({
+    variant,
+    match,
+  }: {
+    variant?: string;
+    match?: { format: "single" | "bo3" | "bo5" };
+  }) => (
+    <div
+      data-testid="match-actions"
+      data-variant={variant ?? "default"}
+      data-match-format={match?.format ?? "none"}
+    />
   ),
 }));
 
