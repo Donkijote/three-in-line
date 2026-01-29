@@ -3,6 +3,16 @@ import { type Infer, v } from "convex/values";
 
 const player = v.union(v.literal("P1"), v.literal("P2"));
 
+export type GamePlayers = Infer<typeof player>;
+
+const matchFormat = v.union(
+  v.literal("single"),
+  v.literal("bo3"),
+  v.literal("bo5"),
+);
+
+export type GameFormat = Infer<typeof matchFormat>;
+
 const status = v.union(
   v.literal("waiting"),
   v.literal("playing"),
@@ -13,23 +23,45 @@ const status = v.union(
 
 export type GameStatus = Infer<typeof status>;
 
+const endedReason = v.union(
+  v.literal("win"),
+  v.literal("draw"),
+  v.literal("abandoned"),
+  v.literal("disconnect"),
+  v.null(),
+);
+
+export type GameEndedReasons = Infer<typeof endedReason>;
+
+const roundSummary = v.object({
+  roundIndex: v.number(),
+  endedReason,
+  winner: v.union(player, v.null()),
+  movesCount: v.number(),
+  endedTime: v.number(),
+});
+
+export type GameRoundSummary = Infer<typeof roundSummary>;
+
 export const GameSchema = defineTable({
   status,
   board: v.array(v.union(player, v.null())),
-  gridSize: v.optional(v.number()),
-  winLength: v.optional(v.number()),
+  gridSize: v.number(),
+  winLength: v.number(),
+  match: v.object({
+    format: matchFormat,
+    targetWins: v.number(),
+    roundIndex: v.number(),
+    score: v.object({ P1: v.number(), P2: v.number() }),
+    matchWinner: v.union(player, v.null()),
+    rounds: v.array(roundSummary),
+  }),
   p1UserId: v.id("users"),
   p2UserId: v.union(v.id("users"), v.null()),
   currentTurn: player,
   winner: v.union(player, v.null()),
   winningLine: v.union(v.array(v.number()), v.null()),
-  endedReason: v.union(
-    v.literal("win"),
-    v.literal("draw"),
-    v.literal("abandoned"),
-    v.literal("disconnect"),
-    v.null(),
-  ),
+  endedReason,
   endedTime: v.union(v.number(), v.null()),
   pausedTime: v.union(v.number(), v.null()),
   abandonedBy: v.union(player, v.null()),

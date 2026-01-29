@@ -35,6 +35,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const opponentUser = useUserById(opponentId);
   const gridSize = game?.gridSize;
   const winLength = game?.winLength;
+  const matchFormat = game?.match?.format;
   const [isPlacing, setIsPlacing] = useState(false);
 
   if (!game || !currentUser) {
@@ -84,6 +85,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
       const nextGameId = await findOrCreateGameUseCase(gameRepository, {
         gridSize,
         winLength,
+        matchFormat,
       });
       await navigate({
         to: "/match",

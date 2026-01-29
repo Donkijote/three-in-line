@@ -23,12 +23,15 @@ export type GameStatus =
   | "ended"
   | "canceled";
 
+export type MatchFormat = "single" | "bo3" | "bo5";
+
 /**
  * Configurable grid and win requirements.
  */
 export type GameConfig = {
   gridSize: number;
   winLength: number;
+  matchFormat?: MatchFormat;
 };
 
 /**

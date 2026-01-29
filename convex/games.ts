@@ -45,6 +45,14 @@ const requireGame = async (ctx: Ctx, gameId: Id<"games">): Promise<GameDoc> => {
   return game;
 };
 
+const matchFormat = v.union(
+  v.literal("single"),
+  v.literal("bo3"),
+  v.literal("bo5"),
+);
+
+type MatchFormat = "single" | "bo3" | "bo5";
+
 const requireParticipantSlot = (game: GameDoc, userId: Id<"users">) => {
   if (game.p1UserId === userId) {
     return "P1" as const;
@@ -96,6 +104,28 @@ const enforceTimeoutOrThrow = async (
   return true;
 };
 
+const resolveMatchFormat = (resolvedFormat = "single" as MatchFormat) => {
+  let targetWins = 1;
+  if (resolvedFormat === "bo3") {
+    targetWins = 2;
+  } else if (resolvedFormat === "bo5") {
+    targetWins = 3;
+  }
+  return { format: resolvedFormat, targetWins };
+};
+
+const createInitialMatch = (format?: MatchFormat): GameDoc["match"] => {
+  const resolved = resolveMatchFormat(format);
+  return {
+    format: resolved.format,
+    targetWins: resolved.targetWins,
+    roundIndex: 1,
+    score: { P1: 0, P2: 0 },
+    matchWinner: null,
+    rounds: [],
+  };
+};
+
 export const getGame = query({
   args: { gameId: v.id("games") },
   handler: async (ctx, args) => {
@@ -139,6 +169,7 @@ export const createGame = mutation({
   args: {
     gridSize: v.optional(v.number()),
     winLength: v.optional(v.number()),
+    matchFormat: v.optional(matchFormat),
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
@@ -148,6 +179,7 @@ export const createGame = mutation({
       board: new Array(gridSize * gridSize).fill(null),
       gridSize,
       winLength,
+      match: createInitialMatch(args.matchFormat),
       p1UserId: userId,
       p2UserId: null,
       currentTurn: "P1",
@@ -170,10 +202,15 @@ export const createGame = mutation({
 });
 
 export const findOrCreateGame = mutation({
-  args: { gridSize: v.number(), winLength: v.number() },
+  args: {
+    gridSize: v.number(),
+    winLength: v.number(),
+    matchFormat: v.optional(matchFormat),
+  },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const { gridSize, winLength } = resolveConfig(args);
+    const { format } = resolveMatchFormat(args.matchFormat);
     const now = Date.now();
 
     const waitingGames = await ctx.db
@@ -190,6 +227,9 @@ export const findOrCreateGame = mutation({
       }
       const gameGridSize = game.gridSize ?? DEFAULT_GRID_SIZE;
       const gameWinLength = game.winLength ?? DEFAULT_WIN_LENGTH;
+      if (game.match.format !== format) {
+        return false;
+      }
       return gameGridSize === gridSize && gameWinLength === winLength;
     });
 
@@ -219,6 +259,7 @@ export const findOrCreateGame = mutation({
       board: new Array(gridSize * gridSize).fill(null),
       gridSize,
       winLength,
+      match: createInitialMatch(args.matchFormat),
       p1UserId: userId,
       p2UserId: null,
       currentTurn: "P1",
@@ -359,48 +400,95 @@ export const placeMark = mutation({
     const nextMovesCount = game.movesCount + 1;
     const winnerResult = evaluateWinner(nextBoard, { gridSize, winLength });
 
-    let status: GameStatus = game.status;
-    let winner: "P1" | "P2" | null = null;
-    let winningLine: number[] | null = null;
-    let currentTurn = game.currentTurn;
-    let endedReason: "win" | "draw" | "abandoned" | "disconnect" | null =
-      game.endedReason;
-    let endedTime: number | null = game.endedTime;
+    const roundWinner = winnerResult ? winnerResult.winner : null;
+    const roundEnded =
+      Boolean(winnerResult) || nextMovesCount >= expectedLength;
 
-    if (winnerResult) {
-      status = "ended";
-      winner = winnerResult.winner;
-      winningLine = winnerResult.line;
-      endedReason = "win";
-      endedTime = Date.now();
-    } else if (nextMovesCount >= expectedLength) {
-      status = "ended";
-      winner = null;
-      winningLine = null;
-      endedReason = "draw";
-      endedTime = Date.now();
-    } else {
-      currentTurn = callerSlot === "P1" ? "P2" : "P1";
+    if (!roundEnded) {
+      await ctx.db.patch(game._id, {
+        board: nextBoard,
+        movesCount: nextMovesCount,
+        currentTurn: callerSlot === "P1" ? "P2" : "P1",
+        lastMove: { index: args.index, by: callerSlot, at: now },
+        updatedTime: now,
+        presence: {
+          ...game.presence,
+          [callerSlot]: { lastSeenTime: now },
+        },
+        version: game.version + 1,
+      });
+      return await ctx.db.get(game._id);
+    }
+
+    const endedReason = winnerResult ? "win" : "draw";
+    const endedTime = now;
+    const roundSummary: GameDoc["match"]["rounds"][number] = {
+      roundIndex: game.match.roundIndex,
+      endedReason,
+      winner: roundWinner,
+      movesCount: nextMovesCount,
+      endedTime,
+    };
+    const nextRounds = [...game.match.rounds, roundSummary];
+    const nextScore = { ...game.match.score };
+    if (roundWinner) {
+      nextScore[roundWinner] += 1;
+    }
+    const didMatchEnd =
+      roundWinner !== null && nextScore[roundWinner] >= game.match.targetWins;
+
+    if (didMatchEnd) {
+      await ctx.db.patch(game._id, {
+        board: nextBoard,
+        movesCount: nextMovesCount,
+        status: "ended",
+        winner: roundWinner,
+        winningLine: winnerResult?.line ?? null,
+        endedReason,
+        endedTime,
+        pausedTime: null,
+        abandonedBy: null,
+        presence: {
+          ...game.presence,
+          [callerSlot]: { lastSeenTime: now },
+        },
+        lastMove: { index: args.index, by: callerSlot, at: now },
+        version: game.version + 1,
+        updatedTime: now,
+        match: {
+          ...game.match,
+          score: nextScore,
+          matchWinner: roundWinner,
+          rounds: nextRounds,
+        },
+      });
+      return await ctx.db.get(game._id);
     }
 
     await ctx.db.patch(game._id, {
-      board: nextBoard,
-      movesCount: nextMovesCount,
-      status,
-      winner,
-      winningLine,
-      currentTurn,
-      endedReason,
-      endedTime,
+      board: Array.from({ length: expectedLength }, () => null),
+      movesCount: 0,
+      status: "playing",
+      winner: null,
+      winningLine: null,
+      endedReason: null,
+      endedTime: null,
+      lastMove: null,
       pausedTime: null,
       abandonedBy: null,
       presence: {
         ...game.presence,
-        [callerSlot]: { lastSeenTime: Date.now() },
+        [callerSlot]: { lastSeenTime: now },
       },
-      lastMove: { index: args.index, by: callerSlot, at: Date.now() },
       version: game.version + 1,
-      updatedTime: Date.now(),
+      updatedTime: now,
+      match: {
+        ...game.match,
+        roundIndex: game.match.roundIndex + 1,
+        score: nextScore,
+        matchWinner: null,
+        rounds: nextRounds,
+      },
     });
 
     return await ctx.db.get(game._id);
