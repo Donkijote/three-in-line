@@ -1,19 +1,23 @@
 import { defineTable } from "convex/server";
 import { type Infer, v } from "convex/values";
 
-const player = v.union(v.literal("P1"), v.literal("P2"));
+import type { Doc, Id } from "../_generated/dataModel";
 
-export type GamePlayers = Infer<typeof player>;
+export const player = v.union(v.literal("P1"), v.literal("P2"));
 
-const matchFormat = v.union(
+export type Player = Infer<typeof player>;
+export type GamePlayers = Player;
+
+export const matchFormat = v.union(
   v.literal("single"),
   v.literal("bo3"),
   v.literal("bo5"),
 );
 
-export type GameFormat = Infer<typeof matchFormat>;
+export type MatchFormat = Infer<typeof matchFormat>;
+export type GameFormat = MatchFormat;
 
-const status = v.union(
+export const status = v.union(
   v.literal("waiting"),
   v.literal("playing"),
   v.literal("ended"),
@@ -23,7 +27,7 @@ const status = v.union(
 
 export type GameStatus = Infer<typeof status>;
 
-const endedReason = v.union(
+export const endedReason = v.union(
   v.literal("win"),
   v.literal("draw"),
   v.literal("abandoned"),
@@ -31,9 +35,10 @@ const endedReason = v.union(
   v.null(),
 );
 
-export type GameEndedReasons = Infer<typeof endedReason>;
+export type GameEndedReason = Infer<typeof endedReason>;
+export type GameEndedReasons = GameEndedReason;
 
-const roundSummary = v.object({
+export const roundSummary = v.object({
   roundIndex: v.number(),
   endedReason,
   winner: v.union(player, v.null()),
@@ -41,7 +46,11 @@ const roundSummary = v.object({
   endedTime: v.number(),
 });
 
-export type GameRoundSummary = Infer<typeof roundSummary>;
+export type RoundSummary = Infer<typeof roundSummary>;
+export type GameRoundSummary = RoundSummary;
+
+export type GameDoc = Doc<"games">;
+export type GameId = Id<"games">;
 
 export const GameSchema = defineTable({
   status,
