@@ -6,7 +6,6 @@ import type { Doc, Id } from "../_generated/dataModel";
 export const player = v.union(v.literal("P1"), v.literal("P2"));
 
 export type Player = Infer<typeof player>;
-export type GamePlayers = Player;
 
 export const matchFormat = v.union(
   v.literal("single"),
@@ -15,7 +14,6 @@ export const matchFormat = v.union(
 );
 
 export type MatchFormat = Infer<typeof matchFormat>;
-export type GameFormat = MatchFormat;
 
 export const status = v.union(
   v.literal("waiting"),
@@ -36,7 +34,6 @@ export const endedReason = v.union(
 );
 
 export type GameEndedReason = Infer<typeof endedReason>;
-export type GameEndedReasons = GameEndedReason;
 
 export const roundSummary = v.object({
   roundIndex: v.number(),
@@ -47,7 +44,6 @@ export const roundSummary = v.object({
 });
 
 export type RoundSummary = Infer<typeof roundSummary>;
-export type GameRoundSummary = RoundSummary;
 
 export type GameDoc = Doc<"games">;
 export type GameId = Id<"games">;
