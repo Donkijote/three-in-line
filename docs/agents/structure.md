@@ -15,5 +15,7 @@ The codebase is organized for the web client only.
 - `src/application/` contains use cases orchestrating domain logic.
 - `src/infrastructure/` contains repositories and external adapters (Convex, storage).
 - `src/infrastructure/convex/repository/` contains Convex-backed repository implementations.
+- `src/infrastructure/convex/GameApi.ts` and `src/infrastructure/convex/UserApi.ts` provide UI-safe Convex query hooks.
+- `src/infrastructure/convex/auth.ts` wraps Convex auth helpers for UI use.
 - `public/` holds static files served as-is.
 - `scripts/` contains repo automation (e.g., `scripts/ghi-pr.sh`).

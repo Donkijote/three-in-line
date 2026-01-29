@@ -338,24 +338,25 @@ Adapters are the **only place** where you talk to:
 - Browser / mobile storage
 - OS or platform APIs
 
+UI rule:
+- UI must not import Convex types or `convex/*` directly; use infrastructure adapters and domain types.
+
 ---
 
 ### Convex React (Web) example (mock)
 ```tsx
 import type { ReactNode } from "react";
 
-import { ConvexProvider, useQuery } from "convex/react";
-
-import { convexClient } from "@/infrastructure/convex/client";
-import { api } from "../../convex/_generated/api";
+import { ConvexProvider } from "@/ui/web/application/providers/ConvexProvider";
+import { useGameById } from "@/infrastructure/convex/GameApi";
 
 function AppProviders({ children }: { children: ReactNode }) {
-  return <ConvexProvider client={convexClient}>{children}</ConvexProvider>;
+  return <ConvexProvider>{children}</ConvexProvider>;
 }
 
 function RoomsList() {
-  const rooms = useQuery(api.rooms.list) ?? [];
-  return <div>Rooms: {rooms.length}</div>;
+  const game = useGameById("game-id");
+  return <div>Game loaded: {Boolean(game)}</div>;
 }
 ```
 
