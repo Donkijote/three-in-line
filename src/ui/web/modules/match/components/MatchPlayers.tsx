@@ -1,5 +1,6 @@
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import { resolveAvatarSrc } from "@/domain/entities/Avatar";
+import type { MatchState } from "@/domain/entities/Game";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { cn } from "@/ui/web/lib/utils";
 import { PlayerCard } from "@/ui/web/modules/match/components/PlayerCard";
@@ -29,6 +30,7 @@ type MatchPlayersProps = {
   currentTurn: "P1" | "P2";
   currentUser: MatchUser;
   opponentUser: MatchUser;
+  match: MatchState | null;
   layout: MatchPlayersLayout;
 };
 
@@ -37,6 +39,7 @@ export const MatchPlayers = ({
   currentTurn,
   currentUser,
   opponentUser,
+  match,
   layout,
 }: MatchPlayersProps) => {
   const players = buildMatchPlayers(
@@ -44,7 +47,9 @@ export const MatchPlayers = ({
     currentTurn,
     currentUser,
     opponentUser,
+    match,
   );
+  const showWins = Boolean(match && match.format !== "single");
 
   return (
     <div
@@ -53,7 +58,7 @@ export const MatchPlayers = ({
       })}
     >
       {players.map((player) => (
-        <PlayerCard key={player.id} {...player} />
+        <PlayerCard key={player.id} showWins={showWins} {...player} />
       ))}
     </div>
   );
@@ -67,6 +72,7 @@ const buildMatchPlayers = (
   currentTurn: "P1" | "P2",
   currentUser: MatchUser,
   opponentUser: MatchUser,
+  match: MatchState | null,
 ): MatchPlayer[] => {
   const currentUserId = currentUser?.id;
   const isP1 = !currentUserId || p1UserId === currentUserId;
@@ -74,6 +80,7 @@ const buildMatchPlayers = (
   const opponentSymbol: "X" | "O" = isP1 ? "O" : "X";
   const myTurnSlot = isP1 ? "P1" : "P2";
   const opponentTurnSlot = isP1 ? "P2" : "P1";
+  const matchScore = match?.score;
 
   return [
     {
@@ -82,7 +89,7 @@ const buildMatchPlayers = (
         useInitialsFallback: true,
       }),
       symbol: mySymbol,
-      wins: 0,
+      wins: matchScore?.[myTurnSlot] ?? 0,
       isTurn: currentTurn === myTurnSlot,
       accent: "primary",
       avatar: resolvePlayerAvatar(currentUser),
@@ -93,7 +100,7 @@ const buildMatchPlayers = (
         useInitialsFallback: true,
       }),
       symbol: opponentSymbol,
-      wins: 0,
+      wins: matchScore?.[opponentTurnSlot] ?? 0,
       isTurn: currentTurn === opponentTurnSlot,
       accent: "opponent",
       avatar: resolvePlayerAvatar(opponentUser),

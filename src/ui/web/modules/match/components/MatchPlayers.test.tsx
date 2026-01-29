@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { render } from "@testing-library/react";
 
 import type { UserAvatar } from "@/domain/entities/Avatar";
+import type { MatchState } from "@/domain/entities/Game";
 
 import { MatchPlayers } from "./MatchPlayers";
 import type { PlayerCard } from "./PlayerCard";
@@ -27,6 +28,14 @@ describe("MatchPlayers", () => {
   it("builds player cards for the current user as P1", () => {
     const p1UserId = "user-1";
     const currentTurn = "P1" as const;
+    const match: MatchState = {
+      format: "bo3",
+      targetWins: 2,
+      roundIndex: 2,
+      score: { P1: 1, P2: 0 },
+      matchWinner: null,
+      rounds: [],
+    };
     const currentUser = {
       id: "user-1",
       username: "nova",
@@ -50,6 +59,7 @@ describe("MatchPlayers", () => {
         currentTurn={currentTurn}
         currentUser={currentUser}
         opponentUser={opponentUser}
+        match={match}
         layout="desktop"
       />,
     );
@@ -64,7 +74,7 @@ describe("MatchPlayers", () => {
       id: "player-me",
       name: "nova",
       symbol: "X",
-      wins: 0,
+      wins: 1,
       isTurn: true,
       accent: "primary",
       avatar: "/avatars/avatar-1.svg",
@@ -84,6 +94,14 @@ describe("MatchPlayers", () => {
   it("swaps symbols when the current user is P2 and uses mobile layout", () => {
     const p1UserId = "user-1";
     const currentTurn = "P2" as const;
+    const match: MatchState = {
+      format: "bo5",
+      targetWins: 3,
+      roundIndex: 3,
+      score: { P1: 2, P2: 1 },
+      matchWinner: null,
+      rounds: [],
+    };
     const currentUser = {
       id: "user-2",
       name: "Alex",
@@ -99,6 +117,7 @@ describe("MatchPlayers", () => {
         currentTurn={currentTurn}
         currentUser={currentUser}
         opponentUser={opponentUser}
+        match={match}
         layout="mobile"
       />,
     );
@@ -112,11 +131,13 @@ describe("MatchPlayers", () => {
     expect(currentPlayerProps).toMatchObject({
       name: "Alex",
       symbol: "O",
+      wins: 1,
       isTurn: true,
     });
     expect(opponentPlayerProps).toMatchObject({
       name: "Riley",
       symbol: "X",
+      wins: 2,
       isTurn: false,
     });
   });

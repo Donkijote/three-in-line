@@ -13,6 +13,7 @@ type PlayerCardProps = {
   name: string;
   symbol: "X" | "O";
   wins: number;
+  showWins: boolean;
   isTurn: boolean;
   avatar?: string;
   accent: "primary" | "opponent";
@@ -22,6 +23,7 @@ export const PlayerCard = ({
   name,
   symbol,
   wins,
+  showWins,
   isTurn,
   avatar,
   accent,
@@ -99,8 +101,10 @@ export const PlayerCard = ({
                 ({symbol})
               </H6>
             </div>
-            {/* TODO implement the correct counter when other game modes are added to the game */}
-            <Activity name={"current-wins"} mode={"hidden"}>
+            <Activity
+              name={"current-wins"}
+              mode={showWins ? "visible" : "hidden"}
+            >
               <Muted
                 className={cn("text-xs text-muted-foreground/50", {
                   "text-muted-foreground/70": isTurn,

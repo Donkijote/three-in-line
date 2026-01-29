@@ -13,6 +13,14 @@ type MatchGame = {
   currentTurn: "P1" | "P2";
   gridSize?: number;
   board: Array<"P1" | "P2" | null>;
+  match: {
+    format: "single" | "bo3" | "bo5";
+    targetWins: number;
+    roundIndex: number;
+    score: { P1: number; P2: number };
+    matchWinner: "P1" | "P2" | null;
+    rounds: [];
+  };
   winner?: "P1" | "P2" | null;
   endedReason?: "win" | "draw" | "abandoned" | "disconnect";
   abandonedBy?: "P1" | "P2" | null;
@@ -181,6 +189,14 @@ describe("MatchScreen", () => {
     currentTurn: "P1",
     gridSize: 3,
     board: ["P1", "P2", null, null, "P1", null, "P2", null, null],
+    match: {
+      format: "single",
+      targetWins: 1,
+      roundIndex: 1,
+      score: { P1: 0, P2: 0 },
+      matchWinner: null,
+      rounds: [],
+    },
     winner: null,
   };
 

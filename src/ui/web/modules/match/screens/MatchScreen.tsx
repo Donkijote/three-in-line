@@ -63,6 +63,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     currentTurn: game.currentTurn,
     currentUser,
     opponentUser,
+    match: game.match,
   };
 
   const handleCellClick = async (index: number) => {
