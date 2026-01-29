@@ -10,6 +10,7 @@ export const MatchResultOverlayBase = ({
   icon,
   pill,
   footer,
+  score,
   primaryLabel,
   secondaryLabel,
   changeModeLabel,
@@ -35,6 +36,7 @@ export const MatchResultOverlayBase = ({
           <MatchResultCard
             pill={pill}
             footer={footer}
+            score={score}
             currentUser={currentUser}
             opponentUser={opponentUser}
             isWinner={isCurrentWinner}

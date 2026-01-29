@@ -152,6 +152,7 @@ vi.mock(
       abandonedBy,
       p1UserId,
       currentUserId,
+      score,
       currentUser,
       opponentUser,
     }: {
@@ -161,6 +162,7 @@ vi.mock(
       abandonedBy: string | null;
       p1UserId: string;
       currentUserId?: string;
+      score?: { P1: number; P2: number };
       currentUser: { name: string };
       opponentUser: { name: string };
     }) => (
@@ -172,6 +174,9 @@ vi.mock(
         data-abandoned={abandonedBy ?? ""}
         data-p1-user-id={p1UserId}
         data-current-user-id={currentUserId ?? ""}
+        data-score={
+          score ? `${score.P1.toString()}-${score.P2.toString()}` : ""
+        }
         data-current={currentUser.name}
         data-opponent={opponentUser.name}
       />
@@ -415,6 +420,10 @@ describe("MatchScreen", () => {
     expect(screen.getByTestId("match-result-overlay")).toHaveAttribute(
       "data-opponent",
       "Opponent",
+    );
+    expect(screen.getByTestId("match-result-overlay")).toHaveAttribute(
+      "data-score",
+      "0-0",
     );
   });
 });

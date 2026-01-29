@@ -150,6 +150,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
         abandonedBy={game.abandonedBy}
         p1UserId={game.p1UserId}
         currentUserId={currentUserId}
+        score={game.match?.score}
         onPrimaryAction={handleCreateNewGame}
         currentUser={{
           name: resolvePlayerLabel(currentUser, "You"),
