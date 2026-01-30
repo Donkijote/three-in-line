@@ -18,6 +18,19 @@ export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
     );
   }
 
+  if (props.endedReason === "abandoned") {
+    const currentSlot = resolveCurrentSlot(props.currentUserId, props.p1UserId);
+    if (currentSlot && props.abandonedBy === currentSlot) {
+      return null;
+    }
+    return (
+      <MatchResultOverlayBase
+        {...toAbandonedModel(props)}
+        onPrimaryAction={props.onPrimaryAction}
+      />
+    );
+  }
+
   if (props.endedReason === "win") {
     return (
       <MatchResultOverlayBase
@@ -105,6 +118,42 @@ const toDisconnectModel = ({
     opponentUser,
     isCurrentWinner: !isDisconnectLoser,
     isAbandonedByCurrentUser: isDisconnectLoser,
+  };
+};
+
+const toAbandonedModel = ({
+  abandonedBy,
+  winner,
+  currentUserId,
+  p1UserId,
+  score,
+  currentUser,
+  opponentUser,
+}: MatchResultOverlayProps): MatchResultViewModel => {
+  const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+  const isCurrentWinner = currentSlot ? winner === currentSlot : false;
+  const resolvedScore = resolveMatchScore(score, currentSlot);
+  const subtitle = isCurrentWinner
+    ? "Your opponent abandoned the match."
+    : "The match ended by abandonment.";
+  const footer = isCurrentWinner ? "Win by Forfeit" : "Match ended";
+
+  return {
+    title: isCurrentWinner ? "Opponent Surrendered" : "Match Ended",
+    subtitle,
+    accent: "primary",
+    icon: "flag",
+    pill: "Match Complete",
+    footer,
+    score: resolvedScore,
+    primaryLabel: "Find New Match",
+    secondaryLabel: "Back Home",
+    changeModeLabel: "Change Mode",
+    currentUser,
+    opponentUser,
+    isCurrentWinner,
+    isAbandonedByCurrentUser:
+      Boolean(currentSlot) && abandonedBy === currentSlot,
   };
 };
 

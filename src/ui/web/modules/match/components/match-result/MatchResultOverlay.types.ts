@@ -2,7 +2,7 @@ import type { UserAvatar } from "@/domain/entities/Avatar";
 import type { GameStatus, MatchScore } from "@/domain/entities/Game";
 
 export type ResultAccent = "primary" | "destructive";
-export type ResultIcon = "trophy" | "heart" | "wifi";
+export type ResultIcon = "trophy" | "heart" | "wifi" | "flag";
 
 export type MatchResultOverlayProps = {
   status: GameStatus;
