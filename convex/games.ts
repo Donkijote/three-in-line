@@ -536,10 +536,45 @@ export const abandonGame = mutation({
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const game = await requireGame(ctx, args.gameId);
-    requireParticipantSlot(game, userId);
+    const callerSlot = requireParticipantSlot(game, userId);
 
-    await ctx.db.delete(game._id);
-    return { deleted: true };
+    const isDeletable =
+      game.movesCount === 0 && game.match.rounds.length === 0;
+
+    if (isDeletable) {
+      await ctx.db.delete(game._id);
+      return { deleted: true };
+    }
+
+    const otherPlayer = callerSlot === "P1" ? "P2" : "P1";
+    const now = Date.now();
+    const roundSummary: GameDoc["match"]["rounds"][number] = {
+      roundIndex: game.match.roundIndex,
+      endedReason: "abandoned",
+      winner: otherPlayer,
+      movesCount: game.movesCount,
+      endedTime: now,
+    };
+    const nextRounds = [...game.match.rounds, roundSummary];
+
+    await ctx.db.patch(game._id, {
+      status: "ended",
+      endedReason: "abandoned",
+      endedTime: now,
+      pausedTime: null,
+      abandonedBy: callerSlot,
+      winner: otherPlayer,
+      winningLine: null,
+      updatedTime: now,
+      version: game.version + 1,
+      match: {
+        ...game.match,
+        matchWinner: otherPlayer,
+        rounds: nextRounds,
+      },
+    });
+
+    return { deleted: false };
   },
 });
 
