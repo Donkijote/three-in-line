@@ -45,18 +45,17 @@ beforeEach(() => {
 });
 
 const gameId = "gameId" as GameId;
+const match: MatchState = {
+  format: "bo3",
+  targetWins: 2,
+  roundIndex: 2,
+  score: { P1: 1, P2: 0 },
+  matchWinner: null,
+  rounds: [],
+};
 
 describe("MatchActions", () => {
   it("renders action buttons and round info", () => {
-    const match: MatchState = {
-      format: "bo3",
-      targetWins: 2,
-      roundIndex: 2,
-      score: { P1: 1, P2: 0 },
-      matchWinner: null,
-      rounds: [],
-    };
-
     render(<MatchActions gameId={gameId} match={match} />);
 
     expect(screen.getByText("Abandon Match")).toBeInTheDocument();
@@ -65,7 +64,7 @@ describe("MatchActions", () => {
   });
 
   it("abandons the match and navigates back to the lobby", async () => {
-    render(<MatchActions gameId={gameId} />);
+    render(<MatchActions gameId={gameId} match={match} />);
 
     fireEvent.click(screen.getByRole("button", { name: /abandon match/i }));
 
@@ -84,7 +83,7 @@ describe("MatchActions", () => {
     });
     vi.mocked(abandonGameUseCase).mockReturnValueOnce(abandonPromise);
 
-    render(<MatchActions gameId={gameId} />);
+    render(<MatchActions gameId={gameId} match={match} />);
 
     const abandonButton = screen.getByRole("button", {
       name: /abandon match/i,
