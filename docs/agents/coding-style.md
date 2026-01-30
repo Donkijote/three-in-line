@@ -17,5 +17,6 @@
 - Keep architecture boundaries: repositories live in infrastructure, use cases in application, UI hooks in `src/ui/web/hooks`.
 - Use case files and exports must end with `UseCase`.
 - Keep reactive Convex queries in UI hooks; repositories should focus on mutations.
+- UI must not import Convex types or `convex/*` directly; use infrastructure adapters and domain types instead.
 - Always run `bun run lint` (Biome) after editing, creating, or generating files to keep formatting consistent.
 - Define domain ports as `interface` declarations so implementations are discoverable in IDEs.

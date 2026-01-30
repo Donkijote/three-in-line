@@ -60,5 +60,27 @@
         }
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["src/ui/**/*"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["convex/*", "@/convex/*"],
+                    "message": "Use infrastructure adapters instead of direct Convex imports in UI."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

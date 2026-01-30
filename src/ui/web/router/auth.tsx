@@ -1,9 +1,12 @@
 import type { PropsWithChildren } from "react";
 
-import { Authenticated, Unauthenticated, useConvexAuth } from "convex/react";
-
 import { Navigate } from "@tanstack/react-router";
 
+import {
+  Authenticated,
+  Unauthenticated,
+  useConvexAuth,
+} from "@/infrastructure/convex/auth";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 
 export const RequireAuth = ({ children }: PropsWithChildren) => {

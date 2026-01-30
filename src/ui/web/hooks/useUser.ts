@@ -1,18 +1,15 @@
 import { useCallback, useState } from "react";
 
-import { useQuery } from "convex/react";
-
 import { checkEmailExistsUseCase } from "@/application/users/checkEmailExistsUseCase";
 import { checkUsernameExistsUseCase } from "@/application/users/checkUsernameExistsUseCase";
 import { updateAvatarUseCase } from "@/application/users/updateAvatarUseCase";
 import { updateUsernameUseCase } from "@/application/users/updateUsernameUseCase";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import type { UserAvatar } from "@/domain/entities/Avatar";
+import { userRepository } from "@/infrastructure/convex/repository/userRepository";
 import {
-  toDomainUser,
-  userRepository,
-} from "@/infrastructure/convex/repository/userRepository";
+  useCurrentUserQuery,
+  useUserByIdQuery,
+} from "@/infrastructure/convex/UserApi";
 
 export function useCheckEmailExists() {
   const [isChecking, setIsChecking] = useState(false);
@@ -45,17 +42,11 @@ export function useCheckUsernameExists() {
 }
 
 export function useCurrentUser() {
-  const currentUser = useQuery(api.users.getCurrentUser);
-  return currentUser ? toDomainUser(currentUser) : currentUser;
+  return useCurrentUserQuery();
 }
 
 export function useUserById(userId?: string | null) {
-  const resolvedId = userId ? (userId as unknown as Id<"users">) : undefined;
-  const user = useQuery(
-    api.users.getUserById,
-    resolvedId ? { userId: resolvedId } : "skip",
-  );
-  return user ? toDomainUser(user) : user;
+  return useUserByIdQuery(userId);
 }
 
 export function useUpdateUsername() {

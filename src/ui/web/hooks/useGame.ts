@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 
-import { useQuery } from "convex/react";
-
 import { heartbeatUseCase } from "@/application/games/heartbeatUseCase";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import type { GameId } from "@/domain/entities/Game";
+import { useGameById } from "@/infrastructure/convex/GameApi";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 
 type HeartbeatParams = {
@@ -17,13 +14,7 @@ type HeartbeatParams = {
 const DEFAULT_INTERVAL_MS = 20_000;
 const DEFAULT_JITTER_MS = 1_500;
 
-export const useGame = (gameId?: string | null) => {
-  const resolvedId = gameId ? (gameId as unknown as Id<"games">) : undefined;
-  return useQuery(
-    api.games.getGame,
-    resolvedId ? { gameId: resolvedId } : "skip",
-  );
-};
+export const useGame = (gameId?: string | null) => useGameById(gameId);
 
 const sendHeartbeat = (params: { gameId: GameId }) =>
   heartbeatUseCase(gameRepository, params);

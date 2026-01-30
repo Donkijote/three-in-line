@@ -18,7 +18,7 @@ const {
   )),
 }));
 
-vi.mock("convex/react", () => ({
+vi.mock("@/infrastructure/convex/auth", () => ({
   Authenticated: AuthenticatedMock,
   Unauthenticated: UnauthenticatedMock,
   useConvexAuth: useConvexAuthMock,

@@ -10,7 +10,7 @@ const { useConvexAuthMock, useRouterStateMock, LinkMock } = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock("convex/react", () => ({
+vi.mock("@/infrastructure/convex/auth", () => ({
   useConvexAuth: useConvexAuthMock,
 }));
 

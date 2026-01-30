@@ -1,15 +1,15 @@
 import type { UserAvatar } from "@/domain/entities/Avatar";
 
 /**
- * Branded id to identify a user in ports and UI.
+ * String id to identify a user in ports and UI.
  */
-export type UserId = string & { readonly __brand: "UserId" };
+export type UserId = User["id"];
 
 /**
  * Domain representation of a user profile.
  */
 export type User = {
-  id: UserId;
+  id: string;
   name?: string;
   email?: string;
   username?: string;

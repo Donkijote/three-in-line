@@ -13,6 +13,14 @@ type MatchGame = {
   currentTurn: "P1" | "P2";
   gridSize?: number;
   board: Array<"P1" | "P2" | null>;
+  match: {
+    format: "single" | "bo3" | "bo5";
+    targetWins: number;
+    roundIndex: number;
+    score: { P1: number; P2: number };
+    matchWinner: "P1" | "P2" | null;
+    rounds: [];
+  };
   winner?: "P1" | "P2" | null;
   endedReason?: "win" | "draw" | "abandoned" | "disconnect";
   abandonedBy?: "P1" | "P2" | null;
@@ -119,8 +127,18 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
 }));
 
 vi.mock("@/ui/web/modules/match/components/MatchActions", () => ({
-  MatchActions: ({ variant }: { variant?: string }) => (
-    <div data-testid="match-actions" data-variant={variant ?? "default"} />
+  MatchActions: ({
+    variant,
+    match,
+  }: {
+    variant?: string;
+    match?: { format: "single" | "bo3" | "bo5" };
+  }) => (
+    <div
+      data-testid="match-actions"
+      data-variant={variant ?? "default"}
+      data-match-format={match?.format ?? "none"}
+    />
   ),
 }));
 
@@ -134,6 +152,7 @@ vi.mock(
       abandonedBy,
       p1UserId,
       currentUserId,
+      score,
       currentUser,
       opponentUser,
     }: {
@@ -143,6 +162,7 @@ vi.mock(
       abandonedBy: string | null;
       p1UserId: string;
       currentUserId?: string;
+      score?: { P1: number; P2: number };
       currentUser: { name: string };
       opponentUser: { name: string };
     }) => (
@@ -154,6 +174,9 @@ vi.mock(
         data-abandoned={abandonedBy ?? ""}
         data-p1-user-id={p1UserId}
         data-current-user-id={currentUserId ?? ""}
+        data-score={
+          score ? `${score.P1.toString()}-${score.P2.toString()}` : ""
+        }
         data-current={currentUser.name}
         data-opponent={opponentUser.name}
       />
@@ -171,6 +194,14 @@ describe("MatchScreen", () => {
     currentTurn: "P1",
     gridSize: 3,
     board: ["P1", "P2", null, null, "P1", null, "P2", null, null],
+    match: {
+      format: "single",
+      targetWins: 1,
+      roundIndex: 1,
+      score: { P1: 0, P2: 0 },
+      matchWinner: null,
+      rounds: [],
+    },
     winner: null,
   };
 
@@ -389,6 +420,10 @@ describe("MatchScreen", () => {
     expect(screen.getByTestId("match-result-overlay")).toHaveAttribute(
       "data-opponent",
       "Opponent",
+    );
+    expect(screen.getByTestId("match-result-overlay")).toHaveAttribute(
+      "data-score",
+      "0-0",
     );
   });
 });
