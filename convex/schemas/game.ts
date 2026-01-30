@@ -45,6 +45,24 @@ export const roundSummary = v.object({
 
 export type RoundSummary = Infer<typeof roundSummary>;
 
+export const matchState = v.object({
+  format: matchFormat,
+  targetWins: v.number(),
+  roundIndex: v.number(),
+  score: v.object({ P1: v.number(), P2: v.number() }),
+  matchWinner: v.union(player, v.null()),
+  rounds: v.array(roundSummary),
+});
+
+export type MatchState = Infer<typeof matchState>;
+
+export const presenceState = v.object({
+  P1: v.object({ lastSeenTime: v.union(v.number(), v.null()) }),
+  P2: v.object({ lastSeenTime: v.union(v.number(), v.null()) }),
+});
+
+export type PresenceState = Infer<typeof presenceState>;
+
 export type GameDoc = Doc<"games">;
 export type GameId = Id<"games">;
 
@@ -53,14 +71,7 @@ export const GameSchema = defineTable({
   board: v.array(v.union(player, v.null())),
   gridSize: v.number(),
   winLength: v.number(),
-  match: v.object({
-    format: matchFormat,
-    targetWins: v.number(),
-    roundIndex: v.number(),
-    score: v.object({ P1: v.number(), P2: v.number() }),
-    matchWinner: v.union(player, v.null()),
-    rounds: v.array(roundSummary),
-  }),
+  match: matchState,
   p1UserId: v.id("users"),
   p2UserId: v.union(v.id("users"), v.null()),
   currentTurn: player,
@@ -70,10 +81,7 @@ export const GameSchema = defineTable({
   endedTime: v.union(v.number(), v.null()),
   pausedTime: v.union(v.number(), v.null()),
   abandonedBy: v.union(player, v.null()),
-  presence: v.object({
-    P1: v.object({ lastSeenTime: v.union(v.number(), v.null()) }),
-    P2: v.object({ lastSeenTime: v.union(v.number(), v.null()) }),
-  }),
+  presence: presenceState,
   movesCount: v.number(),
   version: v.number(),
   lastMove: v.union(

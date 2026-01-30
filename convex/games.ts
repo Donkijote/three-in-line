@@ -11,7 +11,14 @@ import {
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
-import type { GameStatus } from "./schemas/game";
+import type {
+  GameEndedReason,
+  GameStatus,
+  MatchState,
+  Player,
+  PresenceState,
+  RoundSummary,
+} from "./schemas/game";
 
 export const DISCONNECT_THRESHOLD_MS = 60000;
 export const HEARTBEAT_FRESH_MS = 60000;
@@ -19,6 +26,57 @@ export const PAUSE_TIMEOUT_MS = 5 * 60_000;
 
 type Ctx = MutationCtx | QueryCtx;
 type GameDoc = Doc<"games">;
+
+const buildJoinPresence = (presence: PresenceState, now: number) => ({
+  ...presence,
+  P2: { lastSeenTime: now },
+  ...(presence.P1.lastSeenTime ? {} : { P1: { lastSeenTime: now } }),
+});
+
+const buildRoundSummary = (
+  game: GameDoc,
+  endedReason: GameEndedReason,
+  winner: Player | null,
+  movesCount: number,
+  endedTime: number,
+): RoundSummary => ({
+  roundIndex: game.match.roundIndex,
+  endedReason,
+  winner,
+  movesCount,
+  endedTime,
+});
+
+const buildNewGameDoc = (
+  userId: Id<"users">,
+  gridSize: number,
+  winLength: number,
+  matchFormat: MatchFormat | undefined,
+  now: number,
+) => ({
+  status: "waiting" as GameStatus,
+  board: new Array(gridSize * gridSize).fill(null),
+  gridSize,
+  winLength,
+  match: createInitialMatch(matchFormat),
+  p1UserId: userId,
+  p2UserId: null,
+  currentTurn: "P1" as Player,
+  winner: null,
+  winningLine: null,
+  endedReason: null,
+  endedTime: null,
+  pausedTime: null,
+  abandonedBy: null,
+  presence: {
+    P1: { lastSeenTime: now },
+    P2: { lastSeenTime: null },
+  },
+  movesCount: 0,
+  version: 0,
+  lastMove: null,
+  updatedTime: now,
+});
 
 const requireBoardShape = (game: GameDoc) => {
   const { gridSize, winLength } = resolveConfig(game);
@@ -73,7 +131,7 @@ const getTimeoutPatch = (game: GameDoc, now: number) => {
     const p2Seen = game.presence.P2.lastSeenTime;
     const isP1Fresh = p1Seen !== null && now - p1Seen <= HEARTBEAT_FRESH_MS;
     const isP2Fresh = p2Seen !== null && now - p2Seen <= HEARTBEAT_FRESH_MS;
-    let abandonedBy: GameDoc["abandonedBy"] = null;
+    let abandonedBy: Player | null = null;
     if (isP1Fresh !== isP2Fresh) {
       abandonedBy = isP1Fresh ? "P2" : "P1";
     }
@@ -114,7 +172,7 @@ const resolveMatchFormat = (resolvedFormat = "single" as MatchFormat) => {
   return { format: resolvedFormat, targetWins };
 };
 
-const createInitialMatch = (format?: MatchFormat): GameDoc["match"] => {
+const createInitialMatch = (format?: MatchFormat): MatchState => {
   const resolved = resolveMatchFormat(format);
   return {
     format: resolved.format,
@@ -174,30 +232,11 @@ export const createGame = mutation({
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const { gridSize, winLength } = resolveConfig(args);
-    return await ctx.db.insert("games", {
-      status: "waiting",
-      board: new Array(gridSize * gridSize).fill(null),
-      gridSize,
-      winLength,
-      match: createInitialMatch(args.matchFormat),
-      p1UserId: userId,
-      p2UserId: null,
-      currentTurn: "P1",
-      winner: null,
-      winningLine: null,
-      endedReason: null,
-      endedTime: null,
-      pausedTime: null,
-      abandonedBy: null,
-      presence: {
-        P1: { lastSeenTime: Date.now() },
-        P2: { lastSeenTime: null },
-      },
-      movesCount: 0,
-      version: 0,
-      lastMove: null,
-      updatedTime: Date.now(),
-    });
+    const now = Date.now();
+    return await ctx.db.insert(
+      "games",
+      buildNewGameDoc(userId, gridSize, winLength, args.matchFormat, now),
+    );
   },
 });
 
@@ -234,13 +273,7 @@ export const findOrCreateGame = mutation({
     });
 
     if (matchingGame) {
-      const nextPresence = {
-        ...matchingGame.presence,
-        P2: { lastSeenTime: now },
-        ...(matchingGame.presence.P1.lastSeenTime
-          ? {}
-          : { P1: { lastSeenTime: now } }),
-      };
+      const nextPresence = buildJoinPresence(matchingGame.presence, now);
 
       await ctx.db.patch(matchingGame._id, {
         p2UserId: userId,
@@ -254,30 +287,10 @@ export const findOrCreateGame = mutation({
       return { gameId: matchingGame._id };
     }
 
-    const gameId = await ctx.db.insert("games", {
-      status: "waiting",
-      board: new Array(gridSize * gridSize).fill(null),
-      gridSize,
-      winLength,
-      match: createInitialMatch(args.matchFormat),
-      p1UserId: userId,
-      p2UserId: null,
-      currentTurn: "P1",
-      winner: null,
-      winningLine: null,
-      endedReason: null,
-      endedTime: null,
-      pausedTime: null,
-      abandonedBy: null,
-      presence: {
-        P1: { lastSeenTime: now },
-        P2: { lastSeenTime: null },
-      },
-      movesCount: 0,
-      version: 0,
-      lastMove: null,
-      updatedTime: now,
-    });
+    const gameId = await ctx.db.insert(
+      "games",
+      buildNewGameDoc(userId, gridSize, winLength, args.matchFormat, now),
+    );
 
     return { gameId };
   },
@@ -306,11 +319,7 @@ export const joinGame = mutation({
     }
 
     if (game.status === "waiting" && !game.p2UserId) {
-      const nextPresence = {
-        ...game.presence,
-        P2: { lastSeenTime: now },
-        ...(game.presence.P1.lastSeenTime ? {} : { P1: { lastSeenTime: now } }),
-      };
+      const nextPresence = buildJoinPresence(game.presence, now);
 
       await ctx.db.patch(game._id, {
         p2UserId: userId,
@@ -422,13 +431,13 @@ export const placeMark = mutation({
 
     const endedReason = winnerResult ? "win" : "draw";
     const endedTime = now;
-    const roundSummary: GameDoc["match"]["rounds"][number] = {
-      roundIndex: game.match.roundIndex,
+    const roundSummary = buildRoundSummary(
+      game,
       endedReason,
-      winner: roundWinner,
-      movesCount: nextMovesCount,
+      roundWinner,
+      nextMovesCount,
       endedTime,
-    };
+    );
     const nextRounds = [...game.match.rounds, roundSummary];
     const nextScore = { ...game.match.score };
     if (roundWinner) {
@@ -538,8 +547,7 @@ export const abandonGame = mutation({
     const game = await requireGame(ctx, args.gameId);
     const callerSlot = requireParticipantSlot(game, userId);
 
-    const isDeletable =
-      game.movesCount === 0 && game.match.rounds.length === 0;
+    const isDeletable = game.movesCount === 0 && game.match.rounds.length === 0;
 
     if (isDeletable) {
       await ctx.db.delete(game._id);
@@ -548,13 +556,13 @@ export const abandonGame = mutation({
 
     const otherPlayer = callerSlot === "P1" ? "P2" : "P1";
     const now = Date.now();
-    const roundSummary: GameDoc["match"]["rounds"][number] = {
-      roundIndex: game.match.roundIndex,
-      endedReason: "abandoned",
-      winner: otherPlayer,
-      movesCount: game.movesCount,
-      endedTime: now,
-    };
+    const roundSummary = buildRoundSummary(
+      game,
+      "abandoned",
+      otherPlayer,
+      game.movesCount,
+      now,
+    );
     const nextRounds = [...game.match.rounds, roundSummary];
 
     await ctx.db.patch(game._id, {
