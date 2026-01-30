@@ -1,12 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import type { UserAvatar } from "@/domain/entities/Avatar";
-import {
-  toDomainUser,
-  userRepository,
-} from "@/infrastructure/convex/repository/userRepository";
+import { userRepository } from "@/infrastructure/convex/repository/userRepository";
 
 import {
   useCheckEmailExists,
@@ -35,29 +30,24 @@ const createDeferred = <T>(): Deferred<T> => {
 };
 
 const {
-  useQueryMock,
+  useCurrentUserQueryMock,
+  useUserByIdQueryMock,
   checkEmailExistsUseCaseMock,
   checkUsernameExistsUseCaseMock,
   updateAvatarUseCaseMock,
   updateUsernameUseCaseMock,
 } = vi.hoisted(() => ({
-  useQueryMock: vi.fn(),
+  useCurrentUserQueryMock: vi.fn(),
+  useUserByIdQueryMock: vi.fn(),
   checkEmailExistsUseCaseMock: vi.fn(),
   checkUsernameExistsUseCaseMock: vi.fn(),
   updateAvatarUseCaseMock: vi.fn(),
   updateUsernameUseCaseMock: vi.fn(),
 }));
 
-vi.mock("convex/react", () => ({
-  useQuery: useQueryMock,
-  ConvexReactClient: class ConvexReactClient {
-    query = vi.fn();
-    mutation = vi.fn();
-
-    constructor() {
-      return;
-    }
-  },
+vi.mock("@/infrastructure/convex/UserApi", () => ({
+  useCurrentUserQuery: useCurrentUserQueryMock,
+  useUserByIdQuery: useUserByIdQueryMock,
 }));
 
 vi.mock("@/application/users/checkEmailExistsUseCase", () => ({
@@ -76,8 +66,8 @@ vi.mock("@/application/users/updateUsernameUseCase", () => ({
   updateUsernameUseCase: updateUsernameUseCaseMock,
 }));
 
-const userDoc = {
-  _id: "user-1" as Id<"users">,
+const user = {
+  id: "user-1",
   name: "Jess",
   email: "jess@example.com",
   username: "jess",
@@ -92,12 +82,12 @@ const userDoc = {
       value: "avatar-1",
     } as UserAvatar,
   ],
-  _creationTime: Date.now(),
 };
 
 describe("useUser hooks", () => {
   beforeEach(() => {
-    useQueryMock.mockReset();
+    useCurrentUserQueryMock.mockReset();
+    useUserByIdQueryMock.mockReset();
     checkEmailExistsUseCaseMock.mockReset();
     checkUsernameExistsUseCaseMock.mockReset();
     updateAvatarUseCaseMock.mockReset();
@@ -165,41 +155,39 @@ describe("useUser hooks", () => {
   });
 
   it("maps the current user query to a domain user", () => {
-    useQueryMock.mockReturnValue(userDoc);
+    useCurrentUserQueryMock.mockReturnValue(user);
 
     const { result } = renderHook(() => useCurrentUser());
 
-    expect(useQueryMock).toHaveBeenCalledWith(api.users.getCurrentUser);
-    expect(result.current).toEqual(toDomainUser(userDoc));
+    expect(useCurrentUserQueryMock).toHaveBeenCalledWith();
+    expect(result.current).toEqual(user);
   });
 
   it("returns null for the current user when the query has no data", () => {
-    useQueryMock.mockReturnValue(null);
+    useCurrentUserQueryMock.mockReturnValue(null);
 
     const { result } = renderHook(() => useCurrentUser());
 
-    expect(useQueryMock).toHaveBeenCalledWith(api.users.getCurrentUser);
+    expect(useCurrentUserQueryMock).toHaveBeenCalledWith();
     expect(result.current).toBe(null);
   });
 
   it("skips loading a user when no id is provided", () => {
-    useQueryMock.mockReturnValue(null);
+    useUserByIdQueryMock.mockReturnValue(null);
 
     const { result } = renderHook(() => useUserById(undefined));
 
-    expect(useQueryMock).toHaveBeenCalledWith(api.users.getUserById, "skip");
+    expect(useUserByIdQueryMock).toHaveBeenCalledWith(undefined);
     expect(result.current).toBe(null);
   });
 
   it("maps a queried user to a domain user", () => {
-    useQueryMock.mockReturnValue(userDoc);
+    useUserByIdQueryMock.mockReturnValue(user);
 
     const { result } = renderHook(() => useUserById("user-2"));
 
-    expect(useQueryMock).toHaveBeenCalledWith(api.users.getUserById, {
-      userId: "user-2",
-    });
-    expect(result.current).toEqual(toDomainUser(userDoc));
+    expect(useUserByIdQueryMock).toHaveBeenCalledWith("user-2");
+    expect(result.current).toEqual(user);
   });
 
   it("delegates username updates to the use case", async () => {

@@ -1,10 +1,10 @@
 import type { ComponentType } from "react";
 
-import { useConvexAuth } from "convex/react";
 import { Gamepad2, Home, Settings } from "lucide-react";
 
 import { Link, useRouterState } from "@tanstack/react-router";
 
+import { useConvexAuth } from "@/infrastructure/convex/auth";
 import { cn } from "@/ui/web/lib/utils";
 
 type NavItem = {

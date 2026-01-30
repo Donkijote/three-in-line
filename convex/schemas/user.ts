@@ -1,12 +1,16 @@
 import { defineTable } from "convex/server";
 import { type Infer, v } from "convex/values";
 
+import type { Doc, Id } from "../_generated/dataModel";
+
+export const avatarType = v.union(
+  v.literal("custom"),
+  v.literal("preset"),
+  v.literal("generated"),
+);
+
 export const avatar = v.object({
-  type: v.union(
-    v.literal("custom"),
-    v.literal("preset"),
-    v.literal("generated"),
-  ),
+  type: avatarType,
   value: v.string(),
 });
 
@@ -25,4 +29,7 @@ export const UserSchema = defineTable({
   .index("email", ["email"])
   .index("by_username", ["username"]);
 
+export type AvatarType = Infer<typeof avatarType>;
 export type Avatar = Infer<typeof avatar>;
+export type UserDoc = Doc<"users">;
+export type UserId = Id<"users">;

@@ -1,14 +1,12 @@
 import { api } from "@/convex/_generated/api";
-import type { Doc } from "@/convex/_generated/dataModel";
+import type { UserDoc } from "@/convex/schemas/user";
 import type { UserAvatar } from "@/domain/entities/Avatar";
-import type { User, UserId } from "@/domain/entities/User";
+import type { User } from "@/domain/entities/User";
 import type { UserRepository } from "@/domain/ports/UserRepository";
 import { convexClient } from "@/infrastructure/convex/client";
 
-const toUserId = (id: string) => id as UserId;
-
-export const toDomainUser = (user: Doc<"users">): User => ({
-  id: toUserId(user._id),
+export const toDomainUser = (user: UserDoc): User => ({
+  id: user._id,
   name: user.name ?? undefined,
   email: user.email ?? undefined,
   username: user.username ?? undefined,
@@ -30,12 +28,12 @@ export const userRepository: UserRepository = {
     const user = await convexClient.mutation(api.users.updateUsername, {
       username,
     });
-    return toDomainUser(user as Doc<"users">);
+    return toDomainUser(user as UserDoc);
   },
   updateAvatar: async (avatar: UserAvatar) => {
     const user = await convexClient.mutation(api.users.updateAvatar, {
       avatar,
     });
-    return toDomainUser(user as Doc<"users">);
+    return toDomainUser(user as UserDoc);
   },
 };

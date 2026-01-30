@@ -1,6 +1,6 @@
 import { Activity } from "react";
 
-import { HeartCrack, Trophy, WifiOff } from "lucide-react";
+import { Flag, HeartCrack, Trophy, WifiOff } from "lucide-react";
 
 import { H3, Muted } from "@/ui/web/components/Typography";
 import { cn } from "@/ui/web/lib/utils";
@@ -54,7 +54,15 @@ const MatchResultHeaderIcon = ({
   if (icon === "wifi") {
     return (
       <div className="grid place-items-center">
-        <WifiOff className="size-20 text-[oklch(0.78_0.16_65)]" />
+        <WifiOff className="size-20 text-amber-500" />
+      </div>
+    );
+  }
+
+  if (icon === "flag") {
+    return (
+      <div className="grid place-items-center text-muted-foreground">
+        <Flag className="size-20" />
       </div>
     );
   }

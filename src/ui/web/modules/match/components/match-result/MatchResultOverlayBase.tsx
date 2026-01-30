@@ -10,6 +10,7 @@ export const MatchResultOverlayBase = ({
   icon,
   pill,
   footer,
+  score,
   primaryLabel,
   secondaryLabel,
   changeModeLabel,
@@ -20,11 +21,9 @@ export const MatchResultOverlayBase = ({
   onPrimaryAction,
 }: MatchResultViewModel & { onPrimaryAction: () => Promise<void> }) => {
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-background/95 px-6 py-8">
-      <div className="relative w-full max-w-sm">
-        <div className="pointer-events-none absolute -top-12 left-1/2 size-28 -translate-x-1/2 rounded-full bg-linear-to-b from-black/0 via-black/0 to-black/50 blur-2xl" />
-
-        <div className="flex flex-col items-center gap-16 text-center">
+    <div className="fixed inset-0 z-50 flex flex-col items-center bg-background/95 px-6 py-8">
+      <div className="relative flex h-full w-full max-w-sm flex-col">
+        <div className="flex flex-1 flex-col items-center justify-center gap-16 text-center">
           <MatchResultHeader
             title={title}
             subtitle={subtitle}
@@ -35,12 +34,14 @@ export const MatchResultOverlayBase = ({
           <MatchResultCard
             pill={pill}
             footer={footer}
+            score={score}
             currentUser={currentUser}
             opponentUser={opponentUser}
             isWinner={isCurrentWinner}
             isAbandonedByCurrentUser={isAbandonedByCurrentUser}
           />
-
+        </div>
+        <div className="mt-auto">
           <MatchResultActions
             accent={accent}
             primaryLabel={primaryLabel}

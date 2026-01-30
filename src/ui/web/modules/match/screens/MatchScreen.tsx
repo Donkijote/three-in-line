@@ -35,6 +35,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const opponentUser = useUserById(opponentId);
   const gridSize = game?.gridSize;
   const winLength = game?.winLength;
+  const matchFormat = game?.match?.format;
   const [isPlacing, setIsPlacing] = useState(false);
 
   if (!game || !currentUser) {
@@ -62,6 +63,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     currentTurn: game.currentTurn,
     currentUser,
     opponentUser,
+    match: game.match,
   };
 
   const handleCellClick = async (index: number) => {
@@ -84,6 +86,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
       const nextGameId = await findOrCreateGameUseCase(gameRepository, {
         gridSize,
         winLength,
+        matchFormat,
       });
       await navigate({
         to: "/match",
@@ -102,7 +105,12 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
           <Card className="bg-card shadow-sm h-full py-0">
             <CardContent className="flex h-full flex-col gap-6 px-5 py-6">
               <MatchPlayers {...matchPlayersProps} layout="desktop" />
-              <MatchActions gameId={gameId} variant="hud" className="mt-auto" />
+              <MatchActions
+                gameId={gameId}
+                match={game.match}
+                variant="hud"
+                className="mt-auto"
+              />
             </CardContent>
           </Card>
 
@@ -132,7 +140,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             onCellClick={handleCellClick}
           />
 
-          <MatchActions gameId={gameId} />
+          <MatchActions gameId={gameId} match={game.match} />
         </div>
       )}
       <MatchResultOverlay
@@ -142,6 +150,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
         abandonedBy={game.abandonedBy}
         p1UserId={game.p1UserId}
         currentUserId={currentUserId}
+        score={game.match?.score}
         onPrimaryAction={handleCreateNewGame}
         currentUser={{
           name: resolvePlayerLabel(currentUser, "You"),

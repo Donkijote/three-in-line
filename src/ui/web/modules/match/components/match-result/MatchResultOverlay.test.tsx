@@ -43,6 +43,7 @@ describe("MatchResultOverlay", () => {
         abandonedBy={null}
         p1UserId="user-1"
         currentUserId="user-1"
+        score={{ P1: 2, P2: 1 }}
         onPrimaryAction={onPrimaryAction}
         currentUser={{ name: "Nova" }}
         opponentUser={{ name: "Rex" }}
@@ -59,6 +60,9 @@ describe("MatchResultOverlay", () => {
     expect(
       screen.getByRole("button", { name: /change mode/i }),
     ).toBeInTheDocument();
+    expect(screen.getByText("Final Result")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /play again/i }));
     fireEvent.click(screen.getByRole("button", { name: /back home/i }));

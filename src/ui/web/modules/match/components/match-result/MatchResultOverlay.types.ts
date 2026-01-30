@@ -1,8 +1,8 @@
 import type { UserAvatar } from "@/domain/entities/Avatar";
-import type { GameStatus } from "@/domain/entities/Game";
+import type { GameStatus, MatchScore } from "@/domain/entities/Game";
 
 export type ResultAccent = "primary" | "destructive";
-export type ResultIcon = "trophy" | "heart" | "wifi";
+export type ResultIcon = "trophy" | "heart" | "wifi" | "flag";
 
 export type MatchResultOverlayProps = {
   status: GameStatus;
@@ -11,6 +11,7 @@ export type MatchResultOverlayProps = {
   abandonedBy: "P1" | "P2" | null;
   p1UserId: string;
   currentUserId?: string;
+  score?: MatchScore;
   onPrimaryAction: () => Promise<void>;
   currentUser: {
     name: string;
@@ -29,6 +30,10 @@ export type MatchResultViewModel = {
   icon: ResultIcon;
   pill?: string;
   footer?: string;
+  score?: {
+    current: number;
+    opponent: number;
+  };
   primaryLabel: string;
   secondaryLabel: string;
   changeModeLabel: string;

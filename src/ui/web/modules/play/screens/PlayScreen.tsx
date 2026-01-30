@@ -33,7 +33,7 @@ const modes = [
     icon: Hash,
     accent: "text-emerald-500",
     bg: "bg-emerald-500/15",
-    config: { gridSize: 3, winLength: 3 },
+    config: { gridSize: 3, winLength: 3, matchFormat: "single" },
   },
   {
     id: "best-of-three",
@@ -42,7 +42,7 @@ const modes = [
     icon: Trophy,
     accent: "text-yellow-500",
     bg: "bg-yellow-500/15",
-    config: { gridSize: 3, winLength: 3 },
+    config: { gridSize: 3, winLength: 3, matchFormat: "bo3" },
   },
   {
     id: "best-of-five",
@@ -51,7 +51,7 @@ const modes = [
     icon: Medal,
     accent: "text-fuchsia-500",
     bg: "bg-fuchsia-500/15",
-    config: { gridSize: 3, winLength: 3 },
+    config: { gridSize: 3, winLength: 3, matchFormat: "bo5" },
   },
   {
     id: "time-challenge",
@@ -60,7 +60,7 @@ const modes = [
     icon: Clock,
     accent: "text-orange-500",
     bg: "bg-orange-500/15",
-    config: { gridSize: 3, winLength: 3 },
+    config: { gridSize: 3, winLength: 3, matchFormat: "single" },
   },
   {
     id: "grid-4x4",
@@ -69,7 +69,7 @@ const modes = [
     icon: Grid2x2,
     accent: "text-sky-500",
     bg: "bg-sky-500/15",
-    config: { gridSize: 4, winLength: 3 },
+    config: { gridSize: 4, winLength: 3, matchFormat: "single" },
   },
   {
     id: "grid-6x6",
@@ -78,7 +78,7 @@ const modes = [
     icon: Grid3x3,
     accent: "text-purple-500",
     bg: "bg-purple-500/15",
-    config: { gridSize: 6, winLength: 3 },
+    config: { gridSize: 6, winLength: 3, matchFormat: "single" },
   },
 ] as const;
 

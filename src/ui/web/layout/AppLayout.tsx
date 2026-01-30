@@ -1,7 +1,6 @@
 import type { PropsWithChildren } from "react";
 
-import { useConvexAuth } from "convex/react";
-
+import { useConvexAuth } from "@/infrastructure/convex/auth";
 import { ThemeProvider } from "@/ui/web/application/providers/ThemeProvider";
 import { UserPreferencesProvider } from "@/ui/web/application/providers/UserPreferencesProvider";
 import { NavBar } from "@/ui/web/layout/components/NavBar";
