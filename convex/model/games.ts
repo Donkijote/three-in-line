@@ -18,6 +18,7 @@ import type {
 
 export const HEARTBEAT_FRESH_MS = 60000;
 export const PAUSE_TIMEOUT_MS = 5 * 60_000;
+export const DEFAULT_TURN_DURATION_MS = 3000;
 
 type Ctx = MutationCtx | QueryCtx;
 type GameDoc = Doc<"games">;
@@ -148,6 +149,7 @@ export const buildNewGameDoc = (
   gridSize: number,
   winLength: number,
   format: MatchFormat | undefined,
+  isTimed: boolean,
   now: number,
 ) => ({
   status: "waiting" as GameStatus,
@@ -158,7 +160,7 @@ export const buildNewGameDoc = (
   p1UserId: userId,
   p2UserId: null,
   currentTurn: "P1" as Player,
-  turnDurationMs: null,
+  turnDurationMs: isTimed ? DEFAULT_TURN_DURATION_MS : null,
   turnDeadlineTime: null,
   winner: null,
   winningLine: null,
@@ -176,14 +178,13 @@ export const buildNewGameDoc = (
   updatedTime: now,
 });
 
-const isTurnTimerEnabled = (game: GameDoc) =>
-  game.turnDurationMs !== null || game.turnDeadlineTime !== null;
+const isTurnTimerEnabled = (game: GameDoc) => game.turnDurationMs !== null;
 
 export const buildTurnTimerPatch = (game: GameDoc, now: number) => {
   if (!isTurnTimerEnabled(game)) {
     return { turnDurationMs: null, turnDeadlineTime: null };
   }
-  const turnDurationMs = game.turnDurationMs ?? 5000;
+  const turnDurationMs = game.turnDurationMs ?? DEFAULT_TURN_DURATION_MS;
   return { turnDurationMs, turnDeadlineTime: now + turnDurationMs };
 };
 

@@ -42,11 +42,13 @@ export const findOrCreateGame = mutation({
     gridSize: v.number(),
     winLength: v.number(),
     matchFormat: v.optional(matchFormat),
+    isTimed: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const { gridSize, winLength } = resolveConfig(args);
     const { format } = resolveMatchFormat(args.matchFormat);
+    const isTimed = args.isTimed ?? false;
     const now = Date.now();
 
     const waitingGames = await ctx.db
@@ -64,6 +66,9 @@ export const findOrCreateGame = mutation({
       const gameGridSize = game.gridSize ?? DEFAULT_GRID_SIZE;
       const gameWinLength = game.winLength ?? DEFAULT_WIN_LENGTH;
       if (game.match.format !== format) {
+        return false;
+      }
+      if (isTimed ? game.turnDurationMs === null : game.turnDurationMs !== null) {
         return false;
       }
       return gameGridSize === gridSize && gameWinLength === winLength;
@@ -88,7 +93,14 @@ export const findOrCreateGame = mutation({
 
     const gameId = await ctx.db.insert(
       "games",
-      buildNewGameDoc(userId, gridSize, winLength, args.matchFormat, now),
+      buildNewGameDoc(
+        userId,
+        gridSize,
+        winLength,
+        args.matchFormat,
+        isTimed,
+        now,
+      ),
     );
 
     return { gameId };
@@ -114,8 +126,7 @@ export const placeMark = mutation({
 
     requirePlayersTurn(game.currentTurn, callerSlot);
 
-    const timerEnabled =
-      game.turnDurationMs !== null || game.turnDeadlineTime !== null;
+    const timerEnabled = game.turnDurationMs !== null;
     if (timerEnabled) {
       if (game.turnDeadlineTime === null) {
         throw new Error("Timer not initialized");
