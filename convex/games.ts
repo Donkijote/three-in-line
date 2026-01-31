@@ -12,6 +12,7 @@ import {
   buildNewGameDoc,
   buildNextBoard,
   buildRoundSummary,
+  buildTurnTimerPatch,
   enforceTimeoutOrThrow,
   HEARTBEAT_FRESH_MS,
   patchDisconnectedMove,
@@ -119,11 +120,13 @@ export const findOrCreateGame = mutation({
 
     if (matchingGame) {
       const nextPresence = buildJoinPresence(matchingGame.presence, now);
+      const turnTimerPatch = buildTurnTimerPatch(matchingGame, now);
 
       await ctx.db.patch(matchingGame._id, {
         p2UserId: userId,
         status: "playing",
         pausedTime: null,
+        ...turnTimerPatch,
         presence: nextPresence,
         updatedTime: now,
         version: matchingGame.version + 1,
@@ -154,7 +157,8 @@ export const joinGame = mutation({
 
     if (game.p1UserId === userId) {
       if (game.status === "waiting" && game.p2UserId) {
-        await ctx.db.patch(game._id, { status: "playing" });
+        const turnTimerPatch = buildTurnTimerPatch(game, now);
+        await ctx.db.patch(game._id, { status: "playing", ...turnTimerPatch });
       }
       return await ctx.db.get(game._id);
     }
@@ -165,11 +169,13 @@ export const joinGame = mutation({
 
     if (game.status === "waiting" && !game.p2UserId) {
       const nextPresence = buildJoinPresence(game.presence, now);
+      const turnTimerPatch = buildTurnTimerPatch(game, now);
 
       await ctx.db.patch(game._id, {
         p2UserId: userId,
         status: "playing",
         pausedTime: null,
+        ...turnTimerPatch,
         presence: nextPresence,
         updatedTime: now,
         version: game.version + 1,
@@ -201,6 +207,18 @@ export const placeMark = mutation({
 
     requirePlayersTurn(game.currentTurn, callerSlot);
 
+    const timerEnabled =
+      game.turnDurationMs !== null || game.turnDeadlineTime !== null;
+    if (timerEnabled) {
+      if (game.turnDeadlineTime === null) {
+        throw new Error("Timer not initialized");
+      }
+      if (now > game.turnDeadlineTime) {
+        throw new Error("Turn timed out");
+      }
+    }
+    const turnTimerPatch = buildTurnTimerPatch(game, now);
+
     const opponentSlot = callerSlot === "P1" ? "P2" : "P1";
     const opponentLastSeen = game.presence[opponentSlot].lastSeenTime;
     const isOpponentPresent =
@@ -217,6 +235,7 @@ export const placeMark = mutation({
         index: args.index,
         nextBoard,
         nextMovesCount,
+        turnTimerPatch,
       });
     }
 
@@ -226,15 +245,16 @@ export const placeMark = mutation({
       Boolean(winnerResult) || nextMovesCount >= expectedLength;
 
     if (!roundEnded) {
-      return await patchOngoingMove(
+      return await patchOngoingMove({
         ctx,
         game,
         callerSlot,
         now,
-        args.index,
+        index: args.index,
         nextBoard,
         nextMovesCount,
-      );
+        turnTimerPatch,
+      });
     }
 
     return await patchRoundEnd({
@@ -247,6 +267,7 @@ export const placeMark = mutation({
       nextBoard,
       nextMovesCount,
       winnerResult,
+      turnTimerPatch,
     });
   },
 });
@@ -260,6 +281,9 @@ export const restartGame = mutation({
     const { gridSize, winLength, expectedLength } = requireBoardShape(game);
 
     const status = game.p2UserId ? "playing" : "waiting";
+    const now = Date.now();
+    const turnTimerPatch =
+      status === "playing" ? buildTurnTimerPatch(game, now) : null;
 
     await ctx.db.patch(game._id, {
       board: Array.from({ length: expectedLength }, () => null),
@@ -273,14 +297,15 @@ export const restartGame = mutation({
       lastMove: null,
       currentTurn: "P1",
       status,
+      ...(turnTimerPatch ?? {}),
       presence: {
         ...game.presence,
-        [callerSlot]: { lastSeenTime: Date.now() },
+        [callerSlot]: { lastSeenTime: now },
       },
       gridSize,
       winLength,
       version: game.version + 1,
-      updatedTime: Date.now(),
+      updatedTime: now,
     });
 
     return await ctx.db.get(game._id);
@@ -370,6 +395,8 @@ export const heartbeat = mutation({
       status?: GameStatus;
       endedReason?: "win" | "draw" | "abandoned" | "disconnect" | null;
       pausedTime?: number | null;
+      turnDurationMs?: number | null;
+      turnDeadlineTime?: number | null;
       updatedTime?: number;
       version?: number;
     } = {
@@ -384,9 +411,12 @@ export const heartbeat = mutation({
       const isP1Present = p1Seen && now - p1Seen <= HEARTBEAT_FRESH_MS;
       const isP2Present = p2Seen && now - p2Seen <= HEARTBEAT_FRESH_MS;
       if (isP1Present && isP2Present) {
+        const turnTimerPatch = buildTurnTimerPatch(game, now);
         patch.status = "playing";
         patch.endedReason = null;
         patch.pausedTime = null;
+        patch.turnDurationMs = turnTimerPatch.turnDurationMs;
+        patch.turnDeadlineTime = turnTimerPatch.turnDeadlineTime;
         patch.updatedTime = now;
         patch.version = game.version + 1;
         nextStatus = "playing";
