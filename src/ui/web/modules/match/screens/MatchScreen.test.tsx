@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
+import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
 import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import type { GameId } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
@@ -12,6 +13,7 @@ type MatchGame = {
   p2UserId: string | null;
   currentTurn: "P1" | "P2";
   gridSize?: number;
+  winLength?: number;
   board: Array<"P1" | "P2" | null>;
   match: {
     format: "single" | "bo3" | "bo5";
@@ -59,6 +61,10 @@ vi.mock("@/ui/web/hooks/useGame", () => ({
 
 vi.mock("@/application/games/placeMarkUseCase", () => ({
   placeMarkUseCase: vi.fn(),
+}));
+
+vi.mock("@/application/games/findOrCreateGameUseCase", () => ({
+  findOrCreateGameUseCase: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -155,6 +161,7 @@ vi.mock(
       score,
       currentUser,
       opponentUser,
+      onPrimaryAction,
     }: {
       status: string;
       endedReason: string | null;
@@ -165,6 +172,7 @@ vi.mock(
       score?: { P1: number; P2: number };
       currentUser: { name: string };
       opponentUser: { name: string };
+      onPrimaryAction: () => Promise<void>;
     }) => (
       <div
         data-testid="match-result-overlay"
@@ -179,7 +187,11 @@ vi.mock(
         }
         data-current={currentUser.name}
         data-opponent={opponentUser.name}
-      />
+      >
+        <button type="button" onClick={onPrimaryAction}>
+          Primary Action
+        </button>
+      </div>
     ),
   }),
 );
@@ -193,6 +205,7 @@ describe("MatchScreen", () => {
     p2UserId: "user-2",
     currentTurn: "P1",
     gridSize: 3,
+    winLength: 3,
     board: ["P1", "P2", null, null, "P1", null, "P2", null, null],
     match: {
       format: "single",
@@ -224,8 +237,11 @@ describe("MatchScreen", () => {
       lastOpponentId = id;
       return opponentUser;
     });
+    navigate.mockClear();
     vi.mocked(placeMarkUseCase).mockClear();
     vi.mocked(placeMarkUseCase).mockResolvedValue(undefined);
+    vi.mocked(findOrCreateGameUseCase).mockClear();
+    vi.mocked(findOrCreateGameUseCase).mockResolvedValue("next-game-id");
   });
 
   it("shows loading state when the game is missing", () => {
@@ -425,5 +441,68 @@ describe("MatchScreen", () => {
       "data-score",
       "0-0",
     );
+  });
+
+  it("creates a new match when the primary overlay action is triggered", async () => {
+    game = {
+      ...baseGame,
+      status: "ended",
+      endedReason: "win",
+      winner: "P1",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Primary Action" }));
+
+    await waitFor(() => {
+      expect(findOrCreateGameUseCase).toHaveBeenCalledWith(gameRepository, {
+        gridSize: 3,
+        winLength: 3,
+        matchFormat: "single",
+      });
+    });
+    expect(navigate).toHaveBeenCalledWith({
+      to: "/match",
+      search: { gameId: "next-game-id" },
+    });
+  });
+
+  it("does not create a new match when board dimensions are missing", async () => {
+    game = {
+      ...baseGame,
+      status: "ended",
+      endedReason: "win",
+      winner: "P1",
+      winLength: undefined,
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Primary Action" }));
+
+    await waitFor(() => {
+      expect(findOrCreateGameUseCase).not.toHaveBeenCalled();
+    });
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("logs an error when creating a new match fails", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(findOrCreateGameUseCase).mockRejectedValueOnce(new Error("boom"));
+    game = {
+      ...baseGame,
+      status: "ended",
+      endedReason: "win",
+      winner: "P1",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Primary Action" }));
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+    });
+    expect(navigate).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
   });
 });
