@@ -15,10 +15,6 @@ export interface GameRepository {
    */
   placeMark: (params: { gameId: GameId; index: number }) => Promise<void>;
   /**
-   * Reset the current game state while preserving its config.
-   */
-  restartGame: (params: { gameId: GameId }) => Promise<void>;
-  /**
    * Abandoning intentionally deletes the game server-side.
    */
   abandonGame: (params: { gameId: GameId }) => Promise<void>;

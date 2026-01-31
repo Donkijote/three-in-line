@@ -37,55 +37,6 @@ export const getGame = query({
   },
 });
 
-export const listWaitingGames = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db
-      .query("games")
-      .filter((q) => q.eq(q.field("status"), "waiting"))
-      .order("desc")
-      .collect();
-  },
-});
-
-export const myActiveGames = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await requireUserId(ctx);
-
-    return await ctx.db
-      .query("games")
-      .filter((q) =>
-        q.and(
-          q.neq(q.field("status"), "ended"),
-          q.neq(q.field("status"), "canceled"),
-          q.or(
-            q.eq(q.field("p1UserId"), userId),
-            q.eq(q.field("p2UserId"), userId),
-          ),
-        ),
-      )
-      .collect();
-  },
-});
-
-export const createGame = mutation({
-  args: {
-    gridSize: v.optional(v.number()),
-    winLength: v.optional(v.number()),
-    matchFormat: v.optional(matchFormat),
-  },
-  handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
-    const { gridSize, winLength } = resolveConfig(args);
-    const now = Date.now();
-    return await ctx.db.insert(
-      "games",
-      buildNewGameDoc(userId, gridSize, winLength, args.matchFormat, now),
-    );
-  },
-});
-
 export const findOrCreateGame = mutation({
   args: {
     gridSize: v.number(),
@@ -141,50 +92,6 @@ export const findOrCreateGame = mutation({
     );
 
     return { gameId };
-  },
-});
-
-export const joinGame = mutation({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
-    const game = await requireGame(ctx, args.gameId);
-    const now = Date.now();
-    const didTimeout = await enforceTimeoutOrThrow(ctx, game, now);
-    if (didTimeout) {
-      return await ctx.db.get(game._id);
-    }
-
-    if (game.p1UserId === userId) {
-      if (game.status === "waiting" && game.p2UserId) {
-        const turnTimerPatch = buildTurnTimerPatch(game, now);
-        await ctx.db.patch(game._id, { status: "playing", ...turnTimerPatch });
-      }
-      return await ctx.db.get(game._id);
-    }
-
-    if (game.p2UserId === userId) {
-      return await ctx.db.get(game._id);
-    }
-
-    if (game.status === "waiting" && !game.p2UserId) {
-      const nextPresence = buildJoinPresence(game.presence, now);
-      const turnTimerPatch = buildTurnTimerPatch(game, now);
-
-      await ctx.db.patch(game._id, {
-        p2UserId: userId,
-        status: "playing",
-        pausedTime: null,
-        ...turnTimerPatch,
-        presence: nextPresence,
-        updatedTime: now,
-        version: game.version + 1,
-      });
-
-      return await ctx.db.get(game._id);
-    }
-
-    throw new Error("Game is full");
   },
 });
 
@@ -269,46 +176,6 @@ export const placeMark = mutation({
       winnerResult,
       turnTimerPatch,
     });
-  },
-});
-
-export const restartGame = mutation({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
-    const game = await requireGame(ctx, args.gameId);
-    const callerSlot = requireParticipantSlot(game, userId);
-    const { gridSize, winLength, expectedLength } = requireBoardShape(game);
-
-    const status = game.p2UserId ? "playing" : "waiting";
-    const now = Date.now();
-    const turnTimerPatch =
-      status === "playing" ? buildTurnTimerPatch(game, now) : null;
-
-    await ctx.db.patch(game._id, {
-      board: Array.from({ length: expectedLength }, () => null),
-      winner: null,
-      winningLine: null,
-      endedReason: null,
-      endedTime: null,
-      pausedTime: null,
-      abandonedBy: null,
-      movesCount: 0,
-      lastMove: null,
-      currentTurn: "P1",
-      status,
-      ...(turnTimerPatch ?? {}),
-      presence: {
-        ...game.presence,
-        [callerSlot]: { lastSeenTime: now },
-      },
-      gridSize,
-      winLength,
-      version: game.version + 1,
-      updatedTime: now,
-    });
-
-    return await ctx.db.get(game._id);
   },
 });
 

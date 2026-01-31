@@ -44,12 +44,6 @@ export const gameRepository: GameRepository = {
       gameId: toConvexGameId(params.gameId),
     });
   },
-  restartGame: async (params) => {
-    await convexClient.mutation(api.games.restartGame, {
-      ...params,
-      gameId: toConvexGameId(params.gameId),
-    });
-  },
   abandonGame: async (params) => {
     await convexClient.mutation(api.games.abandonGame, {
       ...params,
