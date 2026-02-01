@@ -23,4 +23,9 @@ export interface GameRepository {
    * Record presence/heartbeat; may resume paused games when both are online.
    */
   heartbeat: (params: { gameId: GameId }) => Promise<void>;
+
+  /**
+   * Advance the current turn when the active player times out.
+   */
+  timeoutTurn: (params: { gameId: GameId }) => Promise<void>;
 }

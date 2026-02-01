@@ -58,4 +58,10 @@ export const gameRepository: GameRepository = {
       gameId: toConvexGameId(params.gameId),
     });
   },
+  timeoutTurn: async (params) => {
+    await convexClient.mutation(api.games.timeoutTurn, {
+      ...params,
+      gameId: toConvexGameId(params.gameId),
+    });
+  },
 };

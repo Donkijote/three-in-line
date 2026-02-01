@@ -307,3 +307,38 @@ export const heartbeat = mutation({
     return { ok: true, status: nextStatus };
   },
 });
+
+export const timeoutTurn = mutation({
+  args: { gameId: v.id("games") },
+  handler: async (ctx, args) => {
+    const game = await requireGame(ctx, args.gameId);
+    requireGameInProgress(game);
+
+    if (game.winner !== null) {
+      throw new Error("Game has ended");
+    }
+
+    if (game.turnDurationMs === null) {
+      throw new Error("Timer not enabled");
+    }
+    if (game.turnDeadlineTime === null) {
+      throw new Error("Timer not initialized");
+    }
+
+    const now = Date.now();
+    if (now < game.turnDeadlineTime) {
+      throw new Error("Turn has not timed out");
+    }
+
+    const nextTurn = game.currentTurn === "P1" ? "P2" : "P1";
+
+    await ctx.db.patch(game._id, {
+      currentTurn: nextTurn,
+      turnDeadlineTime: now + game.turnDurationMs,
+      updatedTime: now,
+      version: game.version + 1,
+    });
+
+    return { ok: true };
+  },
+});
