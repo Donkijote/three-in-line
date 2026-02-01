@@ -86,6 +86,8 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
     p1UserId,
     isPlacing,
     gridSize,
+    turnDurationMs,
+    turnDeadlineTime,
   }: {
     onCellClick?: (index: number) => void;
     status: "waiting" | "playing" | "paused" | "ended";
@@ -94,6 +96,8 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
     p1UserId: string;
     isPlacing?: boolean;
     gridSize?: number;
+    turnDurationMs?: number | null;
+    turnDeadlineTime?: number | null;
   }) => {
     let currentSlot: "P1" | "P2" | undefined;
     if (currentUserId) {
@@ -115,6 +119,8 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
         data-is-placing={String(isPlacing ?? false)}
         data-interactive={String(isInteractive)}
         data-grid-size={String(gridSize)}
+        data-turn-duration={String(turnDurationMs ?? "")}
+        data-turn-deadline={String(turnDeadlineTime ?? "")}
       >
         <button
           type="button"

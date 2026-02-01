@@ -125,6 +125,8 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             currentTurn={game.currentTurn}
             currentUserId={currentUserId}
             p1UserId={game.p1UserId}
+            turnDurationMs={game.turnDurationMs}
+            turnDeadlineTime={game.turnDeadlineTime}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
           />
@@ -140,6 +142,8 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             currentTurn={game.currentTurn}
             currentUserId={currentUserId}
             p1UserId={game.p1UserId}
+            turnDurationMs={game.turnDurationMs}
+            turnDeadlineTime={game.turnDeadlineTime}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
           />
