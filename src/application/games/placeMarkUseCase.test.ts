@@ -9,9 +9,9 @@ describe("placeMarkUseCase", () => {
     const repository: GameRepository = {
       findOrCreateGame: vi.fn(),
       placeMark,
-      restartGame: vi.fn(),
       abandonGame: vi.fn(),
       heartbeat: vi.fn(),
+      timeoutTurn: vi.fn(),
     };
     const gameId = "game-1" as GameId;
 

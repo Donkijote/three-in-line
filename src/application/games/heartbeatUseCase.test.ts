@@ -9,9 +9,9 @@ describe("heartbeatUseCase", () => {
     const repository: GameRepository = {
       findOrCreateGame: vi.fn(),
       placeMark: vi.fn(),
-      restartGame: vi.fn(),
       abandonGame: vi.fn(),
       heartbeat,
+      timeoutTurn: vi.fn(),
     };
     const gameId = "game-1" as GameId;
 
