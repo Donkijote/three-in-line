@@ -28,6 +28,8 @@ type MatchPlayer = {
 type MatchPlayersProps = {
   p1UserId: string;
   currentTurn: "P1" | "P2";
+  timerActive: boolean;
+  timerProgress: number;
   currentUser: MatchUser;
   opponentUser: MatchUser;
   match: MatchState | null;
@@ -37,6 +39,8 @@ type MatchPlayersProps = {
 export const MatchPlayers = ({
   p1UserId,
   currentTurn,
+  timerActive,
+  timerProgress,
   currentUser,
   opponentUser,
   match,
@@ -58,7 +62,16 @@ export const MatchPlayers = ({
       })}
     >
       {players.map((player) => (
-        <PlayerCard key={player.id} showWins={showWins} {...player} />
+        <PlayerCard
+          key={player.id}
+          showWins={showWins}
+          turnTimer={
+            timerActive && player.isTurn
+              ? { isActive: true, progress: timerProgress }
+              : undefined
+          }
+          {...player}
+        />
       ))}
     </div>
   );

@@ -4,12 +4,17 @@ import { useNavigate } from "@tanstack/react-router";
 
 import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
 import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
+import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
 import type { GameId } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
-import { useGame, useGameHeartbeat } from "@/ui/web/hooks/useGame";
+import {
+  useGame,
+  useGameHeartbeat,
+  useTurnTimer,
+} from "@/ui/web/hooks/useGame";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
@@ -33,10 +38,19 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const currentUserId = currentUser?.id;
   const opponentId = getOpponentId(game, currentUserId);
   const opponentUser = useUserById(opponentId);
-  const gridSize = game?.gridSize;
-  const winLength = game?.winLength;
-  const matchFormat = game?.match?.format;
   const [isPlacing, setIsPlacing] = useState(false);
+  const timerEnabled = game?.turnDurationMs !== null;
+  const timerActive =
+    Boolean(timerEnabled) &&
+    game?.status === "playing" &&
+    game.turnDeadlineTime !== null;
+  const { isExpired, progress: timerProgress } = useTurnTimer({
+    isActive: Boolean(timerActive),
+    durationMs: game?.turnDurationMs,
+    deadlineTime: game?.turnDeadlineTime,
+    expireDelayMs: 1200,
+    onExpire: () => onExpire(game?.id),
+  });
 
   if (!game || !currentUser) {
     return (
@@ -58,9 +72,19 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     );
   }
 
+  const gridSize = game.gridSize;
+  const matchFormat = game.match.format;
+  const currentSlot = currentUser.id === game.p1UserId ? "P1" : "P2";
+  const shouldShowTimeout =
+    timerActive &&
+    currentSlot !== undefined &&
+    game.currentTurn === currentSlot;
+
   const matchPlayersProps = {
     p1UserId: game.p1UserId,
     currentTurn: game.currentTurn,
+    timerActive: Boolean(timerActive),
+    timerProgress,
     currentUser,
     opponentUser,
     match: game.match,
@@ -79,14 +103,12 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   };
 
   const handleCreateNewGame = async () => {
-    if (gridSize == null || winLength == null) {
-      return;
-    }
     try {
       const nextGameId = await findOrCreateGameUseCase(gameRepository, {
         gridSize,
-        winLength,
+        winLength: game.winLength,
         matchFormat,
+        isTimed: game.turnDurationMs !== null,
       });
       await navigate({
         to: "/match",
@@ -116,11 +138,12 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
 
           <MatchBoard
             board={game.board}
-            gridSize={game.gridSize}
+            gridSize={gridSize}
             status={game.status}
             currentTurn={game.currentTurn}
             currentUserId={currentUserId}
             p1UserId={game.p1UserId}
+            isTimeUp={Boolean(isExpired && shouldShowTimeout)}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
           />
@@ -131,11 +154,12 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
 
           <MatchBoard
             board={game.board}
-            gridSize={game.gridSize}
+            gridSize={gridSize}
             status={game.status}
             currentTurn={game.currentTurn}
             currentUserId={currentUserId}
             p1UserId={game.p1UserId}
+            isTimeUp={Boolean(isExpired && shouldShowTimeout)}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
           />
@@ -173,4 +197,15 @@ const getOpponentId = (game: Game, currentUserId?: string) => {
   }
 
   return game.p1UserId === currentUserId ? game.p2UserId : game.p1UserId;
+};
+
+const onExpire = async (gameId?: string) => {
+  if (!gameId) {
+    return;
+  }
+  try {
+    await timeoutTurnUseCase(gameRepository, { gameId });
+  } catch (error) {
+    console.debug("Timeout turn failed.", error);
+  }
 };

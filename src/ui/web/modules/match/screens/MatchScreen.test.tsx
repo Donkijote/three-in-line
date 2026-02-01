@@ -1,17 +1,23 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
+import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
 import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
+import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
 import type { GameId } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 
 import { MatchScreen } from "./MatchScreen";
 
 type MatchGame = {
+  id: string;
   status: "waiting" | "playing" | "paused" | "ended";
   p1UserId: string;
   p2UserId: string | null;
   currentTurn: "P1" | "P2";
   gridSize?: number;
+  winLength?: number;
+  turnDurationMs: number | null;
+  turnDeadlineTime: number | null;
   board: Array<"P1" | "P2" | null>;
   match: {
     format: "single" | "bo3" | "bo5";
@@ -52,13 +58,29 @@ vi.mock("@/ui/web/hooks/useUser", () => ({
   useUserById: useUserByIdMock,
 }));
 
+const { useTurnTimerMock } = vi.hoisted(() => ({
+  useTurnTimerMock: vi.fn((_: { onExpire?: () => void }) => ({
+    isExpired: false,
+    progress: 0,
+  })),
+}));
+
 vi.mock("@/ui/web/hooks/useGame", () => ({
   useGame: () => game,
   useGameHeartbeat: vi.fn(),
+  useTurnTimer: useTurnTimerMock,
 }));
 
 vi.mock("@/application/games/placeMarkUseCase", () => ({
   placeMarkUseCase: vi.fn(),
+}));
+
+vi.mock("@/application/games/findOrCreateGameUseCase", () => ({
+  findOrCreateGameUseCase: vi.fn(),
+}));
+
+vi.mock("@/application/games/timeoutTurnUseCase", () => ({
+  timeoutTurnUseCase: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -78,6 +100,7 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
     p1UserId,
     isPlacing,
     gridSize,
+    isTimeUp,
   }: {
     onCellClick?: (index: number) => void;
     status: "waiting" | "playing" | "paused" | "ended";
@@ -86,6 +109,7 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
     p1UserId: string;
     isPlacing?: boolean;
     gridSize?: number;
+    isTimeUp?: boolean;
   }) => {
     let currentSlot: "P1" | "P2" | undefined;
     if (currentUserId) {
@@ -107,6 +131,7 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
         data-is-placing={String(isPlacing ?? false)}
         data-interactive={String(isInteractive)}
         data-grid-size={String(gridSize)}
+        data-is-time-up={String(isTimeUp ?? false)}
       >
         <button
           type="button"
@@ -155,6 +180,7 @@ vi.mock(
       score,
       currentUser,
       opponentUser,
+      onPrimaryAction,
     }: {
       status: string;
       endedReason: string | null;
@@ -165,6 +191,7 @@ vi.mock(
       score?: { P1: number; P2: number };
       currentUser: { name: string };
       opponentUser: { name: string };
+      onPrimaryAction: () => Promise<void>;
     }) => (
       <div
         data-testid="match-result-overlay"
@@ -179,7 +206,11 @@ vi.mock(
         }
         data-current={currentUser.name}
         data-opponent={opponentUser.name}
-      />
+      >
+        <button type="button" onClick={onPrimaryAction}>
+          Primary Action
+        </button>
+      </div>
     ),
   }),
 );
@@ -188,11 +219,15 @@ const gameId = "gameId" as GameId;
 
 describe("MatchScreen", () => {
   const baseGame: MatchGame = {
+    id: "gameId",
     status: "playing",
     p1UserId: "user-1",
     p2UserId: "user-2",
     currentTurn: "P1",
     gridSize: 3,
+    winLength: 3,
+    turnDurationMs: null,
+    turnDeadlineTime: null,
     board: ["P1", "P2", null, null, "P1", null, "P2", null, null],
     match: {
       format: "single",
@@ -220,12 +255,17 @@ describe("MatchScreen", () => {
     };
     lastOpponentId = undefined;
     useUserByIdMock.mockClear();
+    useTurnTimerMock.mockClear();
     useUserByIdMock.mockImplementation((id?: string) => {
       lastOpponentId = id;
       return opponentUser;
     });
+    navigate.mockClear();
     vi.mocked(placeMarkUseCase).mockClear();
     vi.mocked(placeMarkUseCase).mockResolvedValue(undefined);
+    vi.mocked(findOrCreateGameUseCase).mockClear();
+    vi.mocked(findOrCreateGameUseCase).mockResolvedValue("next-game-id");
+    vi.mocked(timeoutTurnUseCase).mockClear();
   });
 
   it("shows loading state when the game is missing", () => {
@@ -256,6 +296,72 @@ describe("MatchScreen", () => {
     render(<MatchScreen gameId={gameId} />);
 
     expect(screen.getByText("Waiting for opponent")).toBeInTheDocument();
+  });
+
+  it("wires the timer expiry callback", () => {
+    useTurnTimerMock.mockImplementationOnce(
+      (params: { onExpire?: () => void }) => {
+        params.onExpire?.();
+        return { isExpired: false, progress: 0 };
+      },
+    );
+
+    game = {
+      ...baseGame,
+      turnDurationMs: 3000,
+      turnDeadlineTime: Date.now() + 3000,
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    expect(timeoutTurnUseCase).toHaveBeenCalledWith(gameRepository, {
+      gameId: "gameId",
+    });
+  });
+
+  it("ignores the expire callback when the game id is missing", () => {
+    useTurnTimerMock.mockImplementationOnce(
+      (params: { onExpire?: () => void }) => {
+        params.onExpire?.();
+        return { isExpired: false, progress: 0 };
+      },
+    );
+
+    game = {
+      ...baseGame,
+      id: undefined as unknown as string,
+      turnDurationMs: 3000,
+      turnDeadlineTime: Date.now() + 3000,
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    expect(timeoutTurnUseCase).not.toHaveBeenCalled();
+  });
+
+  it("logs when timeout turn fails", async () => {
+    const consoleSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    vi.mocked(timeoutTurnUseCase).mockRejectedValueOnce(new Error("boom"));
+    useTurnTimerMock.mockImplementationOnce(
+      (params: { onExpire?: () => void }) => {
+        params.onExpire?.();
+        return { isExpired: false, progress: 0 };
+      },
+    );
+
+    game = {
+      ...baseGame,
+      turnDurationMs: 3000,
+      turnDeadlineTime: Date.now() + 3000,
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Timeout turn failed.",
+        expect.any(Error),
+      );
+    });
+
+    consoleSpy.mockRestore();
   });
 
   it("resolves opponent id from player two when current user is missing", () => {
@@ -425,5 +531,51 @@ describe("MatchScreen", () => {
       "data-score",
       "0-0",
     );
+  });
+
+  it("creates a new match when the primary overlay action is triggered", async () => {
+    game = {
+      ...baseGame,
+      status: "ended",
+      endedReason: "win",
+      winner: "P1",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Primary Action" }));
+
+    await waitFor(() => {
+      expect(findOrCreateGameUseCase).toHaveBeenCalledWith(gameRepository, {
+        gridSize: 3,
+        winLength: 3,
+        matchFormat: "single",
+        isTimed: false,
+      });
+    });
+    expect(navigate).toHaveBeenCalledWith({
+      to: "/match",
+      search: { gameId: "next-game-id" },
+    });
+  });
+
+  it("logs an error when creating a new match fails", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(findOrCreateGameUseCase).mockRejectedValueOnce(new Error("boom"));
+    game = {
+      ...baseGame,
+      status: "ended",
+      endedReason: "win",
+      winner: "P1",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Primary Action" }));
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+    });
+    expect(navigate).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
   });
 });

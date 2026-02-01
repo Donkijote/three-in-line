@@ -57,6 +57,8 @@ describe("MatchPlayers", () => {
       <MatchPlayers
         p1UserId={p1UserId}
         currentTurn={currentTurn}
+        timerActive={false}
+        timerProgress={0}
         currentUser={currentUser}
         opponentUser={opponentUser}
         match={match}
@@ -115,6 +117,8 @@ describe("MatchPlayers", () => {
       <MatchPlayers
         p1UserId={p1UserId}
         currentTurn={currentTurn}
+        timerActive={false}
+        timerProgress={0}
         currentUser={currentUser}
         opponentUser={opponentUser}
         match={match}

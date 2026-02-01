@@ -1,3 +1,7 @@
+import { Activity } from "react";
+
+import { TimerOff } from "lucide-react";
+
 import { DEFAULT_GRID_SIZE, type GameStatus } from "@/domain/entities/Game";
 import { Card } from "@/ui/web/components/ui/card";
 import { cn } from "@/ui/web/lib/utils";
@@ -9,6 +13,7 @@ type MatchBoardProps = {
   currentTurn: "P1" | "P2";
   currentUserId?: string;
   p1UserId: string;
+  isTimeUp?: boolean;
   isPlacing?: boolean;
   onCellClick?: (index: number) => void;
   className?: string;
@@ -21,6 +26,7 @@ export const MatchBoard = ({
   currentTurn,
   currentUserId,
   p1UserId,
+  isTimeUp = false,
   isPlacing,
   onCellClick,
   className,
@@ -31,7 +37,8 @@ export const MatchBoard = ({
     status === "playing" &&
     Boolean(currentSlot) &&
     currentTurn === currentSlot &&
-    !isPlacing;
+    !isPlacing &&
+    !isTimeUp;
   const isCurrentUserP1 = currentSlot ? currentSlot === "P1" : true;
   const playerColors = {
     P1: isCurrentUserP1 ? "text-primary" : "text-opponent",
@@ -50,7 +57,10 @@ export const MatchBoard = ({
   return (
     <Card
       className={cn(
-        "px-4 py-4 shadow-[0_14px_30px_-22px_rgba(0,0,0,0.5)]",
+        "relative px-4 py-4 shadow-[0_14px_30px_-22px_rgba(0,0,0,0.5)]",
+        {
+          "border border-destructive/60": isTimeUp,
+        },
         className,
       )}
     >
@@ -94,6 +104,17 @@ export const MatchBoard = ({
           )}
         </div>
       </div>
+      <Activity name={"time-up"} mode={isTimeUp ? "visible" : "hidden"}>
+        <div className="absolute inset-0 bg-card/40 text-destructive backdrop-blur-xs">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-4 text-center">
+            <TimerOff className="size-20" />
+            <span className="text-3xl font-semibold uppercase tracking-[0.3em] leading-none">
+              <span className="block">time's</span>
+              <span className="block">up!</span>
+            </span>
+          </div>
+        </div>
+      </Activity>
     </Card>
   );
 };

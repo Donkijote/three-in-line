@@ -11,9 +11,9 @@ describe("findOrCreateGameUseCase", () => {
     const repository: GameRepository = {
       findOrCreateGame,
       placeMark: vi.fn(),
-      restartGame: vi.fn(),
       abandonGame: vi.fn(),
       heartbeat: vi.fn(),
+      timeoutTurn: vi.fn(),
     };
     const config: GameConfig = { gridSize: 3, winLength: 3 };
 

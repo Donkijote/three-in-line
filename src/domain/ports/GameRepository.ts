@@ -15,10 +15,6 @@ export interface GameRepository {
    */
   placeMark: (params: { gameId: GameId; index: number }) => Promise<void>;
   /**
-   * Reset the current game state while preserving its config.
-   */
-  restartGame: (params: { gameId: GameId }) => Promise<void>;
-  /**
    * Abandoning intentionally deletes the game server-side.
    */
   abandonGame: (params: { gameId: GameId }) => Promise<void>;
@@ -27,4 +23,9 @@ export interface GameRepository {
    * Record presence/heartbeat; may resume paused games when both are online.
    */
   heartbeat: (params: { gameId: GameId }) => Promise<void>;
+
+  /**
+   * Advance the current turn when the active player times out.
+   */
+  timeoutTurn: (params: { gameId: GameId }) => Promise<void>;
 }

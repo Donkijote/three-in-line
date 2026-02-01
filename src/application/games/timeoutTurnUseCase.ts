@@ -1,7 +1,11 @@
 import type { GameId } from "@/domain/entities/Game";
 import type { GameRepository } from "@/domain/ports/GameRepository";
 
-export const restartGameUseCase = (
+type TimeoutTurnParams = {
+  gameId: GameId;
+};
+
+export const timeoutTurnUseCase = (
   repository: GameRepository,
-  params: { gameId: GameId },
-) => repository.restartGame(params);
+  params: TimeoutTurnParams,
+) => repository.timeoutTurn(params);

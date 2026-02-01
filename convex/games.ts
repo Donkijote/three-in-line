@@ -12,6 +12,7 @@ import {
   buildNewGameDoc,
   buildNextBoard,
   buildRoundSummary,
+  buildTurnTimerPatch,
   enforceTimeoutOrThrow,
   HEARTBEAT_FRESH_MS,
   patchDisconnectedMove,
@@ -36,65 +37,18 @@ export const getGame = query({
   },
 });
 
-export const listWaitingGames = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db
-      .query("games")
-      .filter((q) => q.eq(q.field("status"), "waiting"))
-      .order("desc")
-      .collect();
-  },
-});
-
-export const myActiveGames = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await requireUserId(ctx);
-
-    return await ctx.db
-      .query("games")
-      .filter((q) =>
-        q.and(
-          q.neq(q.field("status"), "ended"),
-          q.neq(q.field("status"), "canceled"),
-          q.or(
-            q.eq(q.field("p1UserId"), userId),
-            q.eq(q.field("p2UserId"), userId),
-          ),
-        ),
-      )
-      .collect();
-  },
-});
-
-export const createGame = mutation({
-  args: {
-    gridSize: v.optional(v.number()),
-    winLength: v.optional(v.number()),
-    matchFormat: v.optional(matchFormat),
-  },
-  handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
-    const { gridSize, winLength } = resolveConfig(args);
-    const now = Date.now();
-    return await ctx.db.insert(
-      "games",
-      buildNewGameDoc(userId, gridSize, winLength, args.matchFormat, now),
-    );
-  },
-});
-
 export const findOrCreateGame = mutation({
   args: {
     gridSize: v.number(),
     winLength: v.number(),
     matchFormat: v.optional(matchFormat),
+    isTimed: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const { gridSize, winLength } = resolveConfig(args);
     const { format } = resolveMatchFormat(args.matchFormat);
+    const isTimed = args.isTimed ?? false;
     const now = Date.now();
 
     const waitingGames = await ctx.db
@@ -114,16 +68,23 @@ export const findOrCreateGame = mutation({
       if (game.match.format !== format) {
         return false;
       }
+      if (
+        isTimed ? game.turnDurationMs === null : game.turnDurationMs !== null
+      ) {
+        return false;
+      }
       return gameGridSize === gridSize && gameWinLength === winLength;
     });
 
     if (matchingGame) {
       const nextPresence = buildJoinPresence(matchingGame.presence, now);
+      const turnTimerPatch = buildTurnTimerPatch(matchingGame, now);
 
       await ctx.db.patch(matchingGame._id, {
         p2UserId: userId,
         status: "playing",
         pausedTime: null,
+        ...turnTimerPatch,
         presence: nextPresence,
         updatedTime: now,
         version: matchingGame.version + 1,
@@ -134,51 +95,17 @@ export const findOrCreateGame = mutation({
 
     const gameId = await ctx.db.insert(
       "games",
-      buildNewGameDoc(userId, gridSize, winLength, args.matchFormat, now),
+      buildNewGameDoc(
+        userId,
+        gridSize,
+        winLength,
+        args.matchFormat,
+        isTimed,
+        now,
+      ),
     );
 
     return { gameId };
-  },
-});
-
-export const joinGame = mutation({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
-    const game = await requireGame(ctx, args.gameId);
-    const now = Date.now();
-    const didTimeout = await enforceTimeoutOrThrow(ctx, game, now);
-    if (didTimeout) {
-      return await ctx.db.get(game._id);
-    }
-
-    if (game.p1UserId === userId) {
-      if (game.status === "waiting" && game.p2UserId) {
-        await ctx.db.patch(game._id, { status: "playing" });
-      }
-      return await ctx.db.get(game._id);
-    }
-
-    if (game.p2UserId === userId) {
-      return await ctx.db.get(game._id);
-    }
-
-    if (game.status === "waiting" && !game.p2UserId) {
-      const nextPresence = buildJoinPresence(game.presence, now);
-
-      await ctx.db.patch(game._id, {
-        p2UserId: userId,
-        status: "playing",
-        pausedTime: null,
-        presence: nextPresence,
-        updatedTime: now,
-        version: game.version + 1,
-      });
-
-      return await ctx.db.get(game._id);
-    }
-
-    throw new Error("Game is full");
   },
 });
 
@@ -201,6 +128,17 @@ export const placeMark = mutation({
 
     requirePlayersTurn(game.currentTurn, callerSlot);
 
+    const timerEnabled = game.turnDurationMs !== null;
+    if (timerEnabled) {
+      if (game.turnDeadlineTime === null) {
+        throw new Error("Timer not initialized");
+      }
+      if (now > game.turnDeadlineTime) {
+        throw new Error("Turn timed out");
+      }
+    }
+    const turnTimerPatch = buildTurnTimerPatch(game, now);
+
     const opponentSlot = callerSlot === "P1" ? "P2" : "P1";
     const opponentLastSeen = game.presence[opponentSlot].lastSeenTime;
     const isOpponentPresent =
@@ -217,6 +155,7 @@ export const placeMark = mutation({
         index: args.index,
         nextBoard,
         nextMovesCount,
+        turnTimerPatch,
       });
     }
 
@@ -226,15 +165,16 @@ export const placeMark = mutation({
       Boolean(winnerResult) || nextMovesCount >= expectedLength;
 
     if (!roundEnded) {
-      return await patchOngoingMove(
+      return await patchOngoingMove({
         ctx,
         game,
         callerSlot,
         now,
-        args.index,
+        index: args.index,
         nextBoard,
         nextMovesCount,
-      );
+        turnTimerPatch,
+      });
     }
 
     return await patchRoundEnd({
@@ -247,43 +187,8 @@ export const placeMark = mutation({
       nextBoard,
       nextMovesCount,
       winnerResult,
+      turnTimerPatch,
     });
-  },
-});
-
-export const restartGame = mutation({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
-    const game = await requireGame(ctx, args.gameId);
-    const callerSlot = requireParticipantSlot(game, userId);
-    const { gridSize, winLength, expectedLength } = requireBoardShape(game);
-
-    const status = game.p2UserId ? "playing" : "waiting";
-
-    await ctx.db.patch(game._id, {
-      board: Array.from({ length: expectedLength }, () => null),
-      winner: null,
-      winningLine: null,
-      endedReason: null,
-      endedTime: null,
-      pausedTime: null,
-      abandonedBy: null,
-      movesCount: 0,
-      lastMove: null,
-      currentTurn: "P1",
-      status,
-      presence: {
-        ...game.presence,
-        [callerSlot]: { lastSeenTime: Date.now() },
-      },
-      gridSize,
-      winLength,
-      version: game.version + 1,
-      updatedTime: Date.now(),
-    });
-
-    return await ctx.db.get(game._id);
   },
 });
 
@@ -370,6 +275,8 @@ export const heartbeat = mutation({
       status?: GameStatus;
       endedReason?: "win" | "draw" | "abandoned" | "disconnect" | null;
       pausedTime?: number | null;
+      turnDurationMs?: number | null;
+      turnDeadlineTime?: number | null;
       updatedTime?: number;
       version?: number;
     } = {
@@ -384,9 +291,12 @@ export const heartbeat = mutation({
       const isP1Present = p1Seen && now - p1Seen <= HEARTBEAT_FRESH_MS;
       const isP2Present = p2Seen && now - p2Seen <= HEARTBEAT_FRESH_MS;
       if (isP1Present && isP2Present) {
+        const turnTimerPatch = buildTurnTimerPatch(game, now);
         patch.status = "playing";
         patch.endedReason = null;
         patch.pausedTime = null;
+        patch.turnDurationMs = turnTimerPatch.turnDurationMs;
+        patch.turnDeadlineTime = turnTimerPatch.turnDeadlineTime;
         patch.updatedTime = now;
         patch.version = game.version + 1;
         nextStatus = "playing";
@@ -395,5 +305,40 @@ export const heartbeat = mutation({
 
     await ctx.db.patch(game._id, patch);
     return { ok: true, status: nextStatus };
+  },
+});
+
+export const timeoutTurn = mutation({
+  args: { gameId: v.id("games") },
+  handler: async (ctx, args) => {
+    const game = await requireGame(ctx, args.gameId);
+    requireGameInProgress(game);
+
+    if (game.winner !== null) {
+      throw new Error("Game has ended");
+    }
+
+    if (game.turnDurationMs === null) {
+      throw new Error("Timer not enabled");
+    }
+    if (game.turnDeadlineTime === null) {
+      throw new Error("Timer not initialized");
+    }
+
+    const now = Date.now();
+    if (now < game.turnDeadlineTime) {
+      throw new Error("Turn has not timed out");
+    }
+
+    const nextTurn = game.currentTurn === "P1" ? "P2" : "P1";
+
+    await ctx.db.patch(game._id, {
+      currentTurn: nextTurn,
+      turnDeadlineTime: now + game.turnDurationMs,
+      updatedTime: now,
+      version: game.version + 1,
+    });
+
+    return { ok: true };
   },
 });
