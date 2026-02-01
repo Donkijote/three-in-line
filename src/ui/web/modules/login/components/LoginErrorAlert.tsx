@@ -21,36 +21,28 @@ export const LoginErrorAlert = ({ error, onClose }: LoginErrorAlertProps) => {
   const isOpen = Boolean(error);
 
   return (
-    <AlertDialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose();
-        }
-      }}
-    >
-      <AlertDialogContent
-        size="sm"
-        className="bottom-6 top-auto w-[min(40rem,calc(100%-2rem))] translate-y-0 border border-destructive/60 bg-card/95 shadow-xl max-w-none data-[size=sm]:max-w-none"
-      >
+    <AlertDialog open={isOpen}>
+      <AlertDialogContent className="bottom-6 top-auto w-[min(30rem,calc(100%-2rem))] translate-y-0 border border-destructive bg-card/95 shadow-[0_0_10px_rgba(255,64,64,0.55),0_0_28px_rgba(255,64,64,0.35)] data-[size=default]:max-w-(var(--container-sm))">
         <AlertDialogHeader className="grid grid-cols-[auto_1fr] grid-rows-[auto_auto] items-start gap-x-4 gap-y-1 text-left">
-          <AlertDialogMedia className="bg-destructive/15 text-destructive mb-0 size-10 row-span-2 self-start">
+          <AlertDialogMedia className="bg-destructive/15 text-destructive mb-0 size-10 row-span-2 self-start ring ring-destructive/40">
             <ShieldX className="size-4" />
           </AlertDialogMedia>
-          <AlertDialogTitle className="text-destructive text-sm font-semibold uppercase tracking-[0.2em]">
+          <AlertDialogTitle className="text-destructive w-full font-semibold uppercase tracking-[0.2em]">
             Authentication failed
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground text-xs col-start-2">
+          <AlertDialogDescription className="text-muted-foreground col-start-2">
             {message}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex! w-full justify-end">
-          <AlertDialogAction
-            onClick={onClose}
-            className="rounded-full bg-foreground text-background hover:bg-foreground/90"
-          >
-            Try again
-          </AlertDialogAction>
+        <AlertDialogFooter>
+          <div className="flex w-full justify-center">
+            <AlertDialogAction
+              onClick={onClose}
+              className="rounded-full bg-foreground text-background hover:bg-foreground/90 w-1/3"
+            >
+              Try again
+            </AlertDialogAction>
+          </div>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
