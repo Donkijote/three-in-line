@@ -61,6 +61,9 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const matchPlayersProps = {
     p1UserId: game.p1UserId,
     currentTurn: game.currentTurn,
+    status: game.status,
+    turnDurationMs: game.turnDurationMs,
+    turnDeadlineTime: game.turnDeadlineTime,
     currentUser,
     opponentUser,
     match: game.match,

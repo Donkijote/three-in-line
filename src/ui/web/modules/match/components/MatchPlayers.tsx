@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
+
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import { resolveAvatarSrc } from "@/domain/entities/Avatar";
-import type { MatchState } from "@/domain/entities/Game";
+import type { GameStatus, MatchState } from "@/domain/entities/Game";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { cn } from "@/ui/web/lib/utils";
 import { PlayerCard } from "@/ui/web/modules/match/components/PlayerCard";
@@ -28,6 +30,9 @@ type MatchPlayer = {
 type MatchPlayersProps = {
   p1UserId: string;
   currentTurn: "P1" | "P2";
+  status: GameStatus;
+  turnDurationMs: number | null;
+  turnDeadlineTime: number | null;
   currentUser: MatchUser;
   opponentUser: MatchUser;
   match: MatchState | null;
@@ -37,11 +42,43 @@ type MatchPlayersProps = {
 export const MatchPlayers = ({
   p1UserId,
   currentTurn,
+  status,
+  turnDurationMs,
+  turnDeadlineTime,
   currentUser,
   opponentUser,
   match,
   layout,
 }: MatchPlayersProps) => {
+  const timerEnabled = turnDurationMs !== null;
+  const timerActive =
+    timerEnabled && status === "playing" && turnDeadlineTime !== null;
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!timerActive) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, 100);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [timerActive]);
+
+  const remainingMs =
+    timerActive && turnDurationMs
+      ? Math.max(
+          Math.min((turnDeadlineTime ?? 0) - now, turnDurationMs),
+          0,
+        )
+      : 0;
+  const timerProgress =
+    timerActive && turnDurationMs ? remainingMs / turnDurationMs : 0;
+
   const players = buildMatchPlayers(
     p1UserId,
     currentTurn,
@@ -58,7 +95,16 @@ export const MatchPlayers = ({
       })}
     >
       {players.map((player) => (
-        <PlayerCard key={player.id} showWins={showWins} {...player} />
+        <PlayerCard
+          key={player.id}
+          showWins={showWins}
+          turnTimer={
+            timerActive && player.isTurn
+              ? { isActive: true, progress: timerProgress }
+              : undefined
+          }
+          {...player}
+        />
       ))}
     </div>
   );
