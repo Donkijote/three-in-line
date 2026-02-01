@@ -60,7 +60,12 @@ const modes = [
     icon: Clock,
     accent: "text-orange-500",
     bg: "bg-orange-500/15",
-    config: { gridSize: 3, winLength: 3, matchFormat: "single" },
+    config: {
+      gridSize: 3,
+      winLength: 3,
+      matchFormat: "single",
+      isTimed: true,
+    },
   },
   {
     id: "grid-4x4",

@@ -68,7 +68,9 @@ export const findOrCreateGame = mutation({
       if (game.match.format !== format) {
         return false;
       }
-      if (isTimed ? game.turnDurationMs === null : game.turnDurationMs !== null) {
+      if (
+        isTimed ? game.turnDurationMs === null : game.turnDurationMs !== null
+      ) {
         return false;
       }
       return gameGridSize === gridSize && gameWinLength === winLength;

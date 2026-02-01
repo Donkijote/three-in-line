@@ -87,6 +87,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
         gridSize,
         winLength,
         matchFormat,
+        isTimed: game.turnDurationMs !== null,
       });
       await navigate({
         to: "/match",

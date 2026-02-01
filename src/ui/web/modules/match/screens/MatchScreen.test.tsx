@@ -14,6 +14,8 @@ type MatchGame = {
   currentTurn: "P1" | "P2";
   gridSize?: number;
   winLength?: number;
+  turnDurationMs: number | null;
+  turnDeadlineTime: number | null;
   board: Array<"P1" | "P2" | null>;
   match: {
     format: "single" | "bo3" | "bo5";
@@ -206,6 +208,8 @@ describe("MatchScreen", () => {
     currentTurn: "P1",
     gridSize: 3,
     winLength: 3,
+    turnDurationMs: null,
+    turnDeadlineTime: null,
     board: ["P1", "P2", null, null, "P1", null, "P2", null, null],
     match: {
       format: "single",
@@ -459,6 +463,7 @@ describe("MatchScreen", () => {
         gridSize: 3,
         winLength: 3,
         matchFormat: "single",
+        isTimed: false,
       });
     });
     expect(navigate).toHaveBeenCalledWith({

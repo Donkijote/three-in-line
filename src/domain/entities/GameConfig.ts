@@ -19,6 +19,8 @@ export const DEFAULT_WIN_LENGTH = 3;
 export const resolveConfig = (input?: Partial<GameConfig>): GameConfig => {
   const gridSize = input?.gridSize ?? DEFAULT_GRID_SIZE;
   const winLength = input?.winLength ?? DEFAULT_WIN_LENGTH;
+  const matchFormat = input?.matchFormat;
+  const isTimed = input?.isTimed;
 
   if (!Number.isInteger(gridSize) || gridSize <= 0) {
     throw new GameConfigError("Grid size must be a positive integer");
@@ -29,5 +31,5 @@ export const resolveConfig = (input?: Partial<GameConfig>): GameConfig => {
     );
   }
 
-  return { gridSize, winLength };
+  return { gridSize, winLength, matchFormat, isTimed };
 };

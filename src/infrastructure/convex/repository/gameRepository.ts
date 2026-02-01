@@ -17,6 +17,8 @@ export const toDomainGame = (game: GameDoc): Game => ({
   p1UserId: game.p1UserId,
   p2UserId: game.p2UserId,
   currentTurn: game.currentTurn,
+  turnDurationMs: game.turnDurationMs,
+  turnDeadlineTime: game.turnDeadlineTime,
   winner: game.winner,
   winningLine: game.winningLine,
   endedReason: game.endedReason,
