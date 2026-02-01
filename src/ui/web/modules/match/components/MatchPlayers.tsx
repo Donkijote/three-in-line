@@ -1,7 +1,6 @@
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import { resolveAvatarSrc } from "@/domain/entities/Avatar";
-import type { GameStatus, MatchState } from "@/domain/entities/Game";
-import { useTurnTimer } from "@/ui/web/hooks/useGame";
+import type { MatchState } from "@/domain/entities/Game";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { cn } from "@/ui/web/lib/utils";
 import { PlayerCard } from "@/ui/web/modules/match/components/PlayerCard";
@@ -29,9 +28,8 @@ type MatchPlayer = {
 type MatchPlayersProps = {
   p1UserId: string;
   currentTurn: "P1" | "P2";
-  status: GameStatus;
-  turnDurationMs: number | null;
-  turnDeadlineTime: number | null;
+  timerActive: boolean;
+  timerProgress: number;
   currentUser: MatchUser;
   opponentUser: MatchUser;
   match: MatchState | null;
@@ -41,23 +39,13 @@ type MatchPlayersProps = {
 export const MatchPlayers = ({
   p1UserId,
   currentTurn,
-  status,
-  turnDurationMs,
-  turnDeadlineTime,
+  timerActive,
+  timerProgress,
   currentUser,
   opponentUser,
   match,
   layout,
 }: MatchPlayersProps) => {
-  const timerEnabled = turnDurationMs !== null;
-  const timerActive =
-    timerEnabled && status === "playing" && turnDeadlineTime !== null;
-  const { progress: timerProgress } = useTurnTimer({
-    isActive: timerActive,
-    durationMs: turnDurationMs,
-    deadlineTime: turnDeadlineTime,
-  });
-
   const players = buildMatchPlayers(
     p1UserId,
     currentTurn,

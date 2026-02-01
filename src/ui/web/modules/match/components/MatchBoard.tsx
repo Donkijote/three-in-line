@@ -4,7 +4,6 @@ import { TimerOff } from "lucide-react";
 
 import { DEFAULT_GRID_SIZE, type GameStatus } from "@/domain/entities/Game";
 import { Card } from "@/ui/web/components/ui/card";
-import { useTurnTimer } from "@/ui/web/hooks/useGame";
 import { cn } from "@/ui/web/lib/utils";
 
 type MatchBoardProps = {
@@ -14,8 +13,7 @@ type MatchBoardProps = {
   currentTurn: "P1" | "P2";
   currentUserId?: string;
   p1UserId: string;
-  turnDurationMs?: number | null;
-  turnDeadlineTime?: number | null;
+  isTimeUp?: boolean;
   isPlacing?: boolean;
   onCellClick?: (index: number) => void;
   className?: string;
@@ -28,26 +26,13 @@ export const MatchBoard = ({
   currentTurn,
   currentUserId,
   p1UserId,
-  turnDurationMs,
-  turnDeadlineTime,
+  isTimeUp = false,
   isPlacing,
   onCellClick,
   className,
 }: MatchBoardProps) => {
   const resolvedGridSize = gridSize ?? DEFAULT_GRID_SIZE;
   const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
-  const timerEnabled = turnDurationMs !== null && turnDurationMs !== undefined;
-  const timerActive =
-    timerEnabled &&
-    status === "playing" &&
-    currentSlot === currentTurn &&
-    turnDeadlineTime !== null &&
-    turnDeadlineTime !== undefined;
-  const { isExpired: isTimeUp } = useTurnTimer({
-    isActive: timerActive,
-    durationMs: turnDurationMs,
-    deadlineTime: turnDeadlineTime,
-  });
   const isInteractive =
     status === "playing" &&
     Boolean(currentSlot) &&
