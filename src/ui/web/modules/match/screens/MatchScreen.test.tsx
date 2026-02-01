@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
 import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
+import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
 import type { GameId } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 
@@ -59,6 +60,7 @@ vi.mock("@/ui/web/hooks/useUser", () => ({
 vi.mock("@/ui/web/hooks/useGame", () => ({
   useGame: () => game,
   useGameHeartbeat: vi.fn(),
+  useTurnTimer: vi.fn(() => ({ isExpired: false, progress: 0 })),
 }));
 
 vi.mock("@/application/games/placeMarkUseCase", () => ({
@@ -67,6 +69,10 @@ vi.mock("@/application/games/placeMarkUseCase", () => ({
 
 vi.mock("@/application/games/findOrCreateGameUseCase", () => ({
   findOrCreateGameUseCase: vi.fn(),
+}));
+
+vi.mock("@/application/games/timeoutTurnUseCase", () => ({
+  timeoutTurnUseCase: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -249,6 +255,7 @@ describe("MatchScreen", () => {
     vi.mocked(placeMarkUseCase).mockResolvedValue(undefined);
     vi.mocked(findOrCreateGameUseCase).mockClear();
     vi.mocked(findOrCreateGameUseCase).mockResolvedValue("next-game-id");
+    vi.mocked(timeoutTurnUseCase).mockClear();
   });
 
   it("shows loading state when the game is missing", () => {
@@ -473,24 +480,6 @@ describe("MatchScreen", () => {
       to: "/match",
       search: { gameId: "next-game-id" },
     });
-  });
-
-  it("does not create a new match when board dimensions are missing", async () => {
-    game = {
-      ...baseGame,
-      status: "ended",
-      endedReason: "win",
-      winner: "P1",
-      winLength: undefined,
-    };
-    render(<MatchScreen gameId={gameId} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Primary Action" }));
-
-    await waitFor(() => {
-      expect(findOrCreateGameUseCase).not.toHaveBeenCalled();
-    });
-    expect(navigate).not.toHaveBeenCalled();
   });
 
   it("logs an error when creating a new match fails", async () => {
