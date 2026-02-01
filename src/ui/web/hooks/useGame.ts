@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { heartbeatUseCase } from "@/application/games/heartbeatUseCase";
 import type { GameId } from "@/domain/entities/Game";
@@ -165,4 +165,58 @@ export const useGameHeartbeat = ({
       stopInterval();
     };
   }, [startInterval, stopInterval, triggerHeartbeat]);
+};
+
+type UseTurnTimerParams = {
+  isActive: boolean;
+  durationMs: number | null | undefined;
+  deadlineTime: number | null | undefined;
+  intervalMs?: number;
+};
+
+type UseTurnTimerResult = {
+  isExpired: boolean;
+  remainingMs: number;
+  progress: number;
+};
+
+const clamp = (value: number, min: number, max: number) => {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+};
+
+export const useTurnTimer = ({
+  isActive,
+  durationMs,
+  deadlineTime,
+  intervalMs = 100,
+}: UseTurnTimerParams): UseTurnTimerResult => {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, intervalMs);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [intervalMs, isActive]);
+
+  const hasTimer = Boolean(durationMs);
+  const resolvedDeadline = deadlineTime ?? null;
+  const isExpired =
+    isActive && resolvedDeadline !== null && now > resolvedDeadline && hasTimer;
+  const rawRemainingMs = resolvedDeadline !== null ? resolvedDeadline - now : 0;
+  const remainingMs = hasTimer
+    ? clamp(rawRemainingMs, 0, durationMs as number)
+    : 0;
+  const progress = hasTimer ? remainingMs / (durationMs as number) : 0;
+
+  return { isExpired, remainingMs, progress };
 };

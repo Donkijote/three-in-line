@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
-
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import { resolveAvatarSrc } from "@/domain/entities/Avatar";
 import type { GameStatus, MatchState } from "@/domain/entities/Game";
+import { useTurnTimer } from "@/ui/web/hooks/useGame";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { cn } from "@/ui/web/lib/utils";
 import { PlayerCard } from "@/ui/web/modules/match/components/PlayerCard";
@@ -53,31 +52,11 @@ export const MatchPlayers = ({
   const timerEnabled = turnDurationMs !== null;
   const timerActive =
     timerEnabled && status === "playing" && turnDeadlineTime !== null;
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    if (!timerActive) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 100);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [timerActive]);
-
-  const remainingMs =
-    timerActive && turnDurationMs
-      ? Math.max(
-          Math.min((turnDeadlineTime ?? 0) - now, turnDurationMs),
-          0,
-        )
-      : 0;
-  const timerProgress =
-    timerActive && turnDurationMs ? remainingMs / turnDurationMs : 0;
+  const { progress: timerProgress } = useTurnTimer({
+    isActive: timerActive,
+    durationMs: turnDurationMs,
+    deadlineTime: turnDeadlineTime,
+  });
 
   const players = buildMatchPlayers(
     p1UserId,

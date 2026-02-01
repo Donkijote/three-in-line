@@ -1,9 +1,10 @@
-import { Activity, useEffect, useState } from "react";
+import { Activity } from "react";
 
 import { TimerOff } from "lucide-react";
 
 import { DEFAULT_GRID_SIZE, type GameStatus } from "@/domain/entities/Game";
 import { Card } from "@/ui/web/components/ui/card";
+import { useTurnTimer } from "@/ui/web/hooks/useGame";
 import { cn } from "@/ui/web/lib/utils";
 
 type MatchBoardProps = {
@@ -42,24 +43,11 @@ export const MatchBoard = ({
     currentSlot === currentTurn &&
     turnDeadlineTime !== null &&
     turnDeadlineTime !== undefined;
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    if (!timerActive) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 100);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [timerActive]);
-
-  const isTimeUp =
-    timerActive && now > (turnDeadlineTime ?? Number.POSITIVE_INFINITY);
+  const { isExpired: isTimeUp } = useTurnTimer({
+    isActive: timerActive,
+    durationMs: turnDurationMs,
+    deadlineTime: turnDeadlineTime,
+  });
   const isInteractive =
     status === "playing" &&
     Boolean(currentSlot) &&
