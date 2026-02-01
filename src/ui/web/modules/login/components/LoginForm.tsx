@@ -127,9 +127,14 @@ export const LoginForm = () => {
                 className="text-base text-foreground placeholder:text-muted-foreground/70"
                 value={field.state.value}
                 onChange={(event) => {
-                  field.handleChange(event.target.value);
-                  if (field.state.meta.isValid) {
-                    debouncedCheckCodeName(event.target.value);
+                  const nextValue = event.target.value;
+                  field.handleChange(nextValue);
+                  if (isValidEmail(nextValue.trim())) {
+                    setDoesCodeNameExist(null);
+                    debouncedCheckCodeName(nextValue);
+                  } else {
+                    setDoesCodeNameExist(null);
+                    debouncedCheckCodeName.cancel();
                   }
                 }}
                 onBlur={field.handleBlur}
@@ -218,25 +223,40 @@ export const LoginForm = () => {
 
       <form.Subscribe
         selector={(state) => ({
+          values: state.values,
           canSubmit: state.canSubmit,
           isSubmitting: state.isSubmitting,
         })}
       >
-        {({ canSubmit, isSubmitting }) => (
-          <Button
-            type="submit"
-            size="lg"
-            className="mt-auto h-12 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-            disabled={!canSubmit || isSubmitting}
-          >
-            {doesCodeNameExist === false ? "Sign up" : "START GAME"}
-            {isSubmitting ? (
-              <Loader className={"animate-spin"} />
-            ) : (
-              <ArrowRight />
-            )}
-          </Button>
-        )}
+        {({ values, canSubmit, isSubmitting }) => {
+          const emailValid = isValidEmail(values.email.trim());
+          const passwordValid = Boolean(values.password.trim());
+          const requirePassword = doesCodeNameExist !== null;
+          const isEmailCheckPending = emailValid && doesCodeNameExist === null;
+          const isDisabled =
+            !canSubmit ||
+            isSubmitting ||
+            isChecking ||
+            isEmailCheckPending ||
+            !emailValid ||
+            (requirePassword && !passwordValid);
+
+          return (
+            <Button
+              type="submit"
+              size="lg"
+              className="mt-auto h-12 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+              disabled={isDisabled}
+            >
+              {doesCodeNameExist === false ? "Sign up" : "START GAME"}
+              {isSubmitting ? (
+                <Loader className={"animate-spin"} />
+              ) : (
+                <ArrowRight />
+              )}
+            </Button>
+          );
+        }}
       </form.Subscribe>
     </form>
   );
