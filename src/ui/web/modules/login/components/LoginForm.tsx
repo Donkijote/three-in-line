@@ -112,17 +112,7 @@ export const LoginForm = () => {
         <form.Field
           name="email"
           validators={{
-            onChange: ({ value }) => {
-              if (!value) {
-                return "Email is required";
-              }
-
-              if (!isValidEmail(value.trim())) {
-                return "Email is not valid";
-              }
-
-              return undefined;
-            },
+            onChange: ({ value }) => validateUsername(value),
           }}
         >
           {(field) => (
@@ -173,8 +163,7 @@ export const LoginForm = () => {
           <form.Field
             name="password"
             validators={{
-              onChange: ({ value }) =>
-                value.trim() ? undefined : "Password is required",
+              onChange: ({ value }) => validatePassword(value),
             }}
           >
             {(field) => (
@@ -203,8 +192,7 @@ export const LoginForm = () => {
             value: getRandomPresetAvatarId(),
           }}
           validators={{
-            onChange: ({ value }) =>
-              value?.value ? undefined : "Avatar is required",
+            onChange: ({ value }) => validateAvatar(value),
           }}
         >
           {(field) => (
@@ -271,3 +259,21 @@ export const LoginForm = () => {
     </form>
   );
 };
+
+export const validateUsername = (value: string) => {
+  if (!value) {
+    return "Email is required";
+  }
+
+  if (!isValidEmail(value.trim())) {
+    return "Email is not valid";
+  }
+
+  return undefined;
+};
+
+export const validatePassword = (value: string) =>
+  value.trim() ? undefined : "Password is required";
+
+export const validateAvatar = (value?: UserAvatar) =>
+  value?.value ? undefined : "Avatar is required";
