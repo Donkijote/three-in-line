@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { heartbeatUseCase } from "@/application/games/heartbeatUseCase";
 import type { GameId } from "@/domain/entities/Game";
@@ -40,12 +40,12 @@ export const useGameHeartbeat = ({
     }
 
     if (intervalIdRef.current !== null) {
-      window.clearInterval(intervalIdRef.current);
+      clearInterval(intervalIdRef.current);
       intervalIdRef.current = null;
     }
 
     if (timeoutIdRef.current !== null) {
-      window.clearTimeout(timeoutIdRef.current);
+      clearTimeout(timeoutIdRef.current);
       timeoutIdRef.current = null;
     }
   }, []);
@@ -81,10 +81,10 @@ export const useGameHeartbeat = ({
     }
 
     if (timeoutIdRef.current !== null) {
-      window.clearTimeout(timeoutIdRef.current);
+      clearTimeout(timeoutIdRef.current);
     }
 
-    timeoutIdRef.current = window.setTimeout(() => {
+    timeoutIdRef.current = setTimeout(() => {
       void triggerHeartbeat();
     }, delay);
   }, [triggerHeartbeat]);
@@ -94,7 +94,7 @@ export const useGameHeartbeat = ({
       return;
     }
 
-    intervalIdRef.current = window.setInterval(() => {
+    intervalIdRef.current = setInterval(() => {
       triggerHeartbeatWithJitter();
     }, intervalMsRef.current);
   }, [triggerHeartbeatWithJitter]);
@@ -165,4 +165,89 @@ export const useGameHeartbeat = ({
       stopInterval();
     };
   }, [startInterval, stopInterval, triggerHeartbeat]);
+};
+
+type UseTurnTimerParams = {
+  isActive: boolean;
+  durationMs: number | null | undefined;
+  deadlineTime: number | null | undefined;
+  intervalMs?: number;
+  expireDelayMs?: number;
+  onExpire?: () => Promise<void>;
+};
+
+type UseTurnTimerResult = {
+  isExpired: boolean;
+  remainingMs: number;
+  progress: number;
+};
+
+const clamp = (value: number, min: number, max: number) => {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+};
+
+export const useTurnTimer = ({
+  isActive,
+  durationMs,
+  deadlineTime,
+  intervalMs = 100,
+  expireDelayMs = 0,
+  onExpire,
+}: UseTurnTimerParams): UseTurnTimerResult => {
+  const [now, setNow] = useState(() => Date.now());
+  const timeoutRef = useRef<number | null>(null);
+  const hasTriggeredRef = useRef(false);
+
+  useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      setNow(Date.now());
+    }, intervalMs);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [intervalMs, isActive]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: need to clean up when these deps update
+  useEffect(() => {
+    hasTriggeredRef.current = false;
+    if (timeoutRef.current !== null) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, [deadlineTime, durationMs, isActive, expireDelayMs]);
+
+  const hasTimer = Boolean(durationMs);
+  const resolvedDeadline = deadlineTime ?? null;
+  const isExpired =
+    isActive && resolvedDeadline !== null && now > resolvedDeadline && hasTimer;
+  const rawRemainingMs = resolvedDeadline === null ? 0 : resolvedDeadline - now;
+  const remainingMs = hasTimer
+    ? clamp(rawRemainingMs, 0, durationMs as number)
+    : 0;
+  const progress = hasTimer ? remainingMs / (durationMs as number) : 0;
+
+  useEffect(() => {
+    if (!isExpired || !onExpire || hasTriggeredRef.current) {
+      return;
+    }
+
+    hasTriggeredRef.current = true;
+    if (expireDelayMs <= 0) {
+      void onExpire();
+      return;
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      void onExpire();
+    }, expireDelayMs);
+  }, [expireDelayMs, isExpired, onExpire]);
+
+  return { isExpired, remainingMs, progress };
 };

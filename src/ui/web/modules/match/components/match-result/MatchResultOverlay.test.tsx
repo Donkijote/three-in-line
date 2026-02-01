@@ -148,13 +148,54 @@ describe("MatchResultOverlay", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders nothing for non-win end reasons", () => {
+  it("renders nothing for draw end reason", () => {
     const { container } = render(
       <MatchResultOverlay
         status="ended"
         endedReason="draw"
         winner={null}
         abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId="user-1"
+        onPrimaryAction={vi.fn()}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders abandoned state when opponent surrenders", () => {
+    render(
+      <MatchResultOverlay
+        status="ended"
+        endedReason="abandoned"
+        winner="P1"
+        abandonedBy="P2"
+        p1UserId="user-1"
+        currentUserId="user-1"
+        score={{ P1: 1, P2: 0 }}
+        onPrimaryAction={vi.fn()}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(screen.getByText("Opponent Surrendered")).toBeInTheDocument();
+    expect(screen.getByText(/opponent abandoned/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /find new match/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders nothing when current user abandoned the match", () => {
+    const { container } = render(
+      <MatchResultOverlay
+        status="ended"
+        endedReason="abandoned"
+        winner="P1"
+        abandonedBy="P1"
         p1UserId="user-1"
         currentUserId="user-1"
         onPrimaryAction={vi.fn()}

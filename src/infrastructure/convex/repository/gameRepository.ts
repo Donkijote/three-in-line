@@ -17,6 +17,8 @@ export const toDomainGame = (game: GameDoc): Game => ({
   p1UserId: game.p1UserId,
   p2UserId: game.p2UserId,
   currentTurn: game.currentTurn,
+  turnDurationMs: game.turnDurationMs,
+  turnDeadlineTime: game.turnDeadlineTime,
   winner: game.winner,
   winningLine: game.winningLine,
   endedReason: game.endedReason,
@@ -44,12 +46,6 @@ export const gameRepository: GameRepository = {
       gameId: toConvexGameId(params.gameId),
     });
   },
-  restartGame: async (params) => {
-    await convexClient.mutation(api.games.restartGame, {
-      ...params,
-      gameId: toConvexGameId(params.gameId),
-    });
-  },
   abandonGame: async (params) => {
     await convexClient.mutation(api.games.abandonGame, {
       ...params,
@@ -58,6 +54,12 @@ export const gameRepository: GameRepository = {
   },
   heartbeat: async (params) => {
     await convexClient.mutation(api.games.heartbeat, {
+      ...params,
+      gameId: toConvexGameId(params.gameId),
+    });
+  },
+  timeoutTurn: async (params) => {
+    await convexClient.mutation(api.games.timeoutTurn, {
       ...params,
       gameId: toConvexGameId(params.gameId),
     });

@@ -18,6 +18,7 @@ import type {
 
 export const HEARTBEAT_FRESH_MS = 60000;
 export const PAUSE_TIMEOUT_MS = 5 * 60_000;
+export const DEFAULT_TURN_DURATION_MS = 3000;
 
 type Ctx = MutationCtx | QueryCtx;
 type GameDoc = Doc<"games">;
@@ -148,6 +149,7 @@ export const buildNewGameDoc = (
   gridSize: number,
   winLength: number,
   format: MatchFormat | undefined,
+  isTimed: boolean,
   now: number,
 ) => ({
   status: "waiting" as GameStatus,
@@ -158,6 +160,8 @@ export const buildNewGameDoc = (
   p1UserId: userId,
   p2UserId: null,
   currentTurn: "P1" as Player,
+  turnDurationMs: isTimed ? DEFAULT_TURN_DURATION_MS : null,
+  turnDeadlineTime: null,
   winner: null,
   winningLine: null,
   endedReason: null,
@@ -173,6 +177,16 @@ export const buildNewGameDoc = (
   lastMove: null,
   updatedTime: now,
 });
+
+const isTurnTimerEnabled = (game: GameDoc) => game.turnDurationMs !== null;
+
+export const buildTurnTimerPatch = (game: GameDoc, now: number) => {
+  if (!isTurnTimerEnabled(game)) {
+    return { turnDurationMs: null, turnDeadlineTime: null };
+  }
+  const turnDurationMs = game.turnDurationMs ?? DEFAULT_TURN_DURATION_MS;
+  return { turnDurationMs, turnDeadlineTime: now + turnDurationMs };
+};
 
 export const requireGameInProgress = (game: GameDoc) => {
   if (game.status === "paused") {
@@ -216,6 +230,31 @@ export const buildNextBoard = (
   return nextBoard;
 };
 
+type TurnTimerPatch = {
+  turnDurationMs: number | null;
+  turnDeadlineTime: number | null;
+};
+
+type BaseMovePatchParams = {
+  ctx: MutationCtx;
+  game: GameDoc;
+  callerSlot: Player;
+  now: number;
+  index: number;
+  nextBoard: Array<Player | null>;
+  nextMovesCount: number;
+  turnTimerPatch: TurnTimerPatch;
+};
+
+type DisconnectedMovePatchParams = BaseMovePatchParams & {
+  opponentSlot: Player;
+};
+
+type RoundEndPatchParams = BaseMovePatchParams & {
+  expectedLength: number;
+  winnerResult: ReturnType<typeof evaluateWinner>;
+};
+
 export const patchDisconnectedMove = async ({
   ctx,
   game,
@@ -225,16 +264,8 @@ export const patchDisconnectedMove = async ({
   index,
   nextBoard,
   nextMovesCount,
-}: {
-  ctx: MutationCtx;
-  game: GameDoc;
-  callerSlot: Player;
-  opponentSlot: Player;
-  now: number;
-  index: number;
-  nextBoard: Array<Player | null>;
-  nextMovesCount: number;
-}) => {
+  turnTimerPatch,
+}: DisconnectedMovePatchParams) => {
   await ctx.db.patch(game._id, {
     board: nextBoard,
     movesCount: nextMovesCount,
@@ -242,6 +273,7 @@ export const patchDisconnectedMove = async ({
     endedReason: "disconnect",
     pausedTime: now,
     currentTurn: opponentSlot,
+    ...turnTimerPatch,
     presence: {
       ...game.presence,
       [callerSlot]: { lastSeenTime: now },
@@ -253,19 +285,21 @@ export const patchDisconnectedMove = async ({
   return await ctx.db.get(game._id);
 };
 
-export const patchOngoingMove = async (
-  ctx: MutationCtx,
-  game: GameDoc,
-  callerSlot: Player,
-  now: number,
-  index: number,
-  nextBoard: Array<Player | null>,
-  nextMovesCount: number,
-) => {
+export const patchOngoingMove = async ({
+  ctx,
+  game,
+  callerSlot,
+  now,
+  index,
+  nextBoard,
+  nextMovesCount,
+  turnTimerPatch,
+}: BaseMovePatchParams) => {
   await ctx.db.patch(game._id, {
     board: nextBoard,
     movesCount: nextMovesCount,
     currentTurn: callerSlot === "P1" ? "P2" : "P1",
+    ...turnTimerPatch,
     lastMove: { index, by: callerSlot, at: now },
     updatedTime: now,
     presence: {
@@ -287,17 +321,8 @@ export const patchRoundEnd = async ({
   nextBoard,
   nextMovesCount,
   winnerResult,
-}: {
-  ctx: MutationCtx;
-  game: GameDoc;
-  callerSlot: Player;
-  now: number;
-  index: number;
-  expectedLength: number;
-  nextBoard: Array<Player | null>;
-  nextMovesCount: number;
-  winnerResult: ReturnType<typeof evaluateWinner>;
-}) => {
+  turnTimerPatch,
+}: RoundEndPatchParams) => {
   const endedReason: GameEndedReason = winnerResult ? "win" : "draw";
   const endedTime = now;
   const roundWinner = winnerResult ? winnerResult.winner : null;
@@ -355,6 +380,7 @@ export const patchRoundEnd = async ({
     lastMove: null,
     pausedTime: null,
     abandonedBy: null,
+    ...turnTimerPatch,
     presence: {
       ...game.presence,
       [callerSlot]: { lastSeenTime: now },

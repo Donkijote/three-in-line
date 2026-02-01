@@ -24,6 +24,7 @@ describe("MatchBoard", () => {
         currentTurn="P1"
         currentUserId="user-1"
         p1UserId="user-1"
+        isTimeUp={false}
       />,
     );
 
@@ -47,6 +48,7 @@ describe("MatchBoard", () => {
         currentTurn="P1"
         currentUserId="user-1"
         p1UserId="user-1"
+        isTimeUp={false}
         onCellClick={onCellClick}
       />,
     );
@@ -69,6 +71,7 @@ describe("MatchBoard", () => {
         status="playing"
         currentTurn="P1"
         p1UserId="user-1"
+        isTimeUp={false}
       />,
     );
 

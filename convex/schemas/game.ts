@@ -75,6 +75,8 @@ export const GameSchema = defineTable({
   p1UserId: v.id("users"),
   p2UserId: v.union(v.id("users"), v.null()),
   currentTurn: player,
+  turnDurationMs: v.union(v.number(), v.null()),
+  turnDeadlineTime: v.union(v.number(), v.null()),
   winner: v.union(player, v.null()),
   winningLine: v.union(v.array(v.number()), v.null()),
   endedReason,

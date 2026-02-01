@@ -60,6 +60,7 @@ export type GameConfig = {
   gridSize: number;
   winLength: number;
   matchFormat?: MatchFormat;
+  isTimed?: boolean;
 };
 
 /**
@@ -84,6 +85,8 @@ export type Game = {
   p1UserId: string;
   p2UserId: string | null;
   currentTurn: PlayerSlot;
+  turnDurationMs: number | null;
+  turnDeadlineTime: number | null;
   winner: PlayerSlot | null;
   winningLine: number[] | null;
   endedReason: GameEndedReason;
