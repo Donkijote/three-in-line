@@ -61,7 +61,7 @@ export const PreferencesSection = () => {
 
   return (
     <div className="flex flex-col justify-center gap-1">
-      <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground h-8">
+      <Small variant="label" className="h-8 text-muted-foreground">
         Preferences
       </Small>
       <Card className={"py-0"}>

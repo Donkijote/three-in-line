@@ -71,7 +71,7 @@ export const MatchResultCard = ({
             </span>
           </Activity>
         </div>
-        <div className="grid place-items-center gap-1 text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
+        <div className="grid place-items-center gap-1 text-xs uppercase tracking-widest text-muted-foreground/70">
           <Small className="text-[10px] whitespace-pre-line text-center leading-relaxed">
             {middleLabel}
           </Small>
@@ -99,7 +99,7 @@ export const MatchResultCard = ({
       <Activity name={"footer"} mode={footer ? "visible" : "hidden"}>
         <CardFooter className={"flex flex-col p-0"}>
           <Separator className={"bg-primary/30"} />
-          <div className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          <div className="mt-4 text-xs font-semibold uppercase tracking-widest text-primary">
             {footer}
           </div>
         </CardFooter>

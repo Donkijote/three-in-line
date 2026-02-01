@@ -106,7 +106,7 @@ export const LoginForm = () => {
         )}
       </form.Field>
       <div className="flex flex-col gap-1 space-y-3">
-        <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
+        <Small variant="label" className="text-primary/90">
           Email
         </Small>
         <form.Field
@@ -157,7 +157,7 @@ export const LoginForm = () => {
         mode={doesCodeNameExist === null ? "hidden" : "visible"}
       >
         <div className="flex flex-col gap-1 space-y-3">
-          <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
+          <Small variant="label" className="text-primary/90">
             Password
           </Small>
           <form.Field

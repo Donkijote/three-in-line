@@ -17,15 +17,16 @@ export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
       ) : null}
       <div className="flex flex-col items-center text-center">
         {eyebrow ? (
-          <Small className="text-[10px] font-semibold uppercase tracking-[0.25em] text-primary/80">
+          <Small variant="label" className="text-[10px] text-primary/80">
             {eyebrow}
           </Small>
         ) : null}
         <Small
           className={cn(
-            "text-sm font-semibold uppercase tracking-[0.2em]",
+            "text-sm",
             eyebrow ? "text-foreground" : "text-muted-foreground",
           )}
+          variant="label"
         >
           {title}
         </Small>

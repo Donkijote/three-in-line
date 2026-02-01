@@ -36,7 +36,7 @@ export const FullPageLoader = ({
         </div>
 
         <div className="space-y-2">
-          <Small className="text-xs font-semibold uppercase tracking-[0.3em] text-primary/80">
+          <Small variant="label" className="text-primary/80">
             {label}
           </Small>
           <Activity

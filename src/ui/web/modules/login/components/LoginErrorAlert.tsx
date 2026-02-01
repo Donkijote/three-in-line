@@ -27,7 +27,7 @@ export const LoginErrorAlert = ({ error, onClose }: LoginErrorAlertProps) => {
           <AlertDialogMedia className="bg-destructive/15 text-destructive mb-0 size-10 row-span-2 self-start ring ring-destructive/40">
             <ShieldX className="size-4" />
           </AlertDialogMedia>
-          <AlertDialogTitle className="text-destructive w-full font-semibold uppercase tracking-[0.2em]">
+          <AlertDialogTitle className="text-destructive w-full font-semibold uppercase tracking-widest">
             Authentication failed
           </AlertDialogTitle>
           <AlertDialogDescription className="text-muted-foreground col-start-2">

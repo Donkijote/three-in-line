@@ -108,7 +108,7 @@ export const MatchBoard = ({
         <div className="absolute inset-0 bg-card/40 text-destructive backdrop-blur-xs">
           <div className="flex h-full w-full flex-col items-center justify-center gap-4 text-center">
             <TimerOff className="size-20" />
-            <span className="text-3xl font-semibold uppercase tracking-[0.3em] leading-none">
+            <span className="text-3xl font-semibold uppercase tracking-widest leading-none">
               <span className="block">time's</span>
               <span className="block">up!</span>
             </span>
