@@ -9,6 +9,7 @@ import { gameRepository } from "@/infrastructure/convex/repository/gameRepositor
 import { MatchScreen } from "./MatchScreen";
 
 type MatchGame = {
+  id: string;
   status: "waiting" | "playing" | "paused" | "ended";
   p1UserId: string;
   p2UserId: string | null;
@@ -57,10 +58,17 @@ vi.mock("@/ui/web/hooks/useUser", () => ({
   useUserById: useUserByIdMock,
 }));
 
+const { useTurnTimerMock } = vi.hoisted(() => ({
+  useTurnTimerMock: vi.fn((_: { onExpire?: () => void }) => ({
+    isExpired: false,
+    progress: 0,
+  })),
+}));
+
 vi.mock("@/ui/web/hooks/useGame", () => ({
   useGame: () => game,
   useGameHeartbeat: vi.fn(),
-  useTurnTimer: vi.fn(() => ({ isExpired: false, progress: 0 })),
+  useTurnTimer: useTurnTimerMock,
 }));
 
 vi.mock("@/application/games/placeMarkUseCase", () => ({
@@ -211,6 +219,7 @@ const gameId = "gameId" as GameId;
 
 describe("MatchScreen", () => {
   const baseGame: MatchGame = {
+    id: "gameId",
     status: "playing",
     p1UserId: "user-1",
     p2UserId: "user-2",
@@ -246,6 +255,7 @@ describe("MatchScreen", () => {
     };
     lastOpponentId = undefined;
     useUserByIdMock.mockClear();
+    useTurnTimerMock.mockClear();
     useUserByIdMock.mockImplementation((id?: string) => {
       lastOpponentId = id;
       return opponentUser;
@@ -286,6 +296,72 @@ describe("MatchScreen", () => {
     render(<MatchScreen gameId={gameId} />);
 
     expect(screen.getByText("Waiting for opponent")).toBeInTheDocument();
+  });
+
+  it("wires the timer expiry callback", () => {
+    useTurnTimerMock.mockImplementationOnce(
+      (params: { onExpire?: () => void }) => {
+        params.onExpire?.();
+        return { isExpired: false, progress: 0 };
+      },
+    );
+
+    game = {
+      ...baseGame,
+      turnDurationMs: 3000,
+      turnDeadlineTime: Date.now() + 3000,
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    expect(timeoutTurnUseCase).toHaveBeenCalledWith(gameRepository, {
+      gameId: "gameId",
+    });
+  });
+
+  it("ignores the expire callback when the game id is missing", () => {
+    useTurnTimerMock.mockImplementationOnce(
+      (params: { onExpire?: () => void }) => {
+        params.onExpire?.();
+        return { isExpired: false, progress: 0 };
+      },
+    );
+
+    game = {
+      ...baseGame,
+      id: undefined as unknown as string,
+      turnDurationMs: 3000,
+      turnDeadlineTime: Date.now() + 3000,
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    expect(timeoutTurnUseCase).not.toHaveBeenCalled();
+  });
+
+  it("logs when timeout turn fails", async () => {
+    const consoleSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    vi.mocked(timeoutTurnUseCase).mockRejectedValueOnce(new Error("boom"));
+    useTurnTimerMock.mockImplementationOnce(
+      (params: { onExpire?: () => void }) => {
+        params.onExpire?.();
+        return { isExpired: false, progress: 0 };
+      },
+    );
+
+    game = {
+      ...baseGame,
+      turnDurationMs: 3000,
+      turnDeadlineTime: Date.now() + 3000,
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Timeout turn failed.",
+        expect.any(Error),
+      );
+    });
+
+    consoleSpy.mockRestore();
   });
 
   it("resolves opponent id from player two when current user is missing", () => {
