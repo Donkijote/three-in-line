@@ -1,6 +1,6 @@
 import { Activity, useEffect, useEffectEvent, useState } from "react";
 
-import { ArrowRight, Loader, Pencil, ShieldX } from "lucide-react";
+import { ArrowRight, Loader, Pencil } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce";
 
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -12,16 +12,6 @@ import {
 } from "@/domain/entities/Avatar";
 import { toUserAvatar } from "@/ui/shared/avatars/presets";
 import { Small } from "@/ui/web/components/Typography";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/ui/web/components/ui/alert-dialog";
 import { Button } from "@/ui/web/components/ui/button";
 import {
   InputGroup,
@@ -31,6 +21,7 @@ import {
 import { useCheckEmailExists } from "@/ui/web/hooks/useUser";
 import { isValidEmail } from "@/ui/web/lib/utils";
 import { AvatarOptions } from "@/ui/web/modules/login/components/AvatarOptions";
+import { LoginErrorAlert } from "@/ui/web/modules/login/components/LoginErrorAlert";
 
 type LoginFormData = {
   email: string;
@@ -44,7 +35,7 @@ export const LoginForm = () => {
   const [doesCodeNameExist, setDoesCodeNameExist] = useState<boolean | null>(
     null,
   );
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<unknown>(null);
   const { checkEmailExists, isChecking } = useCheckEmailExists();
 
   const form = useForm({
@@ -64,7 +55,7 @@ export const LoginForm = () => {
         await signIn("password", payload);
       } catch (error) {
         console.error("Authentication failed", error);
-        setAuthError(getAuthErrorMessage(error));
+        setAuthError(error);
       }
     },
   });
@@ -276,38 +267,7 @@ export const LoginForm = () => {
         }}
       </form.Subscribe>
 
-      <AlertDialog open={Boolean(authError)}>
-        <AlertDialogContent className="bottom-6 top-auto w-[min(30rem,calc(100%-2rem))] translate-y-0 border border-destructive/60 shadow-xl data-[size=default]:max-w-(var(--container-sm))">
-          <AlertDialogHeader className="grid grid-cols-[auto_1fr] grid-rows-[auto_auto] items-start gap-x-4 gap-y-1 text-left">
-            <AlertDialogMedia className="bg-destructive/15 text-destructive mb-0 size-10 row-span-2 self-start ring ring-destructive/40">
-              <ShieldX className="size-4" />
-            </AlertDialogMedia>
-            <AlertDialogTitle className="text-destructive font-semibold uppercase tracking-[0.2em] w-full">
-              Authentication failed
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground col-start-2">
-              {authError}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <div className="flex w-full justify-center">
-              <AlertDialogAction onClick={() => setAuthError(null)}>
-                Try again
-              </AlertDialogAction>
-            </div>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <LoginErrorAlert error={authError} onClose={() => setAuthError(null)} />
     </form>
   );
-};
-
-const getAuthErrorMessage = (error: unknown) => {
-  if (error instanceof Error && error.message.trim()) {
-    if (error.message.toLowerCase().includes("invalid")) {
-      return "We couldn't get you into the arena. Please check your credentials and try again.";
-    }
-    return error.message;
-  }
-  return "We couldn't get you into the arena. Please check your credentials and try again.";
 };
