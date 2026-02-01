@@ -127,6 +127,9 @@
     @apply border-border outline-ring/50;
   }
   body {
+    @apply font-sans bg-secondary text-foreground;
+  }
+  .dark body {
     @apply font-sans bg-background text-foreground;
   }
   html {

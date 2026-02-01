@@ -11,7 +11,7 @@ type HeaderProps = {
 
 export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center justify-center border-b border-border/60 bg-background/90 backdrop-blur">
+    <header className="sticky top-0 z-30 flex h-20 items-center justify-center border-b border-border/60 dark:bg-background/90 backdrop-blur">
       {leftSlot ? (
         <div className="absolute left-0 flex items-center">{leftSlot}</div>
       ) : null}
