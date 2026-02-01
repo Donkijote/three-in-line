@@ -9,7 +9,6 @@ describe("timeoutTurnUseCase", () => {
     const repository: GameRepository = {
       findOrCreateGame: vi.fn(),
       placeMark: vi.fn(),
-      restartGame: vi.fn(),
       abandonGame: vi.fn(),
       heartbeat: vi.fn(),
       timeoutTurn,
