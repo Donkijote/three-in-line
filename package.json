@@ -10,7 +10,7 @@
     "lint": "biome check --write",
     "test": "vitest run --coverage",
     "preview": "vite preview",
-    "deploy": "bun ci && bun run build && wrangler pages deploy"
+    "deploy": "bun install --frozen-lockfile && bun run build && wrangler pages deploy dist"
   },
   "dependencies": {
     "@auth/core": "0.37.0",
