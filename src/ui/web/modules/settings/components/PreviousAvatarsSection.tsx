@@ -48,7 +48,7 @@ export const PreviousAvatarsSection = () => {
   return (
     <div className="flex flex-col justify-center">
       <div className="flex items-center justify-between h-8">
-        <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        <Small variant="label" className="text-muted-foreground">
           Previous Avatars
         </Small>
       </div>

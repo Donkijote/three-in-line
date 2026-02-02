@@ -1,5 +1,4 @@
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { defineSchema } from "convex/server";
 
 import { authTables } from "@convex-dev/auth/server";
 
@@ -10,8 +9,4 @@ export default defineSchema({
   ...authTables,
   users: UserSchema,
   games: GameSchema,
-  tasks: defineTable({
-    text: v.string(),
-    isCompleted: v.boolean(),
-  }),
 });

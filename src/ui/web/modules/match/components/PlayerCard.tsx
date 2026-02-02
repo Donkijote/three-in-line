@@ -78,7 +78,7 @@ export const PlayerCard = ({
       <Activity name={"turn-label"} mode={isTurn ? "visible" : "hidden"}>
         <Small
           className={cn(
-            "absolute -top-2 left-1/2 -translate-x-1/2 z-20 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em]",
+            "absolute -top-2 left-1/2 -translate-x-1/2 z-20 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest",
             activeAccentClasses.badge,
           )}
         >

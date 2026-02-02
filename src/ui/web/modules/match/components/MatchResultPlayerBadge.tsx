@@ -64,7 +64,7 @@ export const MatchResultPlayerBadge = ({
         <H6 className="text-sm font-semibold">{name}</H6>
         <Muted
           className={cn(
-            "text-[10px] uppercase tracking-[0.2em] text-destructive",
+            "text-[10px] uppercase tracking-widest text-destructive",
             {
               "text-primary": accent === "primary",
             },

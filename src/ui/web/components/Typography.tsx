@@ -1,5 +1,7 @@
 import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
 
+import { cva, type VariantProps } from "class-variance-authority";
+
 import { cn } from "@/ui/web/lib/utils";
 
 type TypographyProps<T extends keyof JSX.IntrinsicElements> =
@@ -121,11 +123,25 @@ const InlineCode = ({
   </code>
 );
 
-const Small = ({ className, children, ...props }: TypographyProps<"small">) => (
-  <small
-    className={cn("text-sm font-medium leading-none", className)}
-    {...props}
-  >
+const smallVariants = cva("leading-none", {
+  variants: {
+    variant: {
+      default: "text-sm font-medium",
+      label: "text-xs font-semibold uppercase tracking-widest",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+const Small = ({
+  className,
+  children,
+  variant,
+  ...props
+}: TypographyProps<"small"> & VariantProps<typeof smallVariants>) => (
+  <small className={cn(smallVariants({ variant }), className)} {...props}>
     {children}
   </small>
 );

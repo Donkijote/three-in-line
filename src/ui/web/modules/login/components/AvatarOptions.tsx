@@ -39,11 +39,14 @@ export const AvatarOptions = ({ onChange }: AvatarOptionsProps) => {
   return (
     <div className="space-y-4 md:space-y-5">
       <div className="flex items-center justify-between">
-        <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
+        <Small variant="label" className="text-primary/90">
           Select avatar
         </Small>
         <AvatarMoreOptions onAccept={onAcceptAvatar}>
-          <Small className="cursor-pointer text-xs uppercase tracking-[0.2em] text-muted-foreground/70">
+          <Small
+            variant="label"
+            className="cursor-pointer text-muted-foreground/70"
+          >
             see more
           </Small>
         </AvatarMoreOptions>

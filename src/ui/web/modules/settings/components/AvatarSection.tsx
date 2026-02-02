@@ -7,6 +7,7 @@ import { type AvatarPreset, getPresetAvatarById } from "@/ui/shared/avatars";
 import { AvatarMoreOptions } from "@/ui/web/components/AvatarMoreOptions";
 import {
   Avatar,
+  AvatarBadge,
   AvatarFallback,
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
@@ -72,10 +73,10 @@ export const AvatarSection = () => {
                 <Loader className="size-5 animate-spin" />
               </span>
             )}
+            <AvatarBadge className="cursor-pointer size-6!">
+              <Pencil className="size-3!" />
+            </AvatarBadge>
           </Avatar>
-          <span className="absolute bottom-1 right-1 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground cursor-pointer">
-            <Pencil className="size-3" />
-          </span>
         </div>
       </AvatarMoreOptions>
     </div>
