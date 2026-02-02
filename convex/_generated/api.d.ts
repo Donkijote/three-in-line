@@ -14,7 +14,6 @@ import type * as http from "../http.js";
 import type * as model_games from "../model/games.js";
 import type * as schemas_game from "../schemas/game.js";
 import type * as schemas_user from "../schemas/user.js";
-import type * as tasks from "../tasks.js";
 import type * as users from "../users.js";
 
 import type {
@@ -30,7 +29,6 @@ declare const fullApi: ApiFromModules<{
   "model/games": typeof model_games;
   "schemas/game": typeof schemas_game;
   "schemas/user": typeof schemas_user;
-  tasks: typeof tasks;
   users: typeof users;
 }>;
 

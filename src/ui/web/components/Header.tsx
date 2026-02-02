@@ -11,21 +11,22 @@ type HeaderProps = {
 
 export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center justify-center border-b border-border/60 bg-background/90 backdrop-blur">
+    <header className="sticky top-0 z-30 flex h-20 items-center justify-center border-b border-border/60 dark:bg-background/90 backdrop-blur">
       {leftSlot ? (
         <div className="absolute left-0 flex items-center">{leftSlot}</div>
       ) : null}
       <div className="flex flex-col items-center text-center">
         {eyebrow ? (
-          <Small className="text-[10px] font-semibold uppercase tracking-[0.25em] text-primary/80">
+          <Small variant="label" className="text-[10px] text-primary/80">
             {eyebrow}
           </Small>
         ) : null}
         <Small
           className={cn(
-            "text-sm font-semibold uppercase tracking-[0.2em]",
+            "text-sm",
             eyebrow ? "text-foreground" : "text-muted-foreground",
           )}
+          variant="label"
         >
           {title}
         </Small>

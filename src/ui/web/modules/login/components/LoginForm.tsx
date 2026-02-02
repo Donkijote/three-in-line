@@ -21,6 +21,7 @@ import {
 import { useCheckEmailExists } from "@/ui/web/hooks/useUser";
 import { isValidEmail } from "@/ui/web/lib/utils";
 import { AvatarOptions } from "@/ui/web/modules/login/components/AvatarOptions";
+import { LoginErrorAlert } from "@/ui/web/modules/login/components/LoginErrorAlert";
 
 type LoginFormData = {
   email: string;
@@ -34,6 +35,7 @@ export const LoginForm = () => {
   const [doesCodeNameExist, setDoesCodeNameExist] = useState<boolean | null>(
     null,
   );
+  const [authError, setAuthError] = useState<unknown>(null);
   const { checkEmailExists, isChecking } = useCheckEmailExists();
 
   const form = useForm({
@@ -48,7 +50,13 @@ export const LoginForm = () => {
           ? { email: value.email, password: value.password, flow: value.flow }
           : value;
 
-      await signIn("password", payload);
+      try {
+        setAuthError(null);
+        await signIn("password", payload);
+      } catch (error) {
+        console.error("Authentication failed", error);
+        setAuthError(error);
+      }
     },
   });
 
@@ -98,23 +106,13 @@ export const LoginForm = () => {
         )}
       </form.Field>
       <div className="flex flex-col gap-1 space-y-3">
-        <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
+        <Small variant="label" className="text-primary/90">
           Email
         </Small>
         <form.Field
           name="email"
           validators={{
-            onChange: ({ value }) => {
-              if (!value) {
-                return "Email is required";
-              }
-
-              if (!isValidEmail(value.trim())) {
-                return "Email is not valid";
-              }
-
-              return undefined;
-            },
+            onChange: ({ value }) => validateUsername(value),
           }}
         >
           {(field) => (
@@ -127,9 +125,14 @@ export const LoginForm = () => {
                 className="text-base text-foreground placeholder:text-muted-foreground/70"
                 value={field.state.value}
                 onChange={(event) => {
-                  field.handleChange(event.target.value);
-                  if (field.state.meta.isValid) {
-                    debouncedCheckCodeName(event.target.value);
+                  const nextValue = event.target.value;
+                  field.handleChange(nextValue);
+                  if (isValidEmail(nextValue.trim())) {
+                    setDoesCodeNameExist(null);
+                    debouncedCheckCodeName(nextValue);
+                  } else {
+                    setDoesCodeNameExist(null);
+                    debouncedCheckCodeName.cancel();
                   }
                 }}
                 onBlur={field.handleBlur}
@@ -154,14 +157,13 @@ export const LoginForm = () => {
         mode={doesCodeNameExist === null ? "hidden" : "visible"}
       >
         <div className="flex flex-col gap-1 space-y-3">
-          <Small className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/90">
+          <Small variant="label" className="text-primary/90">
             Password
           </Small>
           <form.Field
             name="password"
             validators={{
-              onChange: ({ value }) =>
-                value.trim() ? undefined : "Password is required",
+              onChange: ({ value }) => validatePassword(value),
             }}
           >
             {(field) => (
@@ -190,8 +192,7 @@ export const LoginForm = () => {
             value: getRandomPresetAvatarId(),
           }}
           validators={{
-            onChange: ({ value }) =>
-              value?.value ? undefined : "Avatar is required",
+            onChange: ({ value }) => validateAvatar(value),
           }}
         >
           {(field) => (
@@ -218,26 +219,61 @@ export const LoginForm = () => {
 
       <form.Subscribe
         selector={(state) => ({
+          values: state.values,
           canSubmit: state.canSubmit,
           isSubmitting: state.isSubmitting,
         })}
       >
-        {({ canSubmit, isSubmitting }) => (
-          <Button
-            type="submit"
-            size="lg"
-            className="mt-auto h-12 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-            disabled={!canSubmit || isSubmitting}
-          >
-            {doesCodeNameExist === false ? "Sign up" : "START GAME"}
-            {isSubmitting ? (
-              <Loader className={"animate-spin"} />
-            ) : (
-              <ArrowRight />
-            )}
-          </Button>
-        )}
+        {({ values, canSubmit, isSubmitting }) => {
+          const emailValid = isValidEmail(values.email.trim());
+          const passwordValid = Boolean(values.password.trim());
+          const requirePassword = doesCodeNameExist !== null;
+          const isEmailCheckPending = emailValid && doesCodeNameExist === null;
+          const isDisabled =
+            !canSubmit ||
+            isSubmitting ||
+            isChecking ||
+            isEmailCheckPending ||
+            !emailValid ||
+            (requirePassword && !passwordValid);
+
+          return (
+            <Button
+              type="submit"
+              size="lg"
+              className="mt-auto h-12 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+              disabled={isDisabled}
+            >
+              {doesCodeNameExist === false ? "Sign up" : "START GAME"}
+              {isSubmitting ? (
+                <Loader className={"animate-spin"} />
+              ) : (
+                <ArrowRight />
+              )}
+            </Button>
+          );
+        }}
       </form.Subscribe>
+
+      <LoginErrorAlert error={authError} onClose={() => setAuthError(null)} />
     </form>
   );
 };
+
+export const validateUsername = (value: string) => {
+  if (!value) {
+    return "Email is required";
+  }
+
+  if (!isValidEmail(value.trim())) {
+    return "Email is not valid";
+  }
+
+  return undefined;
+};
+
+export const validatePassword = (value: string) =>
+  value.trim() ? undefined : "Password is required";
+
+export const validateAvatar = (value?: UserAvatar) =>
+  value?.value ? undefined : "Avatar is required";

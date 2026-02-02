@@ -48,7 +48,7 @@ export const NavBar = () => {
               </span>
               <span
                 className={cn(
-                  "text-[10px] font-semibold uppercase tracking-[0.2em]",
+                  "text-[10px] font-semibold uppercase tracking-widest",
                   {
                     "text-primary": isActive,
                     "text-muted-foreground": !isActive,
