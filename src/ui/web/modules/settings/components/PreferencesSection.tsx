@@ -65,7 +65,7 @@ export const PreferencesSection = () => {
         Preferences
       </Small>
       <Card className={"py-0"}>
-        <CardContent className={"px-0"}>
+        <CardContent className={"px-0 my-2"}>
           {preferenceItems.map((preference, index) => {
             const Icon = preference.icon;
             return (
