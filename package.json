@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build",
     "lint": "biome check --write",
     "test": "vitest run --coverage",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "bun ci && bun run build && wrangler pages deploy"
   },
   "dependencies": {
     "@auth/core": "0.37.0",
