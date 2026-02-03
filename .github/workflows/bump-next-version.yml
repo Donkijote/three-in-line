@@ -150,7 +150,7 @@ jobs:
             - Release label: release/${{ steps.bump.outputs.value }}
             - Released version: ${{ steps.released_version.outputs.value }}
             - Next version: ${{ steps.next_version.outputs.value }}
-          author: "Manuel Gonçalves <828141+Donkijote@users.noreply.github.com>"
-          committer: "Manuel Gonçalves <828141+Donkijote@users.noreply.github.com>"
+          author: "Manuel Gonçalves <manuelmjgc@gmail.com>"
+          committer: "Manuel Gonçalves <manuelmjgc@gmail.com>"
           labels: |
             kind/internal
