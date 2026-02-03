@@ -1,0 +1,37 @@
+name: Report Build Status
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [ready_for_review, synchronize]
+
+jobs:
+  report-build-status:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: build-${{ github.head_ref || github.ref_name }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.x
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.6
+
+      - name: Install
+        run: bun install
+
+      - name: Tests
+        run: bun run test
+
+      - name: Build
+        run: bun run build
