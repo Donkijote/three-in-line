@@ -40,7 +40,7 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
-          ssh-key: ${{ secrets.RELEASE_BOT_SSH_KEY }}
+          ssh-key: ${{ secrets.RELEASE_BOT_DEPLOY_KEY }}
 
       - name: Checkout main
         if: github.event_name == 'pull_request'
@@ -48,7 +48,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          ssh-key: ${{ secrets.RELEASE_BOT_SSH_KEY }}
+          ssh-key: ${{ secrets.RELEASE_BOT_DEPLOY_KEY }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -58,10 +58,10 @@ jobs:
       - name: Configure SSH signing
         if: github.event_name != 'workflow_dispatch'
         env:
-          RELEASE_BOT_SSH_KEY: ${{ secrets.RELEASE_BOT_SSH_KEY }}
+          RELEASE_BOT_SIGNING_KEY: ${{ secrets.RELEASE_BOT_SIGNING_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$RELEASE_BOT_SSH_KEY" > ~/.ssh/release_bot_signing_key
+          echo "$RELEASE_BOT_SIGNING_KEY" > ~/.ssh/release_bot_signing_key
           chmod 600 ~/.ssh/release_bot_signing_key
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           git config gpg.format ssh
