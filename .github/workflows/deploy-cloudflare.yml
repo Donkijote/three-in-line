@@ -40,6 +40,7 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
+          ssh-key: ${{ secrets.RELEASE_BOT_SSH_KEY }}
 
       - name: Checkout main
         if: github.event_name == 'pull_request'
@@ -47,11 +48,25 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          ssh-key: ${{ secrets.RELEASE_BOT_SSH_KEY }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.6
+
+      - name: Configure SSH signing
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          RELEASE_BOT_SSH_KEY: ${{ secrets.RELEASE_BOT_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$RELEASE_BOT_SSH_KEY" > ~/.ssh/release_bot_signing_key
+          chmod 600 ~/.ssh/release_bot_signing_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config gpg.format ssh
+          git config user.signingkey ~/.ssh/release_bot_signing_key
+          git config commit.gpgsign true
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -84,9 +99,14 @@ jobs:
             echo "release-mode/force requires a release/<major|minor|patch> label."
             exit 1
           fi
+          if [ "$bump" != "major" ]; then
+            echo "Force bump is only applied for major releases."
+            exit 0
+          fi
           bun pm version --no-git-tag-version "$bump"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "git@github.com:${GITHUB_REPOSITORY}.git"
           git add package.json
           git commit -m "chore: bump release version (${bump})"
           git push origin main
