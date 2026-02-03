@@ -100,8 +100,8 @@ jobs:
             exit 1
           fi
           bun pm version --no-git-tag-version "$bump"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "Manuel Gonçalves"
+          git config user.email "828141+Donkijote@users.noreply.github.com"
           git remote set-url origin "git@github.com:${GITHUB_REPOSITORY}.git"
           git add package.json
           git commit -m "chore: bump release version (${bump})"
@@ -132,8 +132,8 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         id: tag_release
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "Manuel Gonçalves"
+          git config user.email "828141+Donkijote@users.noreply.github.com"
           version="v${{ steps.package_version.outputs.value }}"
           if git rev-parse "${version}" >/dev/null 2>&1; then
             echo "Tag ${version} already exists. Skipping."
