@@ -151,3 +151,5 @@ jobs:
             - Next version: ${{ steps.next_version.outputs.value }}
           author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
           committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          labels: |
+            kind/internal
