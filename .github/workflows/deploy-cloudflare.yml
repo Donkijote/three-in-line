@@ -99,10 +99,6 @@ jobs:
             echo "release-mode/force requires a release/<major|minor|patch> label."
             exit 1
           fi
-          if [ "$bump" != "major" ]; then
-            echo "Force bump is only applied for major releases."
-            exit 0
-          fi
           bun pm version --no-git-tag-version "$bump"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -134,14 +130,27 @@ jobs:
 
       - name: Tag build
         if: github.event_name != 'workflow_dispatch'
+        id: tag_release
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           version="v${{ steps.package_version.outputs.value }}"
           if git rev-parse "${version}" >/dev/null 2>&1; then
             echo "Tag ${version} already exists. Skipping."
+            echo "created=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           build_number="${{ steps.build_tag.outputs.value }}"
           git tag -a "${version}" -m "Release ${version} (${build_number})"
           git push origin "${version}"
+          echo "created=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        if: github.event_name != 'workflow_dispatch' && steps.tag_release.outputs.created == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.package_version.outputs.value }}
+          name: v${{ steps.package_version.outputs.value }}
+          body: |
+            Release v${{ steps.package_version.outputs.value }}
+            Build: ${{ steps.build_tag.outputs.value }}
