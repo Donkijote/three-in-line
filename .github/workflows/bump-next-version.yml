@@ -89,9 +89,9 @@ jobs:
           console.log(JSON.parse(data).version);')"
           echo "value=${version}" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout develop
+      - name: Checkout main
         if: steps.release_pr.outputs.is_release == 'true'
-        run: git checkout develop
+        run: git checkout main
 
       - name: Bump package version
         id: next_version
