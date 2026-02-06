@@ -16,7 +16,10 @@ concurrency:
 
 jobs:
   sync:
-    if: github.event.workflow_run.conclusion == 'success'
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      startsWith(github.event.workflow_run.head_branch, 'release/v')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main

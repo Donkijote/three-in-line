@@ -43,10 +43,10 @@ jobs:
 
       - name: Configure SSH signing key
         env:
-          RELEASE_DEPLOY_KEY: ${{ secrets.RELEASE_DEPLOY_KEY }}
+          RELEASE_SINGING_KEY: ${{ secrets.RELEASE_SINGING_KEY }}
         run: |
           if [ -z "$RELEASE_DEPLOY_KEY" ]; then
-            echo "Missing RELEASE_DEPLOY_KEY secret."
+            echo "Missing RELEASE_SINGING_KEY secret."
             exit 1
           fi
           mkdir -p ~/.ssh
@@ -81,10 +81,12 @@ jobs:
       - name: Detect package manager
         id: pm
         run: |
-          if [ -f bun.lockb ] || [ -f bunfig.toml ]; then
+          if [ -f bun.lock ] || [ -f bun.lockb ] || [ -f bunfig.toml ]; then
             echo "pm=bun" >> "$GITHUB_OUTPUT"
-          else
+          elif [ -f pnpm-lock.yaml ]; then
             echo "pm=pnpm" >> "$GITHUB_OUTPUT"
+          else
+            echo "pm=npm" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Setup runtime
@@ -131,9 +133,11 @@ jobs:
               export PATH="$BUN_INSTALL/bin:$PATH"
             fi
             bun install --frozen-lockfile
-          else
+          elif [ "${{ steps.pm.outputs.pm }}" = "pnpm" ]; then
             corepack enable
             pnpm install --frozen-lockfile
+          else
+            npm ci
           fi
 
       - name: Build
@@ -144,8 +148,10 @@ jobs:
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"
             bun run build
-          else
+          elif [ "${{ steps.pm.outputs.pm }}" = "pnpm" ]; then
             pnpm run build
+          else
+            npm run build
           fi
 
       - name: Deploy (template)
@@ -154,8 +160,10 @@ jobs:
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"          
             bunx wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT"
-          else
+          elif [ "${{ steps.pm.outputs.pm }}" = "pnpm" ]; then
             pnpm dlx wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT"
+          else
+            npx wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT"
           fi
 
       - name: Update changelog
