@@ -36,14 +36,14 @@ jobs:
 
       - name: Configure SSH signing key
         env:
-          RELEASE_DEPLOY_KEY: ${{ secrets.RELEASE_DEPLOY_KEY }}
+          RELEASE_SINGING_KEY: ${{ secrets.RELEASE_SINGING_KEY }}
         run: |
-          if [ -z "$RELEASE_DEPLOY_KEY" ]; then
-            echo "Missing RELEASE_DEPLOY_KEY secret."
+          if [ -z "$RELEASE_SINGING_KEY" ]; then
+            echo "Missing RELEASE_SINGING_KEY secret."
             exit 1
           fi
           mkdir -p ~/.ssh
-          echo "$RELEASE_DEPLOY_KEY" > ~/.ssh/release_deploy_key
+          echo "$RELEASE_SINGING_KEY" > ~/.ssh/release_deploy_key
           chmod 600 ~/.ssh/release_deploy_key
           git config gpg.format ssh
           git config user.signingkey ~/.ssh/release_deploy_key
