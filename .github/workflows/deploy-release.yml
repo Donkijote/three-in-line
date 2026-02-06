@@ -1,0 +1,290 @@
+name: Deploy release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: deploy-spas
+  cancel-in-progress: true
+
+jobs:
+  release:
+    if: >-
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release/v')
+    runs-on: ubuntu-latest
+
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PAGES_PROJECT: ${{ secrets.CLOUDFLARE_PAGES_PROJECT }}
+      VITE_CONVEX_URL: ${{ secrets.VITE_CONVEX_URL_PROD }}
+
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+          token: ${{ secrets.BOT_PAT }}
+
+      - name: Configure git author
+        run: |
+          git config user.name "Manuel Gonçalves"
+          git config user.email "manuelmjgc@gmail.com"
+
+      - name: Configure SSH signing key
+        env:
+          RELEASE_DEPLOY_KEY: ${{ secrets.RELEASE_DEPLOY_KEY }}
+        run: |
+          if [ -z "$RELEASE_DEPLOY_KEY" ]; then
+            echo "Missing RELEASE_DEPLOY_KEY secret."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          echo "$RELEASE_DEPLOY_KEY" > ~/.ssh/release_deploy_key
+          chmod 600 ~/.ssh/release_deploy_key
+          git config gpg.format ssh
+          git config user.signingkey ~/.ssh/release_deploy_key
+          git config commit.gpgsign true
+
+      - name: Parse release labels
+        id: labels
+        env:
+          PR_LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const labels = JSON.parse(process.env.PR_LABELS_JSON || '[]').map(l => l.name);
+          const valid = ['release/patch','release/minor','release/major'];
+          const chosen = labels.filter(l => valid.includes(l));
+          if (chosen.length !== 1) {
+            console.error(`Expected exactly one release label (${valid.join(', ')}). Found: ${chosen.join(', ') || 'none'}`);
+            process.exit(1);
+          }
+          const force = labels.includes('release-mode/force');
+          const bump = chosen[0].split('/')[1];
+          const out = `release_label=${chosen[0]}\n` +
+                      `bump=${bump}\n` +
+                      `force=${force}\n`;
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, out);
+          NODE
+
+      - name: Detect package manager
+        id: pm
+        run: |
+          if [ -f bun.lockb ] || [ -f bunfig.toml ]; then
+            echo "pm=bun" >> "$GITHUB_OUTPUT"
+          else
+            echo "pm=pnpm" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Bump version (force)
+        if: steps.labels.outputs.force == 'true'
+        run: |
+          npm version "${{ steps.labels.outputs.bump }}" --no-git-tag-version
+
+      - name: Read version
+        id: version
+        run: |
+          node -e "const p=require('./package.json'); console.log('version=' + p.version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set build metadata
+        id: build_meta
+        run: |
+          build_number="$(date -u +%Y%m%d%H%M%S)"
+          echo "build_number=${build_number}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+
+      - name: Get previous tag date
+        id: prev_tag
+        run: |
+          prev_tag="$(git tag --list 'v*' --sort=-v:refname | head -n 1)"
+          if [ -z "$prev_tag" ]; then
+            echo "previous_tag=" >> "$GITHUB_OUTPUT"
+            echo "previous_tag_date=1970-01-01T00:00:00Z" >> "$GITHUB_OUTPUT"
+          else
+            prev_date="$(git log -1 --format=%cI "$prev_tag")"
+            echo "previous_tag=$prev_tag" >> "$GITHUB_OUTPUT"
+            echo "previous_tag_date=$prev_date" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        run: |
+          if [ "${{ steps.pm.outputs.pm }}" = "bun" ]; then
+            if ! command -v bun >/dev/null 2>&1; then
+              curl -fsSL https://bun.sh/install | bash
+              export BUN_INSTALL="$HOME/.bun"
+              export PATH="$BUN_INSTALL/bin:$PATH"
+            fi
+            bun install --frozen-lockfile
+          else
+            corepack enable
+            pnpm install --frozen-lockfile
+          fi
+
+      - name: Build
+        run: |
+          export BUILD_NUMBER="${{ steps.build_meta.outputs.build_number }}"
+          export VITE_BUILD_NUMBER="${{ steps.build_meta.outputs.build_number }}"
+          if [ "${{ steps.pm.outputs.pm }}" = "bun" ]; then
+            export BUN_INSTALL="$HOME/.bun"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+            bun run build
+          else
+            pnpm run build
+          fi
+
+      - name: Deploy (template)
+        run: |
+          if [ "${{ steps.pm.outputs.pm }}" = "bun" ]; then
+            export BUN_INSTALL="$HOME/.bun"
+            export PATH="$BUN_INSTALL/bin:$PATH"          
+            bunx wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT"
+          else
+            pnpm dlx wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT"
+          fi
+
+      - name: Update changelog
+        uses: actions/github-script@v7
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          PREVIOUS_TAG_DATE: ${{ steps.prev_tag.outputs.previous_tag_date }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const version = process.env.VERSION;
+            const since = process.env.PREVIOUS_TAG_DATE;
+            const until = new Date().toISOString();
+
+            const labelToSection = {
+              'kind/feature': 'Added',
+              'kind/improvement': 'Updated',
+              'kind/bug': 'Fixed',
+              'kind/hotfix': 'Fixed',
+            };
+            const sectionOrder = ['Added', 'Updated', 'Fixed'];
+            const sections = { Added: [], Updated: [], Fixed: [] };
+
+            const sinceDate = new Date(since);
+            const untilDate = new Date(until);
+            const per_page = 100;
+            let page = 1;
+            while (true) {
+              const res = await github.rest.issues.listForRepo({
+                owner,
+                repo,
+                state: 'closed',
+                since: sinceDate.toISOString(),
+                per_page,
+                page,
+              });
+              for (const item of res.data) {
+                if (item.pull_request) continue;
+                if (!item.closed_at) continue;
+                const closedAt = new Date(item.closed_at);
+                if (closedAt <= sinceDate || closedAt > untilDate) continue;
+                const labels = (item.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
+                let section = null;
+                for (const key of Object.keys(labelToSection)) {
+                  if (labels.includes(key)) {
+                    section = labelToSection[key];
+                    break;
+                  }
+                }
+                if (!section) continue;
+                sections[section].push({
+                  line: `- [GHI#${item.number}](${item.html_url}) ${item.title}`,
+                  closed_at: item.closed_at,
+                });
+              }
+              if (res.data.length < per_page) break;
+              page += 1;
+            }
+
+            for (const section of sectionOrder) {
+              sections[section].sort((a, b) => a.closed_at.localeCompare(b.closed_at));
+            }
+
+            const date = new Date().toISOString().slice(0, 10);
+            let releaseBlock = `## [${version}] - ${date}\n`;
+            const hasAny = sectionOrder.some((s) => sections[s].length > 0);
+            if (hasAny) {
+              releaseBlock += `\n`;
+              for (const section of sectionOrder) {
+                if (sections[section].length === 0) continue;
+                releaseBlock += `### ${section}\n\n`;
+                for (const item of sections[section]) {
+                  releaseBlock += `${item.line}\n`;
+                }
+                releaseBlock += '\n';
+              }
+            }
+
+            const changelogPath = 'CHANGELOG.md';
+            const content = fs.readFileSync(changelogPath, 'utf8');
+            if (content.includes(`## [${version}]`)) {
+              core.info(`Changelog already contains version ${version}. Skipping update.`);
+              return;
+            }
+            const header = '## [Unreleased]';
+            const headerIndex = content.indexOf(header);
+            if (headerIndex === -1) {
+              throw new Error('CHANGELOG.md missing "## [Unreleased]" section.');
+            }
+            const afterHeaderIndex = headerIndex + header.length;
+            const afterHeader = content.slice(afterHeaderIndex);
+            const nextSectionMatch = afterHeader.match(/\n## \[/);
+            const nextSectionIndex = nextSectionMatch
+              ? afterHeaderIndex + nextSectionMatch.index
+              : content.length;
+
+            const before = content.slice(0, afterHeaderIndex);
+            const after = content.slice(nextSectionIndex).replace(/^\n+/, '');
+
+            const updated = `${before}\n\n${releaseBlock}\n${after}`;
+            fs.writeFileSync(changelogPath, updated);
+
+      - name: Commit release changes
+        run: |
+          git add CHANGELOG.md
+          if [ "${{ steps.labels.outputs.force }}" = "true" ]; then
+            git add package.json
+          fi
+          if git diff --staged --quiet; then
+            echo "No release changes to commit."
+          else
+            git commit -S -s -m "chore(release): v${{ steps.version.outputs.version }}"
+            git push origin HEAD:main
+          fi
+
+      - name: Create tag
+        run: |
+          git tag -a "${{ steps.build_meta.outputs.tag }}" -m "Release ${{ steps.build_meta.outputs.tag }} (build ${{ steps.build_meta.outputs.build_number }})"
+          git push origin "${{ steps.build_meta.outputs.tag }}"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "${{ steps.build_meta.outputs.tag }}"
+          name: "${{ steps.build_meta.outputs.tag }}"
+          body: |
+            Release `${{ steps.build_meta.outputs.tag }}`
+            Build: `${{ steps.build_meta.outputs.build_number }}`
+          generate_release_notes: true
