@@ -62,6 +62,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     lastMove: game?.lastMove,
     currentSlot,
     isGameReady: Boolean(game),
+    isMoveSoundEnabled: game?.status === "playing",
   });
 
   if (!game || !currentUser) {

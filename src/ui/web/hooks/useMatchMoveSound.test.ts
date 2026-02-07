@@ -14,6 +14,7 @@ type Params = {
   lastMove: Game["lastMove"] | undefined;
   currentSlot: "P1" | "P2" | null;
   isGameReady: boolean;
+  isMoveSoundEnabled: boolean;
 };
 
 const baseParams: Params = {
@@ -21,6 +22,7 @@ const baseParams: Params = {
   lastMove: null,
   currentSlot: "P1",
   isGameReady: true,
+  isMoveSoundEnabled: true,
 };
 
 describe("useMatchMoveSound", () => {
@@ -46,6 +48,27 @@ describe("useMatchMoveSound", () => {
         ...baseParams,
         lastMove: { index: 3, by: "P2", at: 100 },
       },
+    });
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+  });
+
+  it("does not play when move sounds are disabled", () => {
+    const { rerender } = renderHook(
+      (props: Params) => useMatchMoveSound(props),
+      {
+        initialProps: {
+          ...baseParams,
+          isMoveSoundEnabled: false,
+          lastMove: null,
+        },
+      },
+    );
+
+    rerender({
+      ...baseParams,
+      isMoveSoundEnabled: false,
+      lastMove: { index: 3, by: "P2", at: 100 },
     });
 
     expect(playPlayerMarkSound).not.toHaveBeenCalled();

@@ -8,6 +8,7 @@ type UseMatchMoveSoundParams = {
   lastMove: Game["lastMove"] | undefined;
   currentSlot: PlayerSlot | null;
   isGameReady: boolean;
+  isMoveSoundEnabled: boolean;
 };
 
 export const useMatchMoveSound = ({
@@ -15,6 +16,7 @@ export const useMatchMoveSound = ({
   lastMove,
   currentSlot,
   isGameReady,
+  isMoveSoundEnabled,
 }: UseMatchMoveSoundParams): void => {
   const lastObservedMoveKeyRef = useRef<string | null>(null);
   const observedGameIdRef = useRef<string | null>(null);
@@ -28,6 +30,13 @@ export const useMatchMoveSound = ({
     }
 
     if (!isGameReady) {
+      return;
+    }
+
+    if (!isMoveSoundEnabled) {
+      if (lastMove) {
+        lastObservedMoveKeyRef.current = `${lastMove.at}:${lastMove.index}:${lastMove.by}`;
+      }
       return;
     }
 
@@ -54,5 +63,5 @@ export const useMatchMoveSound = ({
     }
 
     playPlayerMarkSound(lastMove.by === "P1" ? "X" : "O");
-  }, [currentSlot, gameId, isGameReady, lastMove]);
+  }, [currentSlot, gameId, isGameReady, isMoveSoundEnabled, lastMove]);
 };

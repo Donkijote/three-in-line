@@ -582,6 +582,20 @@ describe("MatchScreen", () => {
     expect(playPlayerMarkSound).not.toHaveBeenCalled();
   });
 
+  it("does not play opponent move sound when game is ended", () => {
+    game = {
+      ...baseGame,
+      status: "ended",
+      winner: "P2",
+      endedReason: "win",
+      lastMove: { index: 8, by: "P2", at: 200 },
+    };
+
+    render(<MatchScreen gameId={gameId} />);
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+  });
+
   it("still plays the mark sound when placing a move fails", async () => {
     const consoleSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
     game = {
