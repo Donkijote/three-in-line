@@ -5,6 +5,7 @@ import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
 import type { GameId } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
+import { playPlayerMarkSound } from "@/ui/web/lib/sound";
 
 import { MatchScreen } from "./MatchScreen";
 
@@ -81,6 +82,10 @@ vi.mock("@/application/games/findOrCreateGameUseCase", () => ({
 
 vi.mock("@/application/games/timeoutTurnUseCase", () => ({
   timeoutTurnUseCase: vi.fn(),
+}));
+
+vi.mock("@/ui/web/lib/sound", () => ({
+  playPlayerMarkSound: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -266,6 +271,7 @@ describe("MatchScreen", () => {
     vi.mocked(findOrCreateGameUseCase).mockClear();
     vi.mocked(findOrCreateGameUseCase).mockResolvedValue("next-game-id");
     vi.mocked(timeoutTurnUseCase).mockClear();
+    vi.mocked(playPlayerMarkSound).mockClear();
   });
 
   it("shows loading state when the game is missing", () => {
@@ -504,6 +510,53 @@ describe("MatchScreen", () => {
         index: 4,
       });
     });
+    expect(playPlayerMarkSound).toHaveBeenCalledWith("X");
+  });
+
+  it("plays O sound when the current user is player two and places a move", async () => {
+    currentUser = {
+      id: "user-2",
+      username: "You",
+      avatar: { type: "preset", value: "avatar-2" },
+    };
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P2",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+
+    await waitFor(() => {
+      expect(placeMarkUseCase).toHaveBeenCalledWith(gameRepository, {
+        gameId: "gameId",
+        index: 4,
+      });
+    });
+    expect(playPlayerMarkSound).toHaveBeenCalledWith("O");
+  });
+
+  it("does not play a sound when placing a move fails", async () => {
+    const consoleSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P1",
+    };
+    vi.mocked(placeMarkUseCase).mockRejectedValueOnce(new Error("boom"));
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+
+    await waitFor(() => {
+      expect(placeMarkUseCase).toHaveBeenCalledWith(gameRepository, {
+        gameId: "gameId",
+        index: 4,
+      });
+    });
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+    consoleSpy.mockRestore();
   });
 
   it("shows match result overlay when the current user wins", () => {

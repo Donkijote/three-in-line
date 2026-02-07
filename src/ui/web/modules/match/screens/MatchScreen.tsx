@@ -17,6 +17,7 @@ import {
 } from "@/ui/web/hooks/useGame";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
+import { playPlayerMarkSound } from "@/ui/web/lib/sound";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { MatchActions } from "@/ui/web/modules/match/components/MatchActions";
 import { MatchBoard } from "@/ui/web/modules/match/components/MatchBoard";
@@ -75,6 +76,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const gridSize = game.gridSize;
   const matchFormat = game.match.format;
   const currentSlot = currentUser.id === game.p1UserId ? "P1" : "P2";
+  const currentPlayerSymbol = currentSlot === "P1" ? "X" : "O";
   const shouldShowTimeout =
     timerActive &&
     currentSlot !== undefined &&
@@ -96,7 +98,10 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     }
     setIsPlacing(true);
     try {
+      playPlayerMarkSound(currentPlayerSymbol);
       await placeMarkUseCase(gameRepository, { gameId, index });
+    } catch (error) {
+      console.debug("Place mark failed.", error);
     } finally {
       setIsPlacing(false);
     }
