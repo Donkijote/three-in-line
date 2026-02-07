@@ -19,9 +19,15 @@ const resultPlaybackState: PlaybackState = {
   timeoutId: undefined,
 };
 
+const activeMarkAudios = new Set<HTMLAudioElement>();
+const markAudioTimeoutIds = new Map<HTMLAudioElement, number>();
+
 type PlaySoundOptions = {
   maxDurationMs?: number;
   playbackState?: PlaybackState;
+  onAudioStart?: (audio: HTMLAudioElement) => void;
+  onAudioStop?: (audio: HTMLAudioElement) => void;
+  onTimeoutStart?: (audio: HTMLAudioElement, timeoutId: number) => void;
 };
 
 type PlayerMarkSoundOptions = {
@@ -47,6 +53,22 @@ const clearPlaybackState = (
   }
 };
 
+const untrackMarkAudio = (audio: HTMLAudioElement): void => {
+  const timeoutId = markAudioTimeoutIds.get(audio);
+  if (timeoutId !== undefined) {
+    clearTimeout(timeoutId);
+  }
+  markAudioTimeoutIds.delete(audio);
+  activeMarkAudios.delete(audio);
+};
+
+const stopPlayerMarkSounds = (): void => {
+  for (const audio of activeMarkAudios) {
+    stopAudio(audio);
+    untrackMarkAudio(audio);
+  }
+};
+
 const playSound = (path: string, options?: PlaySoundOptions): void => {
   if (typeof Audio === "undefined") {
     return;
@@ -56,7 +78,16 @@ const playSound = (path: string, options?: PlaySoundOptions): void => {
   if (playbackState) {
     clearPlaybackState(playbackState);
   }
+
   const audio = new Audio(path);
+  options?.onAudioStart?.(audio);
+
+  if (typeof audio.addEventListener === "function" && options?.onAudioStop) {
+    audio.addEventListener("ended", () => {
+      options.onAudioStop?.(audio);
+    });
+  }
+
   if (playbackState) {
     playbackState.audio = audio;
   }
@@ -71,12 +102,14 @@ const playSound = (path: string, options?: PlaySoundOptions): void => {
       }
 
       stopAudio(audio);
+      options?.onAudioStop?.(audio);
     }, maxDurationMs);
 
     if (playbackState) {
       playbackState.timeoutId = timeoutId;
     } else {
       unmanagedTimeoutId = timeoutId;
+      options?.onTimeoutStart?.(audio, timeoutId);
     }
   }
 
@@ -93,9 +126,11 @@ const playSound = (path: string, options?: PlaySoundOptions): void => {
       clearPlaybackState(playbackState);
       return;
     }
+
     if (unmanagedTimeoutId !== undefined) {
       clearTimeout(unmanagedTimeoutId);
     }
+    options?.onAudioStop?.(audio);
     // Ignore autoplay/policy failures; gameplay should continue.
   });
 };
@@ -106,10 +141,20 @@ export const playPlayerMarkSound = (
 ): void => {
   playSound(SOUND_BY_SYMBOL[symbol], {
     maxDurationMs: options?.maxDurationMs,
+    onAudioStart: (audio) => {
+      activeMarkAudios.add(audio);
+    },
+    onAudioStop: (audio) => {
+      untrackMarkAudio(audio);
+    },
+    onTimeoutStart: (audio, timeoutId) => {
+      markAudioTimeoutIds.set(audio, timeoutId);
+    },
   });
 };
 
 export const playVictorySound = (): void => {
+  stopPlayerMarkSounds();
   playSound(VICTORY_SOUND_PATH, {
     maxDurationMs: VICTORY_MAX_DURATION_MS,
     playbackState: resultPlaybackState,
@@ -117,6 +162,7 @@ export const playVictorySound = (): void => {
 };
 
 export const playDefeatSound = (): void => {
+  stopPlayerMarkSounds();
   playSound(DEFEAT_SOUND_PATH, {
     playbackState: resultPlaybackState,
   });

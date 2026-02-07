@@ -10,6 +10,8 @@ type MockAudioInstance = {
   currentTime: number;
   play: ReturnType<typeof vi.fn>;
   pause: ReturnType<typeof vi.fn>;
+  addEventListener: (type: string, cb: () => void) => void;
+  emitEnded: () => void;
 };
 
 const audioInstances: MockAudioInstance[] = [];
@@ -18,6 +20,7 @@ const queuedPlayResults: Array<Promise<void> | undefined> = [];
 const MockAudio = class {
   src = "";
   currentTime = 0;
+  private endedListeners = new Set<() => void>();
   play = vi.fn(() => {
     if (queuedPlayResults.length === 0) {
       return Promise.resolve();
@@ -26,6 +29,17 @@ const MockAudio = class {
     return queuedPlayResults.shift();
   });
   pause = vi.fn();
+  addEventListener = (type: string, cb: () => void) => {
+    if (type === "ended") {
+      this.endedListeners.add(cb);
+    }
+  };
+
+  emitEnded = () => {
+    for (const cb of this.endedListeners) {
+      cb();
+    }
+  };
 
   constructor(src?: string) {
     this.src = src ?? "";
@@ -141,6 +155,28 @@ describe("sound", () => {
     expect(victoryAudio?.currentTime).toBe(0);
     expect(defeatAudio?.src).toBe("/sounds/defeat.mp3");
     expect(defeatAudio?.play).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops active mark sound when a result sound starts", () => {
+    playPlayerMarkSound("X");
+    const markAudio = audioInstances[0];
+
+    playVictorySound();
+    const victoryAudio = audioInstances[1];
+
+    expect(markAudio?.pause).toHaveBeenCalledTimes(1);
+    expect(markAudio?.currentTime).toBe(0);
+    expect(victoryAudio?.src).toBe("/sounds/victory.mp3");
+  });
+
+  it("untracks mark audio when ended event fires", () => {
+    playPlayerMarkSound("X");
+    const markAudio = audioInstances[0];
+    markAudio?.emitEnded();
+
+    playVictorySound();
+
+    expect(markAudio?.pause).not.toHaveBeenCalled();
   });
 
   it("ignores stale managed play rejection when a newer result sound exists", async () => {

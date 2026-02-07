@@ -31,6 +31,7 @@ type MatchGame = {
   winner?: "P1" | "P2" | null;
   endedReason?: "win" | "draw" | "abandoned" | "disconnect";
   abandonedBy?: "P1" | "P2" | null;
+  lastMove?: { index: number; by: "P1" | "P2"; at: number } | null;
 };
 
 type MatchUser = {
@@ -535,6 +536,50 @@ describe("MatchScreen", () => {
       });
     });
     expect(playPlayerMarkSound).toHaveBeenCalledWith("O");
+  });
+
+  it("plays opponent sound when a new opponent move arrives", async () => {
+    game = {
+      ...baseGame,
+      lastMove: null,
+    };
+    const { rerender } = render(<MatchScreen gameId={gameId} />);
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+
+    game = {
+      ...baseGame,
+      lastMove: { index: 6, by: "P2", at: 123 },
+    };
+    rerender(<MatchScreen gameId={gameId} />);
+
+    await waitFor(() => {
+      expect(playPlayerMarkSound).toHaveBeenCalledWith("O");
+    });
+  });
+
+  it("does not play a move sound on initial load with an existing last move", () => {
+    game = {
+      ...baseGame,
+      lastMove: { index: 4, by: "P2", at: 123 },
+    };
+
+    render(<MatchScreen gameId={gameId} />);
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+  });
+
+  it("does not play a move sound when loading from missing game to existing last move", () => {
+    game = undefined;
+    const { rerender } = render(<MatchScreen gameId={gameId} />);
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+
+    game = {
+      ...baseGame,
+      lastMove: { index: 4, by: "P2", at: 123 },
+    };
+    rerender(<MatchScreen gameId={gameId} />);
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
   });
 
   it("still plays the mark sound when placing a move fails", async () => {
