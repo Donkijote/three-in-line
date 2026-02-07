@@ -49,6 +49,7 @@ let game: MatchGame | undefined;
 let currentUser: MatchUser | undefined;
 let opponentUser: MatchUser | undefined;
 let lastOpponentId: string | undefined;
+let gameSoundsEnabled = true;
 const navigate = vi.fn();
 
 vi.mock("@/ui/web/hooks/useMediaQuery", () => ({
@@ -71,6 +72,17 @@ vi.mock("@/ui/web/hooks/useGame", () => ({
   useGame: () => game,
   useGameHeartbeat: vi.fn(),
   useTurnTimer: useTurnTimerMock,
+}));
+
+vi.mock("@/ui/web/application/providers/UserPreferencesProvider", () => ({
+  useUserPreferences: () => ({
+    preferences: {
+      gameSounds: gameSoundsEnabled,
+      haptics: false,
+      theme: "system",
+    },
+    updatePreferences: vi.fn(),
+  }),
 }));
 
 vi.mock("@/application/games/placeMarkUseCase", () => ({
@@ -248,6 +260,7 @@ describe("MatchScreen", () => {
 
   beforeEach(() => {
     isDesktop = false;
+    gameSoundsEnabled = true;
     game = { ...baseGame };
     currentUser = {
       id: "user-1",
@@ -592,6 +605,35 @@ describe("MatchScreen", () => {
     };
 
     render(<MatchScreen gameId={gameId} />);
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+  });
+
+  it("does not play mark sounds when game sounds preference is disabled", async () => {
+    gameSoundsEnabled = false;
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P1",
+      lastMove: null,
+    };
+    const { rerender } = render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+    await waitFor(() => {
+      expect(placeMarkUseCase).toHaveBeenCalledWith(gameRepository, {
+        gameId: "gameId",
+        index: 4,
+      });
+    });
+
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P1",
+      lastMove: { index: 6, by: "P2", at: 123 },
+    };
+    rerender(<MatchScreen gameId={gameId} />);
 
     expect(playPlayerMarkSound).not.toHaveBeenCalled();
   });

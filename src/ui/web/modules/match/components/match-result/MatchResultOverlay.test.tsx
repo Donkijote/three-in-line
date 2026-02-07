@@ -91,6 +91,27 @@ describe("MatchResultOverlay", () => {
     expect(playDefeatSound).not.toHaveBeenCalled();
   });
 
+  it("does not play result sounds when sound is disabled", () => {
+    render(
+      <MatchResultOverlay
+        soundEnabled={false}
+        status="ended"
+        endedReason="win"
+        winner="P1"
+        abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId="user-1"
+        onPrimaryAction={vi.fn()}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(playVictorySound).not.toHaveBeenCalled();
+    expect(playDefeatSound).not.toHaveBeenCalled();
+    expect(stopResultSound).toHaveBeenCalled();
+  });
+
   it("renders defeat state labels", () => {
     render(
       <MatchResultOverlay

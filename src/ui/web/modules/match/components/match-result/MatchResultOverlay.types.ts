@@ -1,14 +1,19 @@
 import type { UserAvatar } from "@/domain/entities/Avatar";
-import type { GameStatus, MatchScore } from "@/domain/entities/Game";
+import type {
+  GameStatus,
+  MatchScore,
+  PlayerSlot,
+} from "@/domain/entities/Game";
 
 export type ResultAccent = "primary" | "destructive";
 export type ResultIcon = "trophy" | "heart" | "wifi" | "flag";
 
 export type MatchResultOverlayProps = {
+  soundEnabled?: boolean;
   status: GameStatus;
   endedReason: "win" | "draw" | "abandoned" | "disconnect" | null;
-  winner: "P1" | "P2" | null;
-  abandonedBy: "P1" | "P2" | null;
+  winner: PlayerSlot | null;
+  abandonedBy: PlayerSlot | null;
   p1UserId: string;
   currentUserId?: string;
   score?: MatchScore;

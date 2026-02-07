@@ -7,6 +7,7 @@ import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
 import type { GameId, PlayerSlot } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
+import { useUserPreferences } from "@/ui/web/application/providers/UserPreferencesProvider";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
@@ -36,6 +37,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const { isDesktop } = useMediaQuery();
   const game = useGame(gameId);
   const currentUser = useCurrentUser();
+  const { preferences } = useUserPreferences();
   const navigate = useNavigate();
   const currentUserId = currentUser?.id;
   const opponentId = getOpponentId(game, currentUserId);
@@ -62,7 +64,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     lastMove: game?.lastMove,
     currentSlot,
     isGameReady: Boolean(game),
-    isMoveSoundEnabled: game?.status === "playing",
+    isMoveSoundEnabled: game?.status === "playing" && preferences.gameSounds,
   });
 
   if (!game || !currentUser) {
@@ -110,7 +112,9 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     }
     setIsPlacing(true);
     try {
-      playPlayerMarkSound(currentPlayerSymbol);
+      if (preferences.gameSounds) {
+        playPlayerMarkSound(currentPlayerSymbol);
+      }
       await placeMarkUseCase(gameRepository, { gameId, index });
     } catch (error) {
       console.debug("Place mark failed.", error);
@@ -185,6 +189,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
         </div>
       )}
       <MatchResultOverlay
+        soundEnabled={preferences.gameSounds}
         status={game.status}
         endedReason={game.endedReason}
         winner={game.winner}

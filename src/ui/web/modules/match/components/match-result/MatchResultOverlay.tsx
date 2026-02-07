@@ -13,22 +13,34 @@ import type {
 import { MatchResultOverlayBase } from "./MatchResultOverlayBase";
 
 export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
+  const {
+    soundEnabled,
+    status,
+    endedReason,
+    winner,
+    abandonedBy,
+    p1UserId,
+    currentUserId,
+    onPrimaryAction,
+  } = props;
   const resultSoundKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (
-      props.status !== "ended" ||
-      props.endedReason !== "win" ||
-      !props.winner
-    ) {
+    if (soundEnabled === false) {
       stopResultSound();
       resultSoundKeyRef.current = null;
       return;
     }
 
-    const currentSlot = resolveCurrentSlot(props.currentUserId, props.p1UserId);
-    const isWinner = currentSlot ? props.winner === currentSlot : false;
-    const soundKey = `${props.currentUserId ?? "unknown"}:${props.winner}:${isWinner ? "victory" : "defeat"}`;
+    if (status !== "ended" || endedReason !== "win" || !winner) {
+      stopResultSound();
+      resultSoundKeyRef.current = null;
+      return;
+    }
+
+    const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+    const isWinner = currentSlot ? winner === currentSlot : false;
+    const soundKey = `${currentUserId ?? "unknown"}:${winner}:${isWinner ? "victory" : "defeat"}`;
 
     if (resultSoundKeyRef.current === soundKey) {
       return;
@@ -41,47 +53,41 @@ export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
     }
 
     playDefeatSound();
-  }, [
-    props.currentUserId,
-    props.endedReason,
-    props.p1UserId,
-    props.status,
-    props.winner,
-  ]);
+  }, [currentUserId, endedReason, p1UserId, soundEnabled, status, winner]);
 
   useEffect(() => () => stopResultSound(), []);
 
-  if (props.status !== "ended") {
+  if (status !== "ended") {
     return null;
   }
 
-  if (props.endedReason === "disconnect") {
+  if (endedReason === "disconnect") {
     return (
       <MatchResultOverlayBase
         {...toDisconnectModel(props)}
-        onPrimaryAction={props.onPrimaryAction}
+        onPrimaryAction={onPrimaryAction}
       />
     );
   }
 
-  if (props.endedReason === "abandoned") {
-    const currentSlot = resolveCurrentSlot(props.currentUserId, props.p1UserId);
-    if (currentSlot && props.abandonedBy === currentSlot) {
+  if (endedReason === "abandoned") {
+    const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+    if (currentSlot && abandonedBy === currentSlot) {
       return null;
     }
     return (
       <MatchResultOverlayBase
         {...toAbandonedModel(props)}
-        onPrimaryAction={props.onPrimaryAction}
+        onPrimaryAction={onPrimaryAction}
       />
     );
   }
 
-  if (props.endedReason === "win") {
+  if (endedReason === "win") {
     return (
       <MatchResultOverlayBase
         {...toWinLossModel(props)}
-        onPrimaryAction={props.onPrimaryAction}
+        onPrimaryAction={onPrimaryAction}
       />
     );
   }
