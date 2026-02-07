@@ -1,6 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import type { UserAvatar } from "@/domain/entities/Avatar";
+import {
+  playDefeatSound,
+  playVictorySound,
+  stopResultSound,
+} from "@/ui/web/lib/sound";
 
 import { MatchResultOverlay } from "./MatchResultOverlay";
 
@@ -10,9 +15,18 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => navigate,
 }));
 
+vi.mock("@/ui/web/lib/sound", () => ({
+  playVictorySound: vi.fn(),
+  playDefeatSound: vi.fn(),
+  stopResultSound: vi.fn(),
+}));
+
 describe("MatchResultOverlay", () => {
   beforeEach(() => {
     navigate.mockClear();
+    vi.mocked(playVictorySound).mockClear();
+    vi.mocked(playDefeatSound).mockClear();
+    vi.mocked(stopResultSound).mockClear();
   });
 
   it("renders nothing when closed", () => {
@@ -31,6 +45,7 @@ describe("MatchResultOverlay", () => {
     );
 
     expect(container.firstChild).toBeNull();
+    expect(stopResultSound).toHaveBeenCalled();
   });
 
   it("renders winner state and triggers actions", () => {
@@ -72,6 +87,8 @@ describe("MatchResultOverlay", () => {
     expect(navigate).toHaveBeenCalledTimes(2);
     expect(navigate).toHaveBeenNthCalledWith(1, { to: "/" });
     expect(navigate).toHaveBeenNthCalledWith(2, { to: "/play" });
+    expect(playVictorySound).toHaveBeenCalledTimes(1);
+    expect(playDefeatSound).not.toHaveBeenCalled();
   });
 
   it("renders defeat state labels", () => {
@@ -103,6 +120,8 @@ describe("MatchResultOverlay", () => {
     expect(
       screen.getByRole("button", { name: /change mode/i }),
     ).toBeInTheDocument();
+    expect(playDefeatSound).toHaveBeenCalledTimes(1);
+    expect(playVictorySound).not.toHaveBeenCalled();
   });
 
   it("renders disconnect messaging when opponent leaves", () => {
@@ -125,6 +144,8 @@ describe("MatchResultOverlay", () => {
     expect(
       screen.getByRole("button", { name: /find new match/i }),
     ).toBeInTheDocument();
+    expect(playVictorySound).not.toHaveBeenCalled();
+    expect(playDefeatSound).not.toHaveBeenCalled();
   });
 
   it("renders disconnect messaging when current user disconnected", () => {
@@ -223,5 +244,60 @@ describe("MatchResultOverlay", () => {
     );
 
     expect(screen.getByText("Defeat")).toBeInTheDocument();
+  });
+
+  it("stops result sound when the overlay unmounts", () => {
+    const { unmount } = render(
+      <MatchResultOverlay
+        status="ended"
+        endedReason="win"
+        winner="P1"
+        abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId="user-1"
+        onPrimaryAction={vi.fn()}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    vi.mocked(stopResultSound).mockClear();
+    unmount();
+
+    expect(stopResultSound).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not replay result sound when rerender keeps the same sound key", () => {
+    const { rerender } = render(
+      <MatchResultOverlay
+        status="ended"
+        endedReason="win"
+        winner="P1"
+        abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId={undefined}
+        onPrimaryAction={vi.fn()}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(playDefeatSound).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <MatchResultOverlay
+        status="ended"
+        endedReason="win"
+        winner="P1"
+        abandonedBy={null}
+        p1UserId="user-2"
+        currentUserId={undefined}
+        onPrimaryAction={vi.fn()}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(playDefeatSound).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,3 +1,11 @@
+import { useEffect, useRef } from "react";
+
+import {
+  playDefeatSound,
+  playVictorySound,
+  stopResultSound,
+} from "@/ui/web/lib/sound";
+
 import type {
   MatchResultOverlayProps,
   MatchResultViewModel,
@@ -5,6 +13,44 @@ import type {
 import { MatchResultOverlayBase } from "./MatchResultOverlayBase";
 
 export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
+  const resultSoundKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (
+      props.status !== "ended" ||
+      props.endedReason !== "win" ||
+      !props.winner
+    ) {
+      stopResultSound();
+      resultSoundKeyRef.current = null;
+      return;
+    }
+
+    const currentSlot = resolveCurrentSlot(props.currentUserId, props.p1UserId);
+    const isWinner = currentSlot ? props.winner === currentSlot : false;
+    const soundKey = `${props.currentUserId ?? "unknown"}:${props.winner}:${isWinner ? "victory" : "defeat"}`;
+
+    if (resultSoundKeyRef.current === soundKey) {
+      return;
+    }
+
+    resultSoundKeyRef.current = soundKey;
+    if (isWinner) {
+      playVictorySound();
+      return;
+    }
+
+    playDefeatSound();
+  }, [
+    props.currentUserId,
+    props.endedReason,
+    props.p1UserId,
+    props.status,
+    props.winner,
+  ]);
+
+  useEffect(() => () => stopResultSound(), []);
+
   if (props.status !== "ended") {
     return null;
   }

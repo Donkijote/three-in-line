@@ -537,7 +537,7 @@ describe("MatchScreen", () => {
     expect(playPlayerMarkSound).toHaveBeenCalledWith("O");
   });
 
-  it("does not play a sound when placing a move fails", async () => {
+  it("still plays the mark sound when placing a move fails", async () => {
     const consoleSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
     game = {
       ...baseGame,
@@ -555,7 +555,7 @@ describe("MatchScreen", () => {
         index: 4,
       });
     });
-    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+    expect(playPlayerMarkSound).toHaveBeenCalledWith("X");
     consoleSpy.mockRestore();
   });
 
