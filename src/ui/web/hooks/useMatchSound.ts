@@ -48,6 +48,7 @@ type ResultSoundAction = {
   key: string;
   play: () => void;
 } | null;
+type ConnectionTransition = "none" | "disconnected" | "reconnected";
 
 export const useMatchSound = ({
   gameId,
@@ -135,29 +136,13 @@ export const useMatchSound = ({
       return;
     }
 
-    if (previousStatus === "playing" && status === "paused") {
-      previousStatusRef.current = status;
-      if (soundEnabled) {
-        playDisconnectedSound();
-      }
-      if (hapticsEnabled) {
-        playOpponentDisconnectedHaptic();
-      }
-      return;
-    }
-
-    if (previousStatus === "paused" && status === "playing") {
-      previousStatusRef.current = status;
-      if (soundEnabled) {
-        playConnectedSound();
-      }
-      if (hapticsEnabled) {
-        playOpponentReconnectedHaptic();
-      }
-      return;
-    }
-
+    const transition = resolveConnectionTransition(previousStatus, status);
     previousStatusRef.current = status;
+    playConnectionFeedback({
+      transition,
+      soundEnabled,
+      hapticsEnabled,
+    });
   }, [gameId, hapticsEnabled, isGameReady, soundEnabled, status]);
 
   useEffect(() => {
@@ -319,4 +304,48 @@ const resolveCurrentSlot = (
   }
 
   return currentUserId === p1UserId ? "P1" : "P2";
+};
+
+const resolveConnectionTransition = (
+  previousStatus: Game["status"],
+  nextStatus: Game["status"],
+): ConnectionTransition => {
+  if (previousStatus === "playing" && nextStatus === "paused") {
+    return "disconnected";
+  }
+
+  if (previousStatus === "paused" && nextStatus === "playing") {
+    return "reconnected";
+  }
+
+  return "none";
+};
+
+const playConnectionFeedback = ({
+  transition,
+  soundEnabled,
+  hapticsEnabled,
+}: {
+  transition: ConnectionTransition;
+  soundEnabled: boolean;
+  hapticsEnabled: boolean;
+}) => {
+  if (transition === "disconnected") {
+    if (soundEnabled) {
+      playDisconnectedSound();
+    }
+    if (hapticsEnabled) {
+      playOpponentDisconnectedHaptic();
+    }
+    return;
+  }
+
+  if (transition === "reconnected") {
+    if (soundEnabled) {
+      playConnectedSound();
+    }
+    if (hapticsEnabled) {
+      playOpponentReconnectedHaptic();
+    }
+  }
 };
