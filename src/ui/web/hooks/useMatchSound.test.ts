@@ -2,6 +2,8 @@ import { renderHook } from "@testing-library/react";
 
 import type { Game, GameId } from "@/domain/entities/Game";
 import {
+  playConnectedSound,
+  playDisconnectedSound,
   playPlayerMarkSound,
   playTimesUpSound,
   startTimerTickSound,
@@ -11,6 +13,8 @@ import {
 import { useMatchSound } from "./useMatchSound";
 
 vi.mock("@/ui/web/lib/sound", () => ({
+  playConnectedSound: vi.fn(),
+  playDisconnectedSound: vi.fn(),
   playPlayerMarkSound: vi.fn(),
   startTimerTickSound: vi.fn(),
   stopTimerTickSound: vi.fn(),
@@ -19,6 +23,7 @@ vi.mock("@/ui/web/lib/sound", () => ({
 
 type Params = {
   gameId: GameId;
+  status: Game["status"] | undefined;
   lastMove: Game["lastMove"] | undefined;
   currentSlot: "P1" | "P2" | null;
   isGameReady: boolean;
@@ -32,6 +37,7 @@ type Params = {
 
 const baseParams: Params = {
   gameId: "game-1" as GameId,
+  status: "playing",
   lastMove: null,
   currentSlot: "P1",
   isGameReady: true,
@@ -45,6 +51,8 @@ const baseParams: Params = {
 
 describe("useMatchSound", () => {
   beforeEach(() => {
+    vi.mocked(playConnectedSound).mockClear();
+    vi.mocked(playDisconnectedSound).mockClear();
     vi.mocked(playPlayerMarkSound).mockClear();
     vi.mocked(startTimerTickSound).mockClear();
     vi.mocked(stopTimerTickSound).mockClear();
@@ -275,5 +283,70 @@ describe("useMatchSound", () => {
     expect(startTimerTickSound).not.toHaveBeenCalled();
     expect(playTimesUpSound).not.toHaveBeenCalled();
     expect(stopTimerTickSound).toHaveBeenCalled();
+  });
+
+  it("plays disconnected sound when match transitions from playing to paused", () => {
+    const { rerender } = renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        status: "playing",
+      },
+    });
+
+    rerender({
+      ...baseParams,
+      status: "paused",
+    });
+
+    expect(playDisconnectedSound).toHaveBeenCalledTimes(1);
+    expect(playConnectedSound).not.toHaveBeenCalled();
+  });
+
+  it("plays connected sound when match transitions from paused to playing", () => {
+    const { rerender } = renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        status: "paused",
+      },
+    });
+
+    rerender({
+      ...baseParams,
+      status: "playing",
+    });
+
+    expect(playConnectedSound).toHaveBeenCalledTimes(1);
+    expect(playDisconnectedSound).not.toHaveBeenCalled();
+  });
+
+  it("does not play connection sounds on initial paused snapshot", () => {
+    renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        status: "paused",
+      },
+    });
+
+    expect(playConnectedSound).not.toHaveBeenCalled();
+    expect(playDisconnectedSound).not.toHaveBeenCalled();
+  });
+
+  it("does not play connection sounds when sounds are disabled", () => {
+    const { rerender } = renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        soundEnabled: false,
+        status: "playing",
+      },
+    });
+
+    rerender({
+      ...baseParams,
+      soundEnabled: false,
+      status: "paused",
+    });
+
+    expect(playConnectedSound).not.toHaveBeenCalled();
+    expect(playDisconnectedSound).not.toHaveBeenCalled();
   });
 });

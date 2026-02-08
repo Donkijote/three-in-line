@@ -2,7 +2,9 @@ import { useEffect, useRef } from "react";
 
 import type { Game, GameId, PlayerSlot } from "@/domain/entities/Game";
 import {
+  playConnectedSound,
   playDefeatSound,
+  playDisconnectedSound,
   playPlayerMarkSound,
   playSurrenderSound,
   playTimesUpSound,
@@ -14,6 +16,7 @@ import {
 
 type UseMatchSoundParams = {
   gameId: GameId;
+  status: Game["status"] | undefined;
   lastMove: Game["lastMove"] | undefined;
   currentSlot: PlayerSlot | null;
   isGameReady: boolean;
@@ -42,6 +45,7 @@ type ResultSoundAction = {
 
 export const useMatchSound = ({
   gameId,
+  status,
   lastMove,
   currentSlot,
   isGameReady,
@@ -55,6 +59,8 @@ export const useMatchSound = ({
   const lastObservedMoveKeyRef = useRef<string | null>(null);
   const observedMoveGameIdRef = useRef<string | null>(null);
   const hasInitializedMoveRef = useRef(false);
+  const observedConnectionGameIdRef = useRef<string | null>(null);
+  const previousStatusRef = useRef<Game["status"] | null>(null);
   const lastTimesUpKeyRef = useRef<string | null>(null);
   const observedTimesUpGameIdRef = useRef<GameId | null>(null);
 
@@ -100,6 +106,41 @@ export const useMatchSound = ({
 
     playPlayerMarkSound(lastMove.by === "P1" ? "X" : "O");
   }, [currentSlot, gameId, isGameReady, isMoveSoundEnabled, lastMove]);
+
+  useEffect(() => {
+    if (observedConnectionGameIdRef.current !== gameId) {
+      observedConnectionGameIdRef.current = gameId;
+      previousStatusRef.current = null;
+    }
+
+    if (!isGameReady || !status) {
+      return;
+    }
+
+    const previousStatus = previousStatusRef.current;
+    if (!previousStatus) {
+      previousStatusRef.current = status;
+      return;
+    }
+
+    if (previousStatus === status) {
+      return;
+    }
+
+    previousStatusRef.current = status;
+    if (!soundEnabled) {
+      return;
+    }
+
+    if (previousStatus === "playing" && status === "paused") {
+      playDisconnectedSound();
+      return;
+    }
+
+    if (previousStatus === "paused" && status === "playing") {
+      playConnectedSound();
+    }
+  }, [gameId, isGameReady, soundEnabled, status]);
 
   useEffect(() => {
     const shouldTick =

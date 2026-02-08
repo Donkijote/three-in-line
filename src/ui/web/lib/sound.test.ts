@@ -1,5 +1,7 @@
 import {
+  playConnectedSound,
   playDefeatSound,
+  playDisconnectedSound,
   playPlayerMarkSound,
   playSurrenderSound,
   playTimesUpSound,
@@ -75,6 +77,17 @@ describe("sound", () => {
     expect(audioInstances).toHaveLength(2);
     expect(audioInstances[0]?.src).toBe("/sounds/X.mp3");
     expect(audioInstances[1]?.src).toBe("/sounds/O.mp3");
+    expect(audioInstances[0]?.play).toHaveBeenCalledTimes(1);
+    expect(audioInstances[1]?.play).toHaveBeenCalledTimes(1);
+  });
+
+  it("plays connected and disconnected sounds", () => {
+    playConnectedSound();
+    playDisconnectedSound();
+
+    expect(audioInstances).toHaveLength(2);
+    expect(audioInstances[0]?.src).toBe("/sounds/connected.mp3");
+    expect(audioInstances[1]?.src).toBe("/sounds/disconnected.mp3");
     expect(audioInstances[0]?.play).toHaveBeenCalledTimes(1);
     expect(audioInstances[1]?.play).toHaveBeenCalledTimes(1);
   });

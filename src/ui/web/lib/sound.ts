@@ -6,6 +6,8 @@ const SOUND_BY_SYMBOL: Record<PlayerSymbol, string> = {
 };
 
 const DEFEAT_SOUND_PATH = "/sounds/defeat.mp3";
+const CONNECTED_SOUND_PATH = "/sounds/connected.mp3";
+const DISCONNECTED_SOUND_PATH = "/sounds/disconnected.mp3";
 const SURRENDER_SOUND_PATH = "/sounds/surrender.mp3";
 const TIMER_SOUND_PATH = "/sounds/timer.mp3";
 const TIMES_UP_SOUND_PATH = "/sounds/timesup.mp3";
@@ -176,6 +178,14 @@ export const playDefeatSound = (): void => {
   playSound(DEFEAT_SOUND_PATH, {
     playbackState: resultPlaybackState,
   });
+};
+
+export const playConnectedSound = (): void => {
+  playSound(CONNECTED_SOUND_PATH);
+};
+
+export const playDisconnectedSound = (): void => {
+  playSound(DISCONNECTED_SOUND_PATH);
 };
 
 export const playSurrenderSound = (): void => {

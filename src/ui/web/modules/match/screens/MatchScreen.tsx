@@ -65,6 +65,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const isTimeUpVisible = Boolean(isExpired && isOwnTurnTimerActive);
   useMatchSound({
     gameId,
+    status: game?.status,
     lastMove: game?.lastMove,
     currentSlot,
     isGameReady: Boolean(game),
