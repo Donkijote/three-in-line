@@ -16,7 +16,7 @@ import {
   useGameHeartbeat,
   useTurnTimer,
 } from "@/ui/web/hooks/useGame";
-import { useMatchMoveSound } from "@/ui/web/hooks/useMatchMoveSound";
+import { useMatchSound } from "@/ui/web/hooks/useMatchSound";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
 import { playPlayerMarkSound } from "@/ui/web/lib/sound";
@@ -59,12 +59,21 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     expireDelayMs: 1200,
     onExpire: () => onExpire(game?.id),
   });
-  useMatchMoveSound({
+  const isOwnTurnTimerActive = Boolean(
+    timerActive && currentSlot && game?.currentTurn === currentSlot,
+  );
+  const isTimeUpVisible = Boolean(isExpired && isOwnTurnTimerActive);
+  useMatchSound({
     gameId,
     lastMove: game?.lastMove,
     currentSlot,
     isGameReady: Boolean(game),
     isMoveSoundEnabled: game?.status === "playing" && preferences.gameSounds,
+    soundEnabled: preferences.gameSounds,
+    isTimedMode: Boolean(timerEnabled),
+    isOwnTurnTimerActive,
+    isTimeUpVisible,
+    deadlineTime: game?.turnDeadlineTime,
   });
 
   if (!game || !currentUser) {
@@ -91,10 +100,6 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const matchFormat = game.match.format;
   const resolvedCurrentSlot = currentSlot === "P1" ? "P1" : "P2";
   const currentPlayerSymbol = resolvedCurrentSlot === "P1" ? "X" : "O";
-  const shouldShowTimeout =
-    timerActive &&
-    resolvedCurrentSlot !== undefined &&
-    game.currentTurn === resolvedCurrentSlot;
 
   const matchPlayersProps = {
     p1UserId: game.p1UserId,
@@ -164,7 +169,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             currentTurn={game.currentTurn}
             currentUserId={currentUserId}
             p1UserId={game.p1UserId}
-            isTimeUp={Boolean(isExpired && shouldShowTimeout)}
+            isTimeUp={isTimeUpVisible}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
           />
@@ -180,7 +185,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             currentTurn={game.currentTurn}
             currentUserId={currentUserId}
             p1UserId={game.p1UserId}
-            isTimeUp={Boolean(isExpired && shouldShowTimeout)}
+            isTimeUp={isTimeUpVisible}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
           />

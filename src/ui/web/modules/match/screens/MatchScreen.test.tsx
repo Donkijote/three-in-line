@@ -99,6 +99,9 @@ vi.mock("@/application/games/timeoutTurnUseCase", () => ({
 
 vi.mock("@/ui/web/lib/sound", () => ({
   playPlayerMarkSound: vi.fn(),
+  startTimerTickSound: vi.fn(),
+  stopTimerTickSound: vi.fn(),
+  playTimesUpSound: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({

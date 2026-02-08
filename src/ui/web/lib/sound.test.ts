@@ -1,13 +1,17 @@
 import {
   playDefeatSound,
   playPlayerMarkSound,
+  playTimesUpSound,
   playVictorySound,
+  startTimerTickSound,
   stopResultSound,
+  stopTimerTickSound,
 } from "./sound";
 
 type MockAudioInstance = {
   src: string;
   currentTime: number;
+  loop: boolean;
   play: ReturnType<typeof vi.fn>;
   pause: ReturnType<typeof vi.fn>;
   addEventListener: (type: string, cb: () => void) => void;
@@ -20,6 +24,7 @@ const queuedPlayResults: Array<Promise<void> | undefined> = [];
 const MockAudio = class {
   src = "";
   currentTime = 0;
+  loop = false;
   private endedListeners = new Set<() => void>();
   play = vi.fn(() => {
     if (queuedPlayResults.length === 0) {
@@ -57,6 +62,7 @@ describe("sound", () => {
 
   afterEach(() => {
     stopResultSound();
+    stopTimerTickSound();
     vi.unstubAllGlobals();
     vi.useRealTimers();
   });
@@ -132,6 +138,35 @@ describe("sound", () => {
     vi.advanceTimersByTime(1);
     expect(victoryAudio?.pause).toHaveBeenCalledTimes(1);
     expect(victoryAudio?.currentTime).toBe(0);
+  });
+
+  it("starts timer ticking sound as a loop and does not duplicate", () => {
+    startTimerTickSound();
+    startTimerTickSound();
+
+    expect(audioInstances).toHaveLength(1);
+    expect(audioInstances[0]?.src).toBe("/sounds/timer.mp3");
+    expect(audioInstances[0]?.loop).toBe(true);
+  });
+
+  it("stops timer ticking sound explicitly", () => {
+    startTimerTickSound();
+    const timerAudio = audioInstances[0];
+
+    stopTimerTickSound();
+
+    expect(timerAudio?.pause).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops timer ticking before times up sound", () => {
+    startTimerTickSound();
+    const timerAudio = audioInstances[0];
+
+    playTimesUpSound();
+    const timesUpAudio = audioInstances[1];
+
+    expect(timerAudio?.pause).toHaveBeenCalledTimes(1);
+    expect(timesUpAudio?.src).toBe("/sounds/timesup.mp3");
   });
 
   it("stops active result sound when explicitly requested", () => {

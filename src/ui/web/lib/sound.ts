@@ -6,6 +6,8 @@ const SOUND_BY_SYMBOL: Record<PlayerSymbol, string> = {
 };
 
 const DEFEAT_SOUND_PATH = "/sounds/defeat.mp3";
+const TIMER_SOUND_PATH = "/sounds/timer.mp3";
+const TIMES_UP_SOUND_PATH = "/sounds/timesup.mp3";
 const VICTORY_SOUND_PATH = "/sounds/victory.mp3";
 const VICTORY_MAX_DURATION_MS = 5_000;
 
@@ -15,6 +17,10 @@ type PlaybackState = {
 };
 
 const resultPlaybackState: PlaybackState = {
+  audio: null,
+  timeoutId: undefined,
+};
+const timerTickPlaybackState: PlaybackState = {
   audio: null,
   timeoutId: undefined,
 };
@@ -155,6 +161,7 @@ export const playPlayerMarkSound = (
 
 export const playVictorySound = (): void => {
   stopPlayerMarkSounds();
+  stopTimerTickSound();
   playSound(VICTORY_SOUND_PATH, {
     maxDurationMs: VICTORY_MAX_DURATION_MS,
     playbackState: resultPlaybackState,
@@ -163,9 +170,32 @@ export const playVictorySound = (): void => {
 
 export const playDefeatSound = (): void => {
   stopPlayerMarkSounds();
+  stopTimerTickSound();
   playSound(DEFEAT_SOUND_PATH, {
     playbackState: resultPlaybackState,
   });
+};
+
+export const startTimerTickSound = (): void => {
+  if (timerTickPlaybackState.audio) {
+    return;
+  }
+
+  playSound(TIMER_SOUND_PATH, {
+    playbackState: timerTickPlaybackState,
+    onAudioStart: (audio) => {
+      audio.loop = true;
+    },
+  });
+};
+
+export const stopTimerTickSound = (): void => {
+  clearPlaybackState(timerTickPlaybackState);
+};
+
+export const playTimesUpSound = (): void => {
+  stopTimerTickSound();
+  playSound(TIMES_UP_SOUND_PATH);
 };
 
 export const stopResultSound = (): void => {
