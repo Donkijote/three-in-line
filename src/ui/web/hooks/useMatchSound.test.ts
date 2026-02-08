@@ -152,6 +152,50 @@ describe("useMatchSound", () => {
     expect(playPlayerMarkSound).not.toHaveBeenCalled();
   });
 
+  it("returns early when initialized and no last move is available", () => {
+    const { rerender } = renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        currentSlot: "P1",
+        lastMove: null,
+      },
+    });
+
+    rerender({
+      ...baseParams,
+      currentSlot: "P2",
+      lastMove: null,
+    });
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+  });
+
+  it("does not replay the same move key", () => {
+    const move = { index: 3, by: "P2" as const, at: 100 };
+    const { rerender } = renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        currentSlot: "P1",
+        lastMove: null,
+      },
+    });
+
+    rerender({
+      ...baseParams,
+      currentSlot: "P1",
+      lastMove: move,
+    });
+    expect(playPlayerMarkSound).toHaveBeenCalledTimes(1);
+
+    rerender({
+      ...baseParams,
+      currentSlot: "P2",
+      lastMove: move,
+    });
+
+    expect(playPlayerMarkSound).toHaveBeenCalledTimes(1);
+  });
+
   it("starts timer ticking while own timed turn is active", () => {
     renderHook((props: Params) => useMatchSound(props), {
       initialProps: baseParams,
