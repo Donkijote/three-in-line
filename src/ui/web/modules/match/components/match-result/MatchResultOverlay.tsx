@@ -9,6 +9,7 @@ import { MatchResultOverlayBase } from "./MatchResultOverlayBase";
 export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
   const {
     soundEnabled,
+    hapticsEnabled,
     status,
     endedReason,
     winner,
@@ -19,6 +20,7 @@ export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
   } = props;
   useMatchResultOverlaySound({
     soundEnabled,
+    hapticsEnabled,
     status,
     endedReason,
     winner,

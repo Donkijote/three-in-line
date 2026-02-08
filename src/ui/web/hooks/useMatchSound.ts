@@ -2,9 +2,12 @@ import { useEffect, useRef } from "react";
 
 import type { Game, GameId, PlayerSlot } from "@/domain/entities/Game";
 import {
+  playAbandonedWinHaptic,
+  playDefeatOverlayHaptic,
   playOpponentDisconnectedHaptic,
   playOpponentReconnectedHaptic,
   playTimeStoppedHaptic,
+  playVictoryOverlayHaptic,
 } from "@/ui/web/lib/haptics";
 import {
   playConnectedSound,
@@ -36,6 +39,7 @@ type UseMatchSoundParams = {
 
 type UseMatchResultOverlaySoundParams = {
   soundEnabled?: boolean;
+  hapticsEnabled?: boolean;
   status: Game["status"];
   endedReason: Game["endedReason"];
   winner: PlayerSlot | null;
@@ -45,6 +49,10 @@ type UseMatchResultOverlaySoundParams = {
 };
 
 type ResultSoundAction = {
+  key: string;
+  play: () => void;
+} | null;
+type ResultHapticAction = {
   key: string;
   play: () => void;
 } | null;
@@ -194,6 +202,7 @@ export const useMatchSound = ({
 
 export const useMatchResultOverlaySound = ({
   soundEnabled,
+  hapticsEnabled,
   status,
   endedReason,
   winner,
@@ -202,6 +211,7 @@ export const useMatchResultOverlaySound = ({
   currentUserId,
 }: UseMatchResultOverlaySoundParams): void => {
   const resultSoundKeyRef = useRef<string | null>(null);
+  const resultHapticKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (shouldResetResultSound(soundEnabled, status)) {
@@ -239,6 +249,42 @@ export const useMatchResultOverlaySound = ({
     winner,
   ]);
 
+  useEffect(() => {
+    if (shouldResetResultHaptic(hapticsEnabled, status)) {
+      resultHapticKeyRef.current = null;
+      return;
+    }
+
+    const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+    const action = resolveResultHapticAction({
+      abandonedBy,
+      currentSlot,
+      currentUserId,
+      endedReason,
+      winner,
+    });
+
+    if (!action) {
+      resultHapticKeyRef.current = null;
+      return;
+    }
+
+    if (resultHapticKeyRef.current === action.key) {
+      return;
+    }
+
+    resultHapticKeyRef.current = action.key;
+    action.play();
+  }, [
+    abandonedBy,
+    currentUserId,
+    endedReason,
+    hapticsEnabled,
+    p1UserId,
+    status,
+    winner,
+  ]);
+
   useEffect(() => () => stopResultSound(), []);
 };
 
@@ -251,6 +297,11 @@ const resetResultSound = (resultSoundKeyRef: { current: string | null }) => {
   stopResultSound();
   resultSoundKeyRef.current = null;
 };
+
+const shouldResetResultHaptic = (
+  hapticsEnabled: boolean | undefined,
+  status: Game["status"],
+): boolean => hapticsEnabled === false || status !== "ended";
 
 const resolveResultSoundAction = ({
   abandonedBy,
@@ -292,6 +343,54 @@ const resolveResultSoundAction = ({
   return {
     key: `${userKey}:${winner}:surrender`,
     play: playSurrenderSound,
+  };
+};
+
+const resolveResultHapticAction = ({
+  abandonedBy,
+  currentSlot,
+  currentUserId,
+  endedReason,
+  winner,
+}: {
+  abandonedBy: PlayerSlot | null;
+  currentSlot: PlayerSlot | undefined;
+  currentUserId: string | undefined;
+  endedReason: Game["endedReason"];
+  winner: PlayerSlot | null;
+}): ResultHapticAction => {
+  if (!winner || !currentSlot) {
+    return null;
+  }
+
+  const userKey = currentUserId ?? "unknown";
+  const isWinner = winner === currentSlot;
+
+  if (endedReason === "abandoned") {
+    if (!abandonedBy || abandonedBy === currentSlot || !isWinner) {
+      return null;
+    }
+
+    return {
+      key: `${userKey}:${winner}:abandoned-win`,
+      play: playAbandonedWinHaptic,
+    };
+  }
+
+  if (endedReason !== "win") {
+    return null;
+  }
+
+  if (isWinner) {
+    return {
+      key: `${userKey}:${winner}:victory`,
+      play: playVictoryOverlayHaptic,
+    };
+  }
+
+  return {
+    key: `${userKey}:${winner}:defeat`,
+    play: playDefeatOverlayHaptic,
   };
 };
 

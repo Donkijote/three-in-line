@@ -10,6 +10,7 @@ export type ResultIcon = "trophy" | "heart" | "wifi" | "flag";
 
 export type MatchResultOverlayProps = {
   soundEnabled?: boolean;
+  hapticsEnabled?: boolean;
   status: GameStatus;
   endedReason: "win" | "draw" | "abandoned" | "disconnect" | null;
   winner: PlayerSlot | null;

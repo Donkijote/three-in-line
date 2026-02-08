@@ -214,6 +214,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
       )}
       <MatchResultOverlay
         soundEnabled={preferences.gameSounds}
+        hapticsEnabled={preferences.haptics}
         status={game.status}
         endedReason={game.endedReason}
         winner={game.winner}

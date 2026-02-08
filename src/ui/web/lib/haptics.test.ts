@@ -5,11 +5,14 @@ describe("haptics", () => {
 
   it("triggers a light tap vibration when supported", async () => {
     const {
+      playAbandonedWinHaptic,
+      playDefeatOverlayHaptic,
       playInvalidMoveHaptic,
       playLightTapHaptic,
       playOpponentDisconnectedHaptic,
       playOpponentReconnectedHaptic,
       playTimeStoppedHaptic,
+      playVictoryOverlayHaptic,
     } = await import("./haptics");
     const vibrate = vi.fn();
     vi.stubGlobal("navigator", { vibrate });
@@ -19,12 +22,18 @@ describe("haptics", () => {
     playTimeStoppedHaptic();
     playOpponentDisconnectedHaptic();
     playOpponentReconnectedHaptic();
+    playVictoryOverlayHaptic();
+    playDefeatOverlayHaptic();
+    playAbandonedWinHaptic();
 
     expect(vibrate).toHaveBeenCalledWith(10);
     expect(vibrate).toHaveBeenCalledWith([24, 36, 24]);
     expect(vibrate).toHaveBeenCalledWith(40);
     expect(vibrate).toHaveBeenCalledWith([18, 24, 18]);
     expect(vibrate).toHaveBeenCalledWith(20);
+    expect(vibrate).toHaveBeenCalledWith([18, 28, 36]);
+    expect(vibrate).toHaveBeenCalledWith(55);
+    expect(vibrate).toHaveBeenCalledWith([14, 20, 24]);
   });
 
   it("returns safely when vibrate is not available", async () => {

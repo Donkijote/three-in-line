@@ -2,6 +2,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import {
+  playAbandonedWinHaptic,
+  playDefeatOverlayHaptic,
+  playVictoryOverlayHaptic,
+} from "@/ui/web/lib/haptics";
+import {
   playDefeatSound,
   playSurrenderSound,
   playVictorySound,
@@ -22,6 +27,11 @@ vi.mock("@/ui/web/lib/sound", () => ({
   playSurrenderSound: vi.fn(),
   stopResultSound: vi.fn(),
 }));
+vi.mock("@/ui/web/lib/haptics", () => ({
+  playAbandonedWinHaptic: vi.fn(),
+  playDefeatOverlayHaptic: vi.fn(),
+  playVictoryOverlayHaptic: vi.fn(),
+}));
 
 describe("MatchResultOverlay", () => {
   beforeEach(() => {
@@ -30,6 +40,9 @@ describe("MatchResultOverlay", () => {
     vi.mocked(playDefeatSound).mockClear();
     vi.mocked(playSurrenderSound).mockClear();
     vi.mocked(stopResultSound).mockClear();
+    vi.mocked(playAbandonedWinHaptic).mockClear();
+    vi.mocked(playDefeatOverlayHaptic).mockClear();
+    vi.mocked(playVictoryOverlayHaptic).mockClear();
   });
 
   it("renders nothing when closed", () => {
@@ -93,12 +106,16 @@ describe("MatchResultOverlay", () => {
     expect(playVictorySound).toHaveBeenCalledTimes(1);
     expect(playDefeatSound).not.toHaveBeenCalled();
     expect(playSurrenderSound).not.toHaveBeenCalled();
+    expect(playAbandonedWinHaptic).not.toHaveBeenCalled();
+    expect(playDefeatOverlayHaptic).not.toHaveBeenCalled();
+    expect(playVictoryOverlayHaptic).toHaveBeenCalledTimes(1);
   });
 
   it("does not play result sounds when sound is disabled", () => {
     render(
       <MatchResultOverlay
         soundEnabled={false}
+        hapticsEnabled={false}
         status="ended"
         endedReason="win"
         winner="P1"
@@ -114,6 +131,8 @@ describe("MatchResultOverlay", () => {
     expect(playVictorySound).not.toHaveBeenCalled();
     expect(playDefeatSound).not.toHaveBeenCalled();
     expect(playSurrenderSound).not.toHaveBeenCalled();
+    expect(playDefeatOverlayHaptic).not.toHaveBeenCalled();
+    expect(playVictoryOverlayHaptic).not.toHaveBeenCalled();
     expect(stopResultSound).toHaveBeenCalled();
   });
 
@@ -149,6 +168,9 @@ describe("MatchResultOverlay", () => {
     expect(playDefeatSound).toHaveBeenCalledTimes(1);
     expect(playVictorySound).not.toHaveBeenCalled();
     expect(playSurrenderSound).not.toHaveBeenCalled();
+    expect(playAbandonedWinHaptic).not.toHaveBeenCalled();
+    expect(playDefeatOverlayHaptic).toHaveBeenCalledTimes(1);
+    expect(playVictoryOverlayHaptic).not.toHaveBeenCalled();
   });
 
   it("renders disconnect messaging when opponent leaves", () => {
@@ -174,6 +196,9 @@ describe("MatchResultOverlay", () => {
     expect(playVictorySound).not.toHaveBeenCalled();
     expect(playDefeatSound).not.toHaveBeenCalled();
     expect(playSurrenderSound).not.toHaveBeenCalled();
+    expect(playAbandonedWinHaptic).not.toHaveBeenCalled();
+    expect(playDefeatOverlayHaptic).not.toHaveBeenCalled();
+    expect(playVictoryOverlayHaptic).not.toHaveBeenCalled();
   });
 
   it("renders disconnect messaging when current user disconnected", () => {
@@ -239,6 +264,9 @@ describe("MatchResultOverlay", () => {
     expect(playSurrenderSound).toHaveBeenCalledTimes(1);
     expect(playVictorySound).not.toHaveBeenCalled();
     expect(playDefeatSound).not.toHaveBeenCalled();
+    expect(playAbandonedWinHaptic).toHaveBeenCalledTimes(1);
+    expect(playDefeatOverlayHaptic).not.toHaveBeenCalled();
+    expect(playVictoryOverlayHaptic).not.toHaveBeenCalled();
   });
 
   it("renders nothing when current user abandoned the match", () => {
@@ -258,6 +286,9 @@ describe("MatchResultOverlay", () => {
 
     expect(container.firstChild).toBeNull();
     expect(playSurrenderSound).not.toHaveBeenCalled();
+    expect(playAbandonedWinHaptic).not.toHaveBeenCalled();
+    expect(playDefeatOverlayHaptic).not.toHaveBeenCalled();
+    expect(playVictoryOverlayHaptic).not.toHaveBeenCalled();
   });
 
   it("renders defeat when current user is unknown", () => {
@@ -331,6 +362,27 @@ describe("MatchResultOverlay", () => {
     );
 
     expect(playDefeatSound).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not play victory haptic when haptics are disabled", () => {
+    render(
+      <MatchResultOverlay
+        hapticsEnabled={false}
+        status="ended"
+        endedReason="win"
+        winner="P1"
+        abandonedBy={null}
+        p1UserId="user-1"
+        currentUserId="user-1"
+        onPrimaryAction={vi.fn()}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(playVictoryOverlayHaptic).not.toHaveBeenCalled();
+    expect(playDefeatOverlayHaptic).not.toHaveBeenCalled();
+    expect(playAbandonedWinHaptic).not.toHaveBeenCalled();
   });
 
   it("does not play surrender sound when current user is unknown", () => {
