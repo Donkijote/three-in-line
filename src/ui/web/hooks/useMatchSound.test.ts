@@ -2,6 +2,11 @@ import { renderHook } from "@testing-library/react";
 
 import type { Game, GameId } from "@/domain/entities/Game";
 import {
+  playOpponentDisconnectedHaptic,
+  playOpponentReconnectedHaptic,
+  playTimeStoppedHaptic,
+} from "@/ui/web/lib/haptics";
+import {
   playConnectedSound,
   playDisconnectedSound,
   playPlayerMarkSound,
@@ -20,6 +25,11 @@ vi.mock("@/ui/web/lib/sound", () => ({
   stopTimerTickSound: vi.fn(),
   playTimesUpSound: vi.fn(),
 }));
+vi.mock("@/ui/web/lib/haptics", () => ({
+  playOpponentDisconnectedHaptic: vi.fn(),
+  playOpponentReconnectedHaptic: vi.fn(),
+  playTimeStoppedHaptic: vi.fn(),
+}));
 
 type Params = {
   gameId: GameId;
@@ -29,6 +39,7 @@ type Params = {
   isGameReady: boolean;
   isMoveSoundEnabled: boolean;
   soundEnabled: boolean;
+  hapticsEnabled: boolean;
   isTimedMode: boolean;
   isOwnTurnTimerActive: boolean;
   isTimeUpVisible: boolean;
@@ -43,6 +54,7 @@ const baseParams: Params = {
   isGameReady: true,
   isMoveSoundEnabled: true,
   soundEnabled: true,
+  hapticsEnabled: true,
   isTimedMode: true,
   isOwnTurnTimerActive: true,
   isTimeUpVisible: false,
@@ -53,6 +65,9 @@ describe("useMatchSound", () => {
   beforeEach(() => {
     vi.mocked(playConnectedSound).mockClear();
     vi.mocked(playDisconnectedSound).mockClear();
+    vi.mocked(playOpponentDisconnectedHaptic).mockClear();
+    vi.mocked(playOpponentReconnectedHaptic).mockClear();
+    vi.mocked(playTimeStoppedHaptic).mockClear();
     vi.mocked(playPlayerMarkSound).mockClear();
     vi.mocked(startTimerTickSound).mockClear();
     vi.mocked(stopTimerTickSound).mockClear();
@@ -249,6 +264,7 @@ describe("useMatchSound", () => {
     });
 
     expect(playTimesUpSound).toHaveBeenCalledTimes(1);
+    expect(playTimeStoppedHaptic).toHaveBeenCalledTimes(1);
   });
 
   it("plays times up again for a different game", () => {
@@ -282,7 +298,22 @@ describe("useMatchSound", () => {
 
     expect(startTimerTickSound).not.toHaveBeenCalled();
     expect(playTimesUpSound).not.toHaveBeenCalled();
+    expect(playTimeStoppedHaptic).toHaveBeenCalledTimes(1);
     expect(stopTimerTickSound).toHaveBeenCalled();
+  });
+
+  it("does not play time stopped haptic when haptics are disabled", () => {
+    renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        soundEnabled: true,
+        hapticsEnabled: false,
+        isTimeUpVisible: true,
+      },
+    });
+
+    expect(playTimesUpSound).toHaveBeenCalledTimes(1);
+    expect(playTimeStoppedHaptic).not.toHaveBeenCalled();
   });
 
   it("plays disconnected sound when match transitions from playing to paused", () => {
@@ -299,6 +330,7 @@ describe("useMatchSound", () => {
     });
 
     expect(playDisconnectedSound).toHaveBeenCalledTimes(1);
+    expect(playOpponentDisconnectedHaptic).toHaveBeenCalledTimes(1);
     expect(playConnectedSound).not.toHaveBeenCalled();
   });
 
@@ -317,6 +349,7 @@ describe("useMatchSound", () => {
 
     expect(playConnectedSound).toHaveBeenCalledTimes(1);
     expect(playDisconnectedSound).not.toHaveBeenCalled();
+    expect(playOpponentReconnectedHaptic).toHaveBeenCalledTimes(1);
   });
 
   it("does not play connection sounds on initial paused snapshot", () => {
@@ -336,6 +369,7 @@ describe("useMatchSound", () => {
       initialProps: {
         ...baseParams,
         soundEnabled: false,
+        hapticsEnabled: false,
         status: "playing",
       },
     });
@@ -343,10 +377,55 @@ describe("useMatchSound", () => {
     rerender({
       ...baseParams,
       soundEnabled: false,
+      hapticsEnabled: false,
       status: "paused",
     });
 
     expect(playConnectedSound).not.toHaveBeenCalled();
     expect(playDisconnectedSound).not.toHaveBeenCalled();
+    expect(playOpponentDisconnectedHaptic).not.toHaveBeenCalled();
+    expect(playOpponentReconnectedHaptic).not.toHaveBeenCalled();
+  });
+
+  it("plays disconnected haptic when sounds are disabled but haptics are enabled", () => {
+    const { rerender } = renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        soundEnabled: false,
+        hapticsEnabled: true,
+        status: "playing",
+      },
+    });
+
+    rerender({
+      ...baseParams,
+      soundEnabled: false,
+      hapticsEnabled: true,
+      status: "paused",
+    });
+
+    expect(playDisconnectedSound).not.toHaveBeenCalled();
+    expect(playOpponentDisconnectedHaptic).toHaveBeenCalledTimes(1);
+  });
+
+  it("plays reconnect haptic when sounds are disabled but haptics are enabled", () => {
+    const { rerender } = renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        soundEnabled: false,
+        hapticsEnabled: true,
+        status: "paused",
+      },
+    });
+
+    rerender({
+      ...baseParams,
+      soundEnabled: false,
+      hapticsEnabled: true,
+      status: "playing",
+    });
+
+    expect(playConnectedSound).not.toHaveBeenCalled();
+    expect(playOpponentReconnectedHaptic).toHaveBeenCalledTimes(1);
   });
 });

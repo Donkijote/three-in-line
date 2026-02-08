@@ -2,6 +2,11 @@ import { useEffect, useRef } from "react";
 
 import type { Game, GameId, PlayerSlot } from "@/domain/entities/Game";
 import {
+  playOpponentDisconnectedHaptic,
+  playOpponentReconnectedHaptic,
+  playTimeStoppedHaptic,
+} from "@/ui/web/lib/haptics";
+import {
   playConnectedSound,
   playDefeatSound,
   playDisconnectedSound,
@@ -22,6 +27,7 @@ type UseMatchSoundParams = {
   isGameReady: boolean;
   isMoveSoundEnabled: boolean;
   soundEnabled: boolean;
+  hapticsEnabled: boolean;
   isTimedMode: boolean;
   isOwnTurnTimerActive: boolean;
   isTimeUpVisible: boolean;
@@ -51,6 +57,7 @@ export const useMatchSound = ({
   isGameReady,
   isMoveSoundEnabled,
   soundEnabled,
+  hapticsEnabled,
   isTimedMode,
   isOwnTurnTimerActive,
   isTimeUpVisible,
@@ -62,6 +69,7 @@ export const useMatchSound = ({
   const observedConnectionGameIdRef = useRef<string | null>(null);
   const previousStatusRef = useRef<Game["status"] | null>(null);
   const lastTimesUpKeyRef = useRef<string | null>(null);
+  const lastTimesUpHapticKeyRef = useRef<string | null>(null);
   const observedTimesUpGameIdRef = useRef<GameId | null>(null);
 
   useEffect(() => {
@@ -127,20 +135,30 @@ export const useMatchSound = ({
       return;
     }
 
-    previousStatusRef.current = status;
-    if (!soundEnabled) {
-      return;
-    }
-
     if (previousStatus === "playing" && status === "paused") {
-      playDisconnectedSound();
+      previousStatusRef.current = status;
+      if (soundEnabled) {
+        playDisconnectedSound();
+      }
+      if (hapticsEnabled) {
+        playOpponentDisconnectedHaptic();
+      }
       return;
     }
 
     if (previousStatus === "paused" && status === "playing") {
-      playConnectedSound();
+      previousStatusRef.current = status;
+      if (soundEnabled) {
+        playConnectedSound();
+      }
+      if (hapticsEnabled) {
+        playOpponentReconnectedHaptic();
+      }
+      return;
     }
-  }, [gameId, isGameReady, soundEnabled, status]);
+
+    previousStatusRef.current = status;
+  }, [gameId, hapticsEnabled, isGameReady, soundEnabled, status]);
 
   useEffect(() => {
     const shouldTick =
@@ -158,27 +176,28 @@ export const useMatchSound = ({
     if (observedTimesUpGameIdRef.current !== gameId) {
       observedTimesUpGameIdRef.current = gameId;
       lastTimesUpKeyRef.current = null;
+      lastTimesUpHapticKeyRef.current = null;
     }
 
-    if (
-      !soundEnabled ||
-      !isTimedMode ||
-      !isOwnTurnTimerActive ||
-      !isTimeUpVisible
-    ) {
+    if (!isTimedMode || !isOwnTurnTimerActive || !isTimeUpVisible) {
       return;
     }
 
     const timesUpKey = `${gameId}:${deadlineTime ?? "none"}`;
-    if (lastTimesUpKeyRef.current === timesUpKey) {
-      return;
+
+    if (soundEnabled && lastTimesUpKeyRef.current !== timesUpKey) {
+      lastTimesUpKeyRef.current = timesUpKey;
+      playTimesUpSound();
     }
 
-    lastTimesUpKeyRef.current = timesUpKey;
-    playTimesUpSound();
+    if (hapticsEnabled && lastTimesUpHapticKeyRef.current !== timesUpKey) {
+      lastTimesUpHapticKeyRef.current = timesUpKey;
+      playTimeStoppedHaptic();
+    }
   }, [
     deadlineTime,
     gameId,
+    hapticsEnabled,
     isOwnTurnTimerActive,
     isTimeUpVisible,
     isTimedMode,

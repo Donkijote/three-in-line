@@ -19,6 +19,10 @@ import {
 import { useMatchSound } from "@/ui/web/hooks/useMatchSound";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
+import {
+  playInvalidMoveHaptic,
+  playLightTapHaptic,
+} from "@/ui/web/lib/haptics";
 import { playPlayerMarkSound } from "@/ui/web/lib/sound";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { MatchActions } from "@/ui/web/modules/match/components/MatchActions";
@@ -71,6 +75,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     isGameReady: Boolean(game),
     isMoveSoundEnabled: game?.status === "playing" && preferences.gameSounds,
     soundEnabled: preferences.gameSounds,
+    hapticsEnabled: preferences.haptics,
     isTimedMode: Boolean(timerEnabled),
     isOwnTurnTimerActive,
     isTimeUpVisible,
@@ -121,12 +126,23 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
       if (preferences.gameSounds) {
         playPlayerMarkSound(currentPlayerSymbol);
       }
+      if (preferences.haptics) {
+        playLightTapHaptic();
+      }
       await placeMarkUseCase(gameRepository, { gameId, index });
     } catch (error) {
       console.debug("Place mark failed.", error);
     } finally {
       setIsPlacing(false);
     }
+  };
+
+  const handleInvalidMoveAttempt = () => {
+    if (!preferences.haptics) {
+      return;
+    }
+
+    playInvalidMoveHaptic();
   };
 
   const handleCreateNewGame = async () => {
@@ -173,6 +189,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             isTimeUp={isTimeUpVisible}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
+            onInvalidMoveAttempt={handleInvalidMoveAttempt}
           />
         </div>
       ) : (
@@ -189,6 +206,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             isTimeUp={isTimeUpVisible}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
+            onInvalidMoveAttempt={handleInvalidMoveAttempt}
           />
 
           <MatchActions gameId={gameId} match={game.match} />
