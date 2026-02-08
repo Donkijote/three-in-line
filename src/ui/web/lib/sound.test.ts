@@ -1,6 +1,7 @@
 import {
   playDefeatSound,
   playPlayerMarkSound,
+  playSurrenderSound,
   playTimesUpSound,
   playVictorySound,
   startTimerTickSound,
@@ -190,6 +191,21 @@ describe("sound", () => {
     expect(victoryAudio?.currentTime).toBe(0);
     expect(defeatAudio?.src).toBe("/sounds/defeat.mp3");
     expect(defeatAudio?.play).toHaveBeenCalledTimes(1);
+  });
+
+  it("plays surrender result sound trimmed to 2 seconds", () => {
+    playSurrenderSound();
+    const surrenderAudio = audioInstances[0];
+
+    expect(surrenderAudio?.src).toBe("/sounds/surrender.mp3");
+    expect(surrenderAudio?.play).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(1_999);
+    expect(surrenderAudio?.pause).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
+    expect(surrenderAudio?.pause).toHaveBeenCalledTimes(1);
+    expect(surrenderAudio?.currentTime).toBe(0);
   });
 
   it("stops active mark sound when a result sound starts", () => {

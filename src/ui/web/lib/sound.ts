@@ -6,9 +6,11 @@ const SOUND_BY_SYMBOL: Record<PlayerSymbol, string> = {
 };
 
 const DEFEAT_SOUND_PATH = "/sounds/defeat.mp3";
+const SURRENDER_SOUND_PATH = "/sounds/surrender.mp3";
 const TIMER_SOUND_PATH = "/sounds/timer.mp3";
 const TIMES_UP_SOUND_PATH = "/sounds/timesup.mp3";
 const VICTORY_SOUND_PATH = "/sounds/victory.mp3";
+const SURRENDER_MAX_DURATION_MS = 2_000;
 const VICTORY_MAX_DURATION_MS = 5_000;
 
 type PlaybackState = {
@@ -172,6 +174,15 @@ export const playDefeatSound = (): void => {
   stopPlayerMarkSounds();
   stopTimerTickSound();
   playSound(DEFEAT_SOUND_PATH, {
+    playbackState: resultPlaybackState,
+  });
+};
+
+export const playSurrenderSound = (): void => {
+  stopPlayerMarkSounds();
+  stopTimerTickSound();
+  playSound(SURRENDER_SOUND_PATH, {
+    maxDurationMs: SURRENDER_MAX_DURATION_MS,
     playbackState: resultPlaybackState,
   });
 };

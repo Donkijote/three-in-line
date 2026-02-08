@@ -2,9 +2,13 @@ import { useEffect, useRef } from "react";
 
 import type { Game, GameId, PlayerSlot } from "@/domain/entities/Game";
 import {
+  playDefeatSound,
   playPlayerMarkSound,
+  playSurrenderSound,
   playTimesUpSound,
+  playVictorySound,
   startTimerTickSound,
+  stopResultSound,
   stopTimerTickSound,
 } from "@/ui/web/lib/sound";
 
@@ -20,6 +24,21 @@ type UseMatchSoundParams = {
   isTimeUpVisible: boolean;
   deadlineTime: number | null | undefined;
 };
+
+type UseMatchResultOverlaySoundParams = {
+  soundEnabled?: boolean;
+  status: Game["status"];
+  endedReason: Game["endedReason"];
+  winner: PlayerSlot | null;
+  abandonedBy: PlayerSlot | null;
+  p1UserId: string;
+  currentUserId?: string;
+};
+
+type ResultSoundAction = {
+  key: string;
+  play: () => void;
+} | null;
 
 export const useMatchSound = ({
   gameId,
@@ -126,4 +145,118 @@ export const useMatchSound = ({
   ]);
 
   useEffect(() => () => stopTimerTickSound(), []);
+};
+
+export const useMatchResultOverlaySound = ({
+  soundEnabled,
+  status,
+  endedReason,
+  winner,
+  abandonedBy,
+  p1UserId,
+  currentUserId,
+}: UseMatchResultOverlaySoundParams): void => {
+  const resultSoundKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (shouldResetResultSound(soundEnabled, status)) {
+      resetResultSound(resultSoundKeyRef);
+      return;
+    }
+
+    const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+    const action = resolveResultSoundAction({
+      abandonedBy,
+      currentSlot,
+      currentUserId,
+      endedReason,
+      winner,
+    });
+
+    if (!action) {
+      resetResultSound(resultSoundKeyRef);
+      return;
+    }
+
+    if (resultSoundKeyRef.current === action.key) {
+      return;
+    }
+
+    resultSoundKeyRef.current = action.key;
+    action.play();
+  }, [
+    abandonedBy,
+    currentUserId,
+    endedReason,
+    p1UserId,
+    soundEnabled,
+    status,
+    winner,
+  ]);
+
+  useEffect(() => () => stopResultSound(), []);
+};
+
+const shouldResetResultSound = (
+  soundEnabled: boolean | undefined,
+  status: Game["status"],
+): boolean => soundEnabled === false || status !== "ended";
+
+const resetResultSound = (resultSoundKeyRef: { current: string | null }) => {
+  stopResultSound();
+  resultSoundKeyRef.current = null;
+};
+
+const resolveResultSoundAction = ({
+  abandonedBy,
+  currentSlot,
+  currentUserId,
+  endedReason,
+  winner,
+}: {
+  abandonedBy: PlayerSlot | null;
+  currentSlot: PlayerSlot | undefined;
+  currentUserId: string | undefined;
+  endedReason: Game["endedReason"];
+  winner: PlayerSlot | null;
+}): ResultSoundAction => {
+  if (!winner) {
+    return null;
+  }
+
+  const isWinner = currentSlot ? winner === currentSlot : false;
+  const userKey = currentUserId ?? "unknown";
+
+  if (endedReason === "win") {
+    const type = isWinner ? "victory" : "defeat";
+    return {
+      key: `${userKey}:${winner}:${type}`,
+      play: isWinner ? playVictorySound : playDefeatSound,
+    };
+  }
+
+  if (endedReason !== "abandoned" || !currentSlot || !abandonedBy) {
+    return null;
+  }
+
+  const didCurrentUserAbandon = abandonedBy === currentSlot;
+  if (didCurrentUserAbandon || !isWinner) {
+    return null;
+  }
+
+  return {
+    key: `${userKey}:${winner}:surrender`,
+    play: playSurrenderSound,
+  };
+};
+
+const resolveCurrentSlot = (
+  currentUserId: string | undefined,
+  p1UserId: string,
+): PlayerSlot | undefined => {
+  if (!currentUserId) {
+    return undefined;
+  }
+
+  return currentUserId === p1UserId ? "P1" : "P2";
 };

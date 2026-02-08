@@ -1,10 +1,4 @@
-import { useEffect, useRef } from "react";
-
-import {
-  playDefeatSound,
-  playVictorySound,
-  stopResultSound,
-} from "@/ui/web/lib/sound";
+import { useMatchResultOverlaySound } from "@/ui/web/hooks/useMatchSound";
 
 import type {
   MatchResultOverlayProps,
@@ -23,39 +17,15 @@ export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
     currentUserId,
     onPrimaryAction,
   } = props;
-  const resultSoundKeyRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (soundEnabled === false) {
-      stopResultSound();
-      resultSoundKeyRef.current = null;
-      return;
-    }
-
-    if (status !== "ended" || endedReason !== "win" || !winner) {
-      stopResultSound();
-      resultSoundKeyRef.current = null;
-      return;
-    }
-
-    const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
-    const isWinner = currentSlot ? winner === currentSlot : false;
-    const soundKey = `${currentUserId ?? "unknown"}:${winner}:${isWinner ? "victory" : "defeat"}`;
-
-    if (resultSoundKeyRef.current === soundKey) {
-      return;
-    }
-
-    resultSoundKeyRef.current = soundKey;
-    if (isWinner) {
-      playVictorySound();
-      return;
-    }
-
-    playDefeatSound();
-  }, [currentUserId, endedReason, p1UserId, soundEnabled, status, winner]);
-
-  useEffect(() => () => stopResultSound(), []);
+  useMatchResultOverlaySound({
+    soundEnabled,
+    status,
+    endedReason,
+    winner,
+    abandonedBy,
+    p1UserId,
+    currentUserId,
+  });
 
   if (status !== "ended") {
     return null;

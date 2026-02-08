@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import {
   playDefeatSound,
+  playSurrenderSound,
   playVictorySound,
   stopResultSound,
 } from "@/ui/web/lib/sound";
@@ -18,6 +19,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@/ui/web/lib/sound", () => ({
   playVictorySound: vi.fn(),
   playDefeatSound: vi.fn(),
+  playSurrenderSound: vi.fn(),
   stopResultSound: vi.fn(),
 }));
 
@@ -26,6 +28,7 @@ describe("MatchResultOverlay", () => {
     navigate.mockClear();
     vi.mocked(playVictorySound).mockClear();
     vi.mocked(playDefeatSound).mockClear();
+    vi.mocked(playSurrenderSound).mockClear();
     vi.mocked(stopResultSound).mockClear();
   });
 
@@ -89,6 +92,7 @@ describe("MatchResultOverlay", () => {
     expect(navigate).toHaveBeenNthCalledWith(2, { to: "/play" });
     expect(playVictorySound).toHaveBeenCalledTimes(1);
     expect(playDefeatSound).not.toHaveBeenCalled();
+    expect(playSurrenderSound).not.toHaveBeenCalled();
   });
 
   it("does not play result sounds when sound is disabled", () => {
@@ -109,6 +113,7 @@ describe("MatchResultOverlay", () => {
 
     expect(playVictorySound).not.toHaveBeenCalled();
     expect(playDefeatSound).not.toHaveBeenCalled();
+    expect(playSurrenderSound).not.toHaveBeenCalled();
     expect(stopResultSound).toHaveBeenCalled();
   });
 
@@ -143,6 +148,7 @@ describe("MatchResultOverlay", () => {
     ).toBeInTheDocument();
     expect(playDefeatSound).toHaveBeenCalledTimes(1);
     expect(playVictorySound).not.toHaveBeenCalled();
+    expect(playSurrenderSound).not.toHaveBeenCalled();
   });
 
   it("renders disconnect messaging when opponent leaves", () => {
@@ -167,6 +173,7 @@ describe("MatchResultOverlay", () => {
     ).toBeInTheDocument();
     expect(playVictorySound).not.toHaveBeenCalled();
     expect(playDefeatSound).not.toHaveBeenCalled();
+    expect(playSurrenderSound).not.toHaveBeenCalled();
   });
 
   it("renders disconnect messaging when current user disconnected", () => {
@@ -229,6 +236,9 @@ describe("MatchResultOverlay", () => {
     expect(
       screen.getByRole("button", { name: /find new match/i }),
     ).toBeInTheDocument();
+    expect(playSurrenderSound).toHaveBeenCalledTimes(1);
+    expect(playVictorySound).not.toHaveBeenCalled();
+    expect(playDefeatSound).not.toHaveBeenCalled();
   });
 
   it("renders nothing when current user abandoned the match", () => {
@@ -247,6 +257,7 @@ describe("MatchResultOverlay", () => {
     );
 
     expect(container.firstChild).toBeNull();
+    expect(playSurrenderSound).not.toHaveBeenCalled();
   });
 
   it("renders defeat when current user is unknown", () => {
@@ -320,5 +331,23 @@ describe("MatchResultOverlay", () => {
     );
 
     expect(playDefeatSound).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not play surrender sound when current user is unknown", () => {
+    render(
+      <MatchResultOverlay
+        status="ended"
+        endedReason="abandoned"
+        winner="P1"
+        abandonedBy="P2"
+        p1UserId="user-1"
+        currentUserId={undefined}
+        onPrimaryAction={vi.fn()}
+        currentUser={{ name: "Nova" }}
+        opponentUser={{ name: "Rex" }}
+      />,
+    );
+
+    expect(playSurrenderSound).not.toHaveBeenCalled();
   });
 });
