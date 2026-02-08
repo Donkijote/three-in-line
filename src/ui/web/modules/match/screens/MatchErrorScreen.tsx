@@ -1,7 +1,10 @@
+import { useEffect, useRef } from "react";
+
 import { Flag } from "lucide-react";
 
 import { useNavigate } from "@tanstack/react-router";
 
+import { useUserPreferences } from "@/ui/web/application/providers/UserPreferencesProvider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,6 +15,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/ui/web/components/ui/alert-dialog";
+import { playDisconnectedSound } from "@/ui/web/lib/sound";
 
 type MatchErrorScreenProps = {
   error: unknown;
@@ -19,7 +23,18 @@ type MatchErrorScreenProps = {
 
 export const MatchErrorScreen = ({ error }: MatchErrorScreenProps) => {
   const navigate = useNavigate();
+  const { preferences } = useUserPreferences();
+  const hasPlayedDisconnectedSoundRef = useRef(false);
   const message = getMatchErrorMessage(error);
+
+  useEffect(() => {
+    if (hasPlayedDisconnectedSoundRef.current || !preferences.gameSounds) {
+      return;
+    }
+
+    hasPlayedDisconnectedSoundRef.current = true;
+    playDisconnectedSound();
+  }, [preferences.gameSounds]);
 
   const handleOk = () => {
     void navigate({ to: "/play" });
