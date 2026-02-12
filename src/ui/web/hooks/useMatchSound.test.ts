@@ -2,33 +2,47 @@ import { renderHook } from "@testing-library/react";
 
 import type { Game, GameId } from "@/domain/entities/Game";
 import {
+  playAbandonedWinHaptic,
+  playDefeatOverlayHaptic,
   playOpponentDisconnectedHaptic,
   playOpponentReconnectedHaptic,
   playTimeStoppedHaptic,
+  playVictoryOverlayHaptic,
 } from "@/ui/web/lib/haptics";
 import {
+  playDefeatSound,
   playConnectedSound,
   playDisconnectedSound,
   playPlayerMarkSound,
+  playSurrenderSound,
   playTimesUpSound,
+  playVictorySound,
   startTimerTickSound,
+  stopResultSound,
   stopTimerTickSound,
 } from "@/ui/web/lib/sound";
 
-import { useMatchSound } from "./useMatchSound";
+import { useMatchResultOverlaySound, useMatchSound } from "./useMatchSound";
 
 vi.mock("@/ui/web/lib/sound", () => ({
+  playDefeatSound: vi.fn(),
   playConnectedSound: vi.fn(),
   playDisconnectedSound: vi.fn(),
   playPlayerMarkSound: vi.fn(),
+  playSurrenderSound: vi.fn(),
   startTimerTickSound: vi.fn(),
   stopTimerTickSound: vi.fn(),
   playTimesUpSound: vi.fn(),
+  playVictorySound: vi.fn(),
+  stopResultSound: vi.fn(),
 }));
 vi.mock("@/ui/web/lib/haptics", () => ({
+  playAbandonedWinHaptic: vi.fn(),
+  playDefeatOverlayHaptic: vi.fn(),
   playOpponentDisconnectedHaptic: vi.fn(),
   playOpponentReconnectedHaptic: vi.fn(),
   playTimeStoppedHaptic: vi.fn(),
+  playVictoryOverlayHaptic: vi.fn(),
 }));
 
 type Params = {
@@ -427,5 +441,82 @@ describe("useMatchSound", () => {
 
     expect(playConnectedSound).not.toHaveBeenCalled();
     expect(playOpponentReconnectedHaptic).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not play connectivity feedback for unrelated status transitions", () => {
+    const { rerender } = renderHook((props: Params) => useMatchSound(props), {
+      initialProps: {
+        ...baseParams,
+        status: "playing",
+      },
+    });
+
+    rerender({
+      ...baseParams,
+      status: "ended",
+    });
+
+    expect(playConnectedSound).not.toHaveBeenCalled();
+    expect(playDisconnectedSound).not.toHaveBeenCalled();
+    expect(playOpponentDisconnectedHaptic).not.toHaveBeenCalled();
+    expect(playOpponentReconnectedHaptic).not.toHaveBeenCalled();
+  });
+});
+
+describe("useMatchResultOverlaySound", () => {
+  beforeEach(() => {
+    vi.mocked(playVictorySound).mockClear();
+    vi.mocked(playDefeatSound).mockClear();
+    vi.mocked(playSurrenderSound).mockClear();
+    vi.mocked(stopResultSound).mockClear();
+    vi.mocked(playVictoryOverlayHaptic).mockClear();
+    vi.mocked(playDefeatOverlayHaptic).mockClear();
+    vi.mocked(playAbandonedWinHaptic).mockClear();
+  });
+
+  it("does not replay the same haptic key when dependencies change without action-key change", () => {
+    const { rerender } = renderHook(
+      (props: { abandonedBy: "P1" | "P2" | null }) =>
+        useMatchResultOverlaySound({
+          soundEnabled: false,
+          hapticsEnabled: true,
+          status: "ended",
+          endedReason: "win",
+          winner: "P1",
+          abandonedBy: props.abandonedBy,
+          p1UserId: "user-1",
+          currentUserId: "user-1",
+        }),
+      {
+        initialProps: { abandonedBy: null },
+      },
+    );
+
+    expect(playVictoryOverlayHaptic).toHaveBeenCalledTimes(1);
+
+    rerender({ abandonedBy: "P2" });
+
+    expect(playVictoryOverlayHaptic).toHaveBeenCalledTimes(1);
+    expect(playDefeatOverlayHaptic).not.toHaveBeenCalled();
+    expect(playAbandonedWinHaptic).not.toHaveBeenCalled();
+  });
+
+  it("does not play result haptic for ended reasons other than win/abandoned", () => {
+    renderHook(() =>
+      useMatchResultOverlaySound({
+        soundEnabled: true,
+        hapticsEnabled: true,
+        status: "ended",
+        endedReason: "disconnect",
+        winner: "P1",
+        abandonedBy: null,
+        p1UserId: "user-1",
+        currentUserId: "user-1",
+      }),
+    );
+
+    expect(playVictoryOverlayHaptic).not.toHaveBeenCalled();
+    expect(playDefeatOverlayHaptic).not.toHaveBeenCalled();
+    expect(playAbandonedWinHaptic).not.toHaveBeenCalled();
   });
 });

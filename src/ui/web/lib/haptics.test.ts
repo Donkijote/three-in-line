@@ -1,4 +1,6 @@
 describe("haptics", () => {
+  const loadAllHaptics = async () => import("./haptics");
+
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -13,7 +15,7 @@ describe("haptics", () => {
       playOpponentReconnectedHaptic,
       playTimeStoppedHaptic,
       playVictoryOverlayHaptic,
-    } = await import("./haptics");
+    } = await loadAllHaptics();
     const vibrate = vi.fn();
     vi.stubGlobal("navigator", { vibrate });
 
@@ -37,16 +39,48 @@ describe("haptics", () => {
   });
 
   it("returns safely when vibrate is not available", async () => {
+    const {
+      playAbandonedWinHaptic,
+      playDefeatOverlayHaptic,
+      playInvalidMoveHaptic,
+      playLightTapHaptic,
+      playOpponentDisconnectedHaptic,
+      playOpponentReconnectedHaptic,
+      playTimeStoppedHaptic,
+      playVictoryOverlayHaptic,
+    } = await loadAllHaptics();
     vi.stubGlobal("navigator", {});
-    const { playLightTapHaptic } = await import("./haptics");
 
     expect(() => playLightTapHaptic()).not.toThrow();
+    expect(() => playInvalidMoveHaptic()).not.toThrow();
+    expect(() => playTimeStoppedHaptic()).not.toThrow();
+    expect(() => playOpponentDisconnectedHaptic()).not.toThrow();
+    expect(() => playOpponentReconnectedHaptic()).not.toThrow();
+    expect(() => playVictoryOverlayHaptic()).not.toThrow();
+    expect(() => playDefeatOverlayHaptic()).not.toThrow();
+    expect(() => playAbandonedWinHaptic()).not.toThrow();
   });
 
   it("returns safely when navigator is unavailable", async () => {
-    const { playLightTapHaptic } = await import("./haptics");
+    const {
+      playAbandonedWinHaptic,
+      playDefeatOverlayHaptic,
+      playInvalidMoveHaptic,
+      playLightTapHaptic,
+      playOpponentDisconnectedHaptic,
+      playOpponentReconnectedHaptic,
+      playTimeStoppedHaptic,
+      playVictoryOverlayHaptic,
+    } = await loadAllHaptics();
     vi.stubGlobal("navigator", undefined);
 
     expect(() => playLightTapHaptic()).not.toThrow();
+    expect(() => playInvalidMoveHaptic()).not.toThrow();
+    expect(() => playTimeStoppedHaptic()).not.toThrow();
+    expect(() => playOpponentDisconnectedHaptic()).not.toThrow();
+    expect(() => playOpponentReconnectedHaptic()).not.toThrow();
+    expect(() => playVictoryOverlayHaptic()).not.toThrow();
+    expect(() => playDefeatOverlayHaptic()).not.toThrow();
+    expect(() => playAbandonedWinHaptic()).not.toThrow();
   });
 });
