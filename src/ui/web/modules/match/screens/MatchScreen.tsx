@@ -5,8 +5,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
 import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
-import type { GameId } from "@/domain/entities/Game";
+import type { GameId, PlayerSlot } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
+import { useUserPreferences } from "@/ui/web/application/providers/UserPreferencesProvider";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
@@ -15,8 +16,14 @@ import {
   useGameHeartbeat,
   useTurnTimer,
 } from "@/ui/web/hooks/useGame";
+import { useMatchSound } from "@/ui/web/hooks/useMatchSound";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
 import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
+import {
+  playInvalidMoveHaptic,
+  playLightTapHaptic,
+} from "@/ui/web/lib/haptics";
+import { playPlayerMarkSound } from "@/ui/web/lib/sound";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { MatchActions } from "@/ui/web/modules/match/components/MatchActions";
 import { MatchBoard } from "@/ui/web/modules/match/components/MatchBoard";
@@ -34,11 +41,16 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   const { isDesktop } = useMediaQuery();
   const game = useGame(gameId);
   const currentUser = useCurrentUser();
+  const { preferences } = useUserPreferences();
   const navigate = useNavigate();
   const currentUserId = currentUser?.id;
   const opponentId = getOpponentId(game, currentUserId);
   const opponentUser = useUserById(opponentId);
   const [isPlacing, setIsPlacing] = useState(false);
+  let currentSlot: PlayerSlot | null = null;
+  if (currentUser && game) {
+    currentSlot = currentUser.id === game.p1UserId ? "P1" : "P2";
+  }
   const timerEnabled = game?.turnDurationMs !== null;
   const timerActive =
     Boolean(timerEnabled) &&
@@ -50,6 +62,24 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     deadlineTime: game?.turnDeadlineTime,
     expireDelayMs: 1200,
     onExpire: () => onExpire(game?.id),
+  });
+  const isOwnTurnTimerActive = Boolean(
+    timerActive && currentSlot && game?.currentTurn === currentSlot,
+  );
+  const isTimeUpVisible = Boolean(isExpired && isOwnTurnTimerActive);
+  useMatchSound({
+    gameId,
+    status: game?.status,
+    lastMove: game?.lastMove,
+    currentSlot,
+    isGameReady: Boolean(game),
+    isMoveSoundEnabled: game?.status === "playing" && preferences.gameSounds,
+    soundEnabled: preferences.gameSounds,
+    hapticsEnabled: preferences.haptics,
+    isTimedMode: Boolean(timerEnabled),
+    isOwnTurnTimerActive,
+    isTimeUpVisible,
+    deadlineTime: game?.turnDeadlineTime,
   });
 
   if (!game || !currentUser) {
@@ -74,11 +104,8 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
 
   const gridSize = game.gridSize;
   const matchFormat = game.match.format;
-  const currentSlot = currentUser.id === game.p1UserId ? "P1" : "P2";
-  const shouldShowTimeout =
-    timerActive &&
-    currentSlot !== undefined &&
-    game.currentTurn === currentSlot;
+  const resolvedCurrentSlot = currentSlot === "P1" ? "P1" : "P2";
+  const currentPlayerSymbol = resolvedCurrentSlot === "P1" ? "X" : "O";
 
   const matchPlayersProps = {
     p1UserId: game.p1UserId,
@@ -96,10 +123,26 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
     }
     setIsPlacing(true);
     try {
+      if (preferences.gameSounds) {
+        playPlayerMarkSound(currentPlayerSymbol);
+      }
+      if (preferences.haptics) {
+        playLightTapHaptic();
+      }
       await placeMarkUseCase(gameRepository, { gameId, index });
+    } catch (error) {
+      console.debug("Place mark failed.", error);
     } finally {
       setIsPlacing(false);
     }
+  };
+
+  const handleInvalidMoveAttempt = () => {
+    if (!preferences.haptics) {
+      return;
+    }
+
+    playInvalidMoveHaptic();
   };
 
   const handleCreateNewGame = async () => {
@@ -143,9 +186,10 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             currentTurn={game.currentTurn}
             currentUserId={currentUserId}
             p1UserId={game.p1UserId}
-            isTimeUp={Boolean(isExpired && shouldShowTimeout)}
+            isTimeUp={isTimeUpVisible}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
+            onInvalidMoveAttempt={handleInvalidMoveAttempt}
           />
         </div>
       ) : (
@@ -159,15 +203,18 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
             currentTurn={game.currentTurn}
             currentUserId={currentUserId}
             p1UserId={game.p1UserId}
-            isTimeUp={Boolean(isExpired && shouldShowTimeout)}
+            isTimeUp={isTimeUpVisible}
             isPlacing={isPlacing}
             onCellClick={handleCellClick}
+            onInvalidMoveAttempt={handleInvalidMoveAttempt}
           />
 
           <MatchActions gameId={gameId} match={game.match} />
         </div>
       )}
       <MatchResultOverlay
+        soundEnabled={preferences.gameSounds}
+        hapticsEnabled={preferences.haptics}
         status={game.status}
         endedReason={game.endedReason}
         winner={game.winner}

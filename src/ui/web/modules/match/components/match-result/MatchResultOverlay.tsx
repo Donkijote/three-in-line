@@ -1,3 +1,5 @@
+import { useMatchResultOverlaySound } from "@/ui/web/hooks/useMatchSound";
+
 import type {
   MatchResultOverlayProps,
   MatchResultViewModel,
@@ -5,37 +7,59 @@ import type {
 import { MatchResultOverlayBase } from "./MatchResultOverlayBase";
 
 export const MatchResultOverlay = (props: MatchResultOverlayProps) => {
-  if (props.status !== "ended") {
+  const {
+    soundEnabled,
+    hapticsEnabled,
+    status,
+    endedReason,
+    winner,
+    abandonedBy,
+    p1UserId,
+    currentUserId,
+    onPrimaryAction,
+  } = props;
+  useMatchResultOverlaySound({
+    soundEnabled,
+    hapticsEnabled,
+    status,
+    endedReason,
+    winner,
+    abandonedBy,
+    p1UserId,
+    currentUserId,
+  });
+
+  if (status !== "ended") {
     return null;
   }
 
-  if (props.endedReason === "disconnect") {
+  if (endedReason === "disconnect") {
     return (
       <MatchResultOverlayBase
         {...toDisconnectModel(props)}
-        onPrimaryAction={props.onPrimaryAction}
+        onPrimaryAction={onPrimaryAction}
       />
     );
   }
 
-  if (props.endedReason === "abandoned") {
-    const currentSlot = resolveCurrentSlot(props.currentUserId, props.p1UserId);
-    if (currentSlot && props.abandonedBy === currentSlot) {
+  if (endedReason === "abandoned") {
+    const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+    if (currentSlot && abandonedBy === currentSlot) {
       return null;
     }
     return (
       <MatchResultOverlayBase
         {...toAbandonedModel(props)}
-        onPrimaryAction={props.onPrimaryAction}
+        onPrimaryAction={onPrimaryAction}
       />
     );
   }
 
-  if (props.endedReason === "win") {
+  if (endedReason === "win") {
     return (
       <MatchResultOverlayBase
         {...toWinLossModel(props)}
-        onPrimaryAction={props.onPrimaryAction}
+        onPrimaryAction={onPrimaryAction}
       />
     );
   }

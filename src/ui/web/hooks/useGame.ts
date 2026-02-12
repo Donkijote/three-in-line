@@ -56,14 +56,9 @@ export const useGameHeartbeat = ({
       return;
     }
 
-    const heartbeatFn = heartbeatRef.current;
-    if (!heartbeatFn) {
-      return;
-    }
-
     inFlightRef.current = true;
     try {
-      await heartbeatFn({ gameId: currentGameId });
+      await heartbeatRef.current({ gameId: currentGameId });
     } catch (error) {
       console.debug("Game heartbeat failed.", error);
     } finally {

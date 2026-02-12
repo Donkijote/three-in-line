@@ -5,6 +5,12 @@ import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
 import type { GameId } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
+import {
+  playInvalidMoveHaptic,
+  playLightTapHaptic,
+  playTimeStoppedHaptic,
+} from "@/ui/web/lib/haptics";
+import { playPlayerMarkSound } from "@/ui/web/lib/sound";
 
 import { MatchScreen } from "./MatchScreen";
 
@@ -30,6 +36,7 @@ type MatchGame = {
   winner?: "P1" | "P2" | null;
   endedReason?: "win" | "draw" | "abandoned" | "disconnect";
   abandonedBy?: "P1" | "P2" | null;
+  lastMove?: { index: number; by: "P1" | "P2"; at: number } | null;
 };
 
 type MatchUser = {
@@ -47,6 +54,8 @@ let game: MatchGame | undefined;
 let currentUser: MatchUser | undefined;
 let opponentUser: MatchUser | undefined;
 let lastOpponentId: string | undefined;
+let gameSoundsEnabled = true;
+let hapticsEnabled = false;
 const navigate = vi.fn();
 
 vi.mock("@/ui/web/hooks/useMediaQuery", () => ({
@@ -71,6 +80,17 @@ vi.mock("@/ui/web/hooks/useGame", () => ({
   useTurnTimer: useTurnTimerMock,
 }));
 
+vi.mock("@/ui/web/application/providers/UserPreferencesProvider", () => ({
+  useUserPreferences: () => ({
+    preferences: {
+      gameSounds: gameSoundsEnabled,
+      haptics: hapticsEnabled,
+      theme: "system",
+    },
+    updatePreferences: vi.fn(),
+  }),
+}));
+
 vi.mock("@/application/games/placeMarkUseCase", () => ({
   placeMarkUseCase: vi.fn(),
 }));
@@ -81,6 +101,19 @@ vi.mock("@/application/games/findOrCreateGameUseCase", () => ({
 
 vi.mock("@/application/games/timeoutTurnUseCase", () => ({
   timeoutTurnUseCase: vi.fn(),
+}));
+
+vi.mock("@/ui/web/lib/sound", () => ({
+  playPlayerMarkSound: vi.fn(),
+  startTimerTickSound: vi.fn(),
+  stopTimerTickSound: vi.fn(),
+  playTimesUpSound: vi.fn(),
+}));
+
+vi.mock("@/ui/web/lib/haptics", () => ({
+  playLightTapHaptic: vi.fn(),
+  playInvalidMoveHaptic: vi.fn(),
+  playTimeStoppedHaptic: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -94,6 +127,7 @@ vi.mock("@/ui/web/modules/match/components/PlayerCard", () => ({
 vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
   MatchBoard: ({
     onCellClick,
+    onInvalidMoveAttempt,
     status,
     currentTurn,
     currentUserId,
@@ -103,6 +137,7 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
     isTimeUp,
   }: {
     onCellClick?: (index: number) => void;
+    onInvalidMoveAttempt?: () => void;
     status: "waiting" | "playing" | "paused" | "ended";
     currentTurn: "P1" | "P2";
     currentUserId?: string;
@@ -138,7 +173,9 @@ vi.mock("@/ui/web/modules/match/components/MatchBoard", () => ({
           onClick={() => {
             if (isInteractive) {
               onCellClick?.(4);
+              return;
             }
+            onInvalidMoveAttempt?.();
           }}
         >
           Place
@@ -242,6 +279,8 @@ describe("MatchScreen", () => {
 
   beforeEach(() => {
     isDesktop = false;
+    gameSoundsEnabled = true;
+    hapticsEnabled = false;
     game = { ...baseGame };
     currentUser = {
       id: "user-1",
@@ -266,6 +305,10 @@ describe("MatchScreen", () => {
     vi.mocked(findOrCreateGameUseCase).mockClear();
     vi.mocked(findOrCreateGameUseCase).mockResolvedValue("next-game-id");
     vi.mocked(timeoutTurnUseCase).mockClear();
+    vi.mocked(playLightTapHaptic).mockClear();
+    vi.mocked(playInvalidMoveHaptic).mockClear();
+    vi.mocked(playTimeStoppedHaptic).mockClear();
+    vi.mocked(playPlayerMarkSound).mockClear();
   });
 
   it("shows loading state when the game is missing", () => {
@@ -504,6 +547,210 @@ describe("MatchScreen", () => {
         index: 4,
       });
     });
+    expect(playPlayerMarkSound).toHaveBeenCalledWith("X");
+  });
+
+  it("plays O sound when the current user is player two and places a move", async () => {
+    currentUser = {
+      id: "user-2",
+      username: "You",
+      avatar: { type: "preset", value: "avatar-2" },
+    };
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P2",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+
+    await waitFor(() => {
+      expect(placeMarkUseCase).toHaveBeenCalledWith(gameRepository, {
+        gameId: "gameId",
+        index: 4,
+      });
+    });
+    expect(playPlayerMarkSound).toHaveBeenCalledWith("O");
+  });
+
+  it("plays opponent sound when a new opponent move arrives", async () => {
+    game = {
+      ...baseGame,
+      lastMove: null,
+    };
+    const { rerender } = render(<MatchScreen gameId={gameId} />);
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+
+    game = {
+      ...baseGame,
+      lastMove: { index: 6, by: "P2", at: 123 },
+    };
+    rerender(<MatchScreen gameId={gameId} />);
+
+    await waitFor(() => {
+      expect(playPlayerMarkSound).toHaveBeenCalledWith("O");
+    });
+  });
+
+  it("does not play a move sound on initial load with an existing last move", () => {
+    game = {
+      ...baseGame,
+      lastMove: { index: 4, by: "P2", at: 123 },
+    };
+
+    render(<MatchScreen gameId={gameId} />);
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+  });
+
+  it("does not play a move sound when loading from missing game to existing last move", () => {
+    game = undefined;
+    const { rerender } = render(<MatchScreen gameId={gameId} />);
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+
+    game = {
+      ...baseGame,
+      lastMove: { index: 4, by: "P2", at: 123 },
+    };
+    rerender(<MatchScreen gameId={gameId} />);
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+  });
+
+  it("does not play opponent move sound when game is ended", () => {
+    game = {
+      ...baseGame,
+      status: "ended",
+      winner: "P2",
+      endedReason: "win",
+      lastMove: { index: 8, by: "P2", at: 200 },
+    };
+
+    render(<MatchScreen gameId={gameId} />);
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+  });
+
+  it("does not play mark sounds when game sounds preference is disabled", async () => {
+    gameSoundsEnabled = false;
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P1",
+      lastMove: null,
+    };
+    const { rerender } = render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+    await waitFor(() => {
+      expect(placeMarkUseCase).toHaveBeenCalledWith(gameRepository, {
+        gameId: "gameId",
+        index: 4,
+      });
+    });
+
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P1",
+      lastMove: { index: 6, by: "P2", at: 123 },
+    };
+    rerender(<MatchScreen gameId={gameId} />);
+
+    expect(playPlayerMarkSound).not.toHaveBeenCalled();
+  });
+
+  it("still plays the mark sound when placing a move fails", async () => {
+    const consoleSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P1",
+    };
+    vi.mocked(placeMarkUseCase).mockRejectedValueOnce(new Error("boom"));
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+
+    await waitFor(() => {
+      expect(placeMarkUseCase).toHaveBeenCalledWith(gameRepository, {
+        gameId: "gameId",
+        index: 4,
+      });
+    });
+    expect(playPlayerMarkSound).toHaveBeenCalledWith("X");
+    consoleSpy.mockRestore();
+  });
+
+  it("plays light tap haptic when placing a move and haptics is enabled", async () => {
+    hapticsEnabled = true;
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P1",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+
+    await waitFor(() => {
+      expect(placeMarkUseCase).toHaveBeenCalledWith(gameRepository, {
+        gameId: "gameId",
+        index: 4,
+      });
+    });
+    expect(playLightTapHaptic).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not play light tap haptic when haptics preference is disabled", async () => {
+    hapticsEnabled = false;
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P1",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+
+    await waitFor(() => {
+      expect(placeMarkUseCase).toHaveBeenCalledWith(gameRepository, {
+        gameId: "gameId",
+        index: 4,
+      });
+    });
+    expect(playLightTapHaptic).not.toHaveBeenCalled();
+  });
+
+  it("plays invalid move haptic when tapping out of turn and haptics is enabled", () => {
+    hapticsEnabled = true;
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P2",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+
+    expect(playInvalidMoveHaptic).toHaveBeenCalledTimes(1);
+    expect(placeMarkUseCase).not.toHaveBeenCalled();
+  });
+
+  it("does not play invalid move haptic when haptics is disabled", () => {
+    hapticsEnabled = false;
+    game = {
+      ...baseGame,
+      status: "playing",
+      currentTurn: "P2",
+    };
+    render(<MatchScreen gameId={gameId} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Place" }));
+
+    expect(playInvalidMoveHaptic).not.toHaveBeenCalled();
+    expect(placeMarkUseCase).not.toHaveBeenCalled();
   });
 
   it("shows match result overlay when the current user wins", () => {
