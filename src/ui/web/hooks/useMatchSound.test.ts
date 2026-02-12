@@ -10,8 +10,8 @@ import {
   playVictoryOverlayHaptic,
 } from "@/ui/web/lib/haptics";
 import {
-  playDefeatSound,
   playConnectedSound,
+  playDefeatSound,
   playDisconnectedSound,
   playPlayerMarkSound,
   playSurrenderSound,
@@ -494,7 +494,7 @@ describe("useMatchResultOverlaySound", () => {
 
     expect(playVictoryOverlayHaptic).toHaveBeenCalledTimes(1);
 
-    rerender({ abandonedBy: "P2" });
+    rerender({ abandonedBy: null });
 
     expect(playVictoryOverlayHaptic).toHaveBeenCalledTimes(1);
     expect(playDefeatOverlayHaptic).not.toHaveBeenCalled();
