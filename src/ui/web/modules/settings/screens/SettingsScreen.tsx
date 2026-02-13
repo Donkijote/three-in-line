@@ -8,7 +8,7 @@ import { VersionInfo } from "@/ui/web/modules/settings/components/VersionInfo";
 
 export const SettingsScreen = () => {
   return (
-    <section className="mx-auto flex w-full h-full max-w-xl flex-col gap-10 pb-12">
+    <section className="mx-auto flex max-w-[calc(100svw-2rem)] w-full h-full md:max-w-xl flex-col gap-10 pb-12">
       <Header title="Settings" />
 
       <AvatarSection />
