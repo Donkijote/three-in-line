@@ -4,7 +4,7 @@ import { P } from "@/ui/web/components/Typography";
 
 export function HomeScreen() {
   return (
-    <div className="flex h-screen flex-col items-center justify-center gap-4 text-center">
+    <div className="flex h-svh flex-col items-center justify-center gap-4 text-center no-offset">
       <div className="flex size-20 items-center justify-center rounded-full border bg-card">
         <ScrollText className="size-10 text-foreground/80" />
       </div>

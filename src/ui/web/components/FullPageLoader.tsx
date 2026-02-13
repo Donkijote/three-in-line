@@ -19,7 +19,7 @@ export const FullPageLoader = ({
   return (
     <div
       className={cn(
-        "relative flex h-screen w-full items-center justify-center overflow-hidden bg-background px-6 py-12 text-foreground no-offset",
+        "relative flex min-h-svh w-full items-center justify-center overflow-hidden bg-background px-6 py-12 text-foreground no-offset",
         className,
       )}
       {...props}
