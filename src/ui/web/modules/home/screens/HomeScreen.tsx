@@ -1,75 +1,120 @@
+import { Activity } from "react";
+
 import { ScrollText } from "lucide-react";
 
+import type { Game, PlayerSlot } from "@/domain/entities/Game";
+import { useRecentGamesQuery } from "@/infrastructure/convex/GameApi";
 import { Header } from "@/ui/web/components/Header";
 import { P } from "@/ui/web/components/Typography";
-import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
+import { useCurrentUser } from "@/ui/web/hooks/useUser";
 import { HomeMatchCard } from "@/ui/web/modules/home/components/HomeMatchCard";
 import { HomeSectionLabel } from "@/ui/web/modules/home/components/HomeSectionLabel";
-import { HomeStatCard } from "@/ui/web/modules/home/components/HomeStatCard";
-import type {
-  HomeMatch,
-  HomeStat,
-} from "@/ui/web/modules/home/components/home.types";
+import { HomeStats } from "@/ui/web/modules/home/components/HomeStats";
+import type { HomeMatch } from "@/ui/web/modules/home/components/home.types";
 
-const homeStats: HomeStat[] = [
-  { id: "wins", label: "Wins", value: "42", accent: "primary" },
-  { id: "win-rate", label: "Win Rate", value: "68%", accent: "opponent" },
-  { id: "streak", label: "Streak", value: "5", accent: "warning" },
-];
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-const recentMatches: HomeMatch[] = [
-  {
-    id: "recent-1",
-    status: "victory",
-    time: "14:02",
-    title: "CPU (Hard)",
-    subtitle: "Tactical Grid Mode",
-    opponentInitials: "CP",
-  },
-  {
-    id: "recent-2",
-    status: "defeat",
-    time: "09:15",
-    title: "Cyber_Samurai",
-    subtitle: "Classic Mode",
-    opponentInitials: "CS",
-  },
-  {
-    id: "recent-3",
-    status: "stalemate",
-    time: "Oct 22 · 18:45",
-    title: "CPU (Medium)",
-    subtitle: "Timed Challenge",
-    opponentInitials: "CP",
-  },
-];
+const toOutcomeStatus = (game: Game, viewerSlot: PlayerSlot | null) => {
+  if (game.endedReason === "draw" || game.winner === null || !viewerSlot) {
+    return "stalemate" as const;
+  }
+  return game.winner === viewerSlot ? "victory" : "defeat";
+};
 
-const previousWeekMatches: HomeMatch[] = [
-  {
-    id: "week-1",
-    status: "victory",
-    time: "Oct 18",
-    title: "Player_Two",
-    subtitle: "Tactical Grid Mode",
-    opponentInitials: "PT",
-  },
-];
+const toOpponentName = (game: Game, currentUserId: string | undefined) => {
+  if (!currentUserId) {
+    return "Opponent";
+  }
+  const opponentId =
+    game.p1UserId === currentUserId ? game.p2UserId : game.p1UserId;
+  if (!opponentId) {
+    return "Open Slot";
+  }
+  return `Player ${opponentId.slice(-4).toUpperCase()}`;
+};
+
+const toOpponentInitials = (name: string) => {
+  const chunks = name.split(" ").filter(Boolean);
+  if (chunks.length === 1) {
+    return chunks[0].slice(0, 2).toUpperCase();
+  }
+  return `${chunks[0][0] ?? ""}${chunks[1][0] ?? ""}`.toUpperCase();
+};
+
+const toModeLabel = (game: Game) => {
+  if (game.turnDurationMs !== null) {
+    return "Timed Challenge";
+  }
+  if (game.match.format === "bo3") {
+    return "Best of Three";
+  }
+  if (game.match.format === "bo5") {
+    return "Best of Five";
+  }
+  if (game.gridSize > 3) {
+    return "Tactical Grid Mode";
+  }
+  return "Classic Mode";
+};
+
+const toMatchTime = (timestamp: number) => {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(timestamp);
+};
+
+const resolveViewerSlot = (
+  game: Game,
+  currentUserId: string | undefined,
+): PlayerSlot | null => {
+  if (!currentUserId) {
+    return null;
+  }
+  if (game.p1UserId === currentUserId) {
+    return "P1";
+  }
+  return "P2";
+};
 
 export function HomeScreen() {
+  const currentUser = useCurrentUser();
+  const recentGames = useRecentGamesQuery();
+
+  const endedGames = recentGames ?? [];
+  const currentUserId = currentUser?.id;
+  const now = Date.now();
+  const recentMatches: HomeMatch[] = [];
+  const previousWeekMatches: HomeMatch[] = [];
+
+  for (const game of endedGames) {
+    const viewerSlot = resolveViewerSlot(game, currentUserId);
+    const status = toOutcomeStatus(game, viewerSlot);
+    const opponentName = toOpponentName(game, currentUserId);
+    const match: HomeMatch = {
+      id: game.id,
+      status,
+      time: toMatchTime(game.updatedTime),
+      title: opponentName,
+      subtitle: toModeLabel(game),
+      opponentInitials: toOpponentInitials(opponentName),
+    };
+
+    if (now - game.updatedTime <= WEEK_MS) {
+      recentMatches.push(match);
+      continue;
+    }
+    previousWeekMatches.push(match);
+  }
+
   return (
     <section className="mx-auto flex max-w-[calc(100svw-2rem)] w-full h-full md:max-w-xl flex-col gap-10 pb-12">
       <Header title="Match History" eyebrow="Mission Logs" />
 
-      <ScrollArea>
-        <div className="flex gap-4 overflow-x-auto py-3">
-          {homeStats.map((stat) => (
-            <div className="snap-center" key={stat.id}>
-              <HomeStatCard {...stat} />
-            </div>
-          ))}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      <HomeStats endedGames={endedGames} />
 
       <div className="flex flex-col gap-5 pr-2">
         <HomeSectionLabel text="Recent Matches" />
@@ -77,6 +122,14 @@ export function HomeScreen() {
           {recentMatches.map((match) => (
             <HomeMatchCard key={match.id} {...match} />
           ))}
+          <Activity
+            name={"recent-empty"}
+            mode={recentMatches.length === 0 ? "visible" : "hidden"}
+          >
+            <P className="mt-0! text-sm font-semibold text-muted-foreground">
+              No recent matches in the last 7 days.
+            </P>
+          </Activity>
         </div>
 
         <HomeSectionLabel text="Previous Week" />
