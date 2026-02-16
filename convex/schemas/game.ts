@@ -99,4 +99,6 @@ export const GameSchema = defineTable({
   .index("by_updatedTime", ["updatedTime"])
   .index("by_p1_updatedTime", ["p1UserId", "updatedTime"])
   .index("by_p2_updatedTime", ["p2UserId", "updatedTime"])
+  .index("by_status_p1_updatedTime", ["status", "p1UserId", "updatedTime"])
+  .index("by_status_p2_updatedTime", ["status", "p2UserId", "updatedTime"])
   .index("by_status_p2_createdTime", ["status", "p2UserId"]);

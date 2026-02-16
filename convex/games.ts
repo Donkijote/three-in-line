@@ -47,12 +47,16 @@ export const getRecentGames = query({
     const [asP1, asP2] = await Promise.all([
       ctx.db
         .query("games")
-        .withIndex("by_p1_updatedTime", (q) => q.eq("p1UserId", userId))
+        .withIndex("by_status_p1_updatedTime", (q) =>
+          q.eq("status", "ended").eq("p1UserId", userId),
+        )
         .order("desc")
         .take(RECENT_GAMES_FETCH_LIMIT),
       ctx.db
         .query("games")
-        .withIndex("by_p2_updatedTime", (q) => q.eq("p2UserId", userId))
+        .withIndex("by_status_p2_updatedTime", (q) =>
+          q.eq("status", "ended").eq("p2UserId", userId),
+        )
         .order("desc")
         .take(RECENT_GAMES_FETCH_LIMIT),
     ]);
