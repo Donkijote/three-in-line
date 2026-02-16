@@ -11,7 +11,6 @@ export type HomeMatch = {
   id: string;
   status: HomeMatchStatus;
   time: string;
-  title: string;
+  opponentUserId: string | null;
   subtitle: string;
-  opponentInitials: string;
 };

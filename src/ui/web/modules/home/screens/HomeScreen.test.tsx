@@ -4,6 +4,7 @@ import { HomeScreen } from "./HomeScreen";
 
 const useRecentGamesQueryMock = vi.fn();
 const useCurrentUserMock = vi.fn();
+const useUserByIdMock = vi.fn();
 
 vi.mock("@/infrastructure/convex/GameApi", () => ({
   useRecentGamesQuery: () => useRecentGamesQueryMock(),
@@ -11,11 +12,26 @@ vi.mock("@/infrastructure/convex/GameApi", () => ({
 
 vi.mock("@/ui/web/hooks/useUser", () => ({
   useCurrentUser: () => useCurrentUserMock(),
+  useUserById: (userId?: string | null) => useUserByIdMock(userId),
 }));
 
 describe("HomeScreen", () => {
   beforeEach(() => {
-    useCurrentUserMock.mockReturnValue({ id: "user-1" });
+    useCurrentUserMock.mockReturnValue({
+      id: "user-1",
+      username: "you",
+      avatar: { type: "preset", value: "avatar-1" },
+    });
+    useUserByIdMock.mockImplementation((userId?: string | null) => {
+      if (!userId) {
+        return null;
+      }
+      return {
+        id: userId,
+        username: `player-${userId.slice(-1)}`,
+        avatar: { type: "preset", value: "avatar-2" },
+      };
+    });
   });
 
   it("renders the match history dashboard layout", () => {

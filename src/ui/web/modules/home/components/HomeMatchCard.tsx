@@ -1,9 +1,16 @@
 import { ChevronRight } from "lucide-react";
 
+import { resolveAvatarSrc } from "@/domain/entities/Avatar";
 import { H6, Muted, Small } from "@/ui/web/components/Typography";
-import { Avatar, AvatarFallback } from "@/ui/web/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/ui/web/components/ui/avatar";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
-import { cn } from "@/ui/web/lib/utils";
+import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
+import { resolvePlayerLabel } from "@/ui/web/lib/user";
+import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
 import type {
   HomeMatch,
   HomeMatchStatus,
@@ -37,10 +44,26 @@ export const HomeMatchCard = ({
   status,
   subtitle,
   time,
-  title,
-  opponentInitials,
+  opponentUserId,
 }: HomeMatch) => {
   const statusStyle = statusStyles[status];
+  const currentUser = useCurrentUser();
+  const opponentUser = useUserById(opponentUserId);
+
+  const currentName = resolvePlayerLabel(currentUser ?? {}, "You");
+  const opponentName = resolvePlayerLabel(opponentUser ?? {}, "Opponent");
+  const currentInitials = getFallbackInitials({
+    name: currentUser?.name,
+    username: currentUser?.username,
+    email: currentUser?.email,
+  });
+  const opponentInitials = getFallbackInitials({
+    name: opponentUser?.name,
+    username: opponentUser?.username,
+    email: opponentUser?.email,
+  });
+  const currentAvatar = resolveAvatarSrc(currentUser?.avatar);
+  const opponentAvatar = resolveAvatarSrc(opponentUser?.avatar);
 
   return (
     <Card className="group relative gap-0 overflow-hidden rounded-4xl py-0 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.35)] transition-colors hover:bg-card/80 dark:shadow-[0_20px_48px_-36px_rgba(0,0,0,0.75)]">
@@ -64,7 +87,7 @@ export const HomeMatchCard = ({
               {time}
             </Small>
           </div>
-          <H6 className="truncate text-base">vs {title}</H6>
+          <H6 className="truncate text-base">vs {opponentName}</H6>
           <Muted className="mt-0 truncate text-xs text-muted-foreground">
             {subtitle}
           </Muted>
@@ -80,14 +103,16 @@ export const HomeMatchCard = ({
                   statusStyle.ring,
                 )}
               >
+                <AvatarImage src={currentAvatar} alt={currentName} />
                 <AvatarFallback className="bg-card font-semibold text-foreground">
-                  Y
+                  {currentInitials}
                 </AvatarFallback>
               </Avatar>
               <Avatar
                 size="lg"
                 className="border border-background bg-secondary text-foreground ring-2 ring-border/80"
               >
+                <AvatarImage src={opponentAvatar} alt={opponentName} />
                 <AvatarFallback className="bg-secondary font-semibold text-foreground">
                   {opponentInitials}
                 </AvatarFallback>
