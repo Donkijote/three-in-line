@@ -18,6 +18,8 @@ import {
   patchDisconnectedMove,
   patchOngoingMove,
   patchRoundEnd,
+  RECENT_GAMES_FETCH_LIMIT,
+  RECENT_GAMES_LIMIT,
   requireBoardShape,
   requireEmptyCell,
   requireGame,
@@ -34,6 +36,47 @@ export const getGame = query({
   args: { gameId: v.id("games") },
   handler: async (ctx, args) => {
     return await requireGame(ctx, args.gameId);
+  },
+});
+
+export const getRecentGames = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+
+    const [asP1, asP2] = await Promise.all([
+      ctx.db
+        .query("games")
+        .withIndex("by_p1_updatedTime", (q) => q.eq("p1UserId", userId))
+        .order("desc")
+        .take(RECENT_GAMES_FETCH_LIMIT),
+      ctx.db
+        .query("games")
+        .withIndex("by_p2_updatedTime", (q) => q.eq("p2UserId", userId))
+        .order("desc")
+        .take(RECENT_GAMES_FETCH_LIMIT),
+    ]);
+
+    const sortedGames = [...asP1, ...asP2].sort(
+      (a, b) => b.updatedTime - a.updatedTime,
+    );
+    const dedupedGames: typeof sortedGames = [];
+    const seenIds = new Set<(typeof sortedGames)[number]["_id"]>();
+
+    for (const game of sortedGames) {
+      if (seenIds.has(game._id)) {
+        continue;
+      }
+      dedupedGames.push(game);
+      seenIds.add(game._id);
+      if (dedupedGames.length >= RECENT_GAMES_FETCH_LIMIT) {
+        break;
+      }
+    }
+
+    return {
+      games: dedupedGames.slice(0, RECENT_GAMES_LIMIT),
+    };
   },
 });
 
