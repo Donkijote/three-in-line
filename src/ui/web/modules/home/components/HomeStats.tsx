@@ -53,7 +53,7 @@ export const HomeStats = ({ endedGames }: HomeStatsProps) => {
 
   return (
     <ScrollArea>
-      <div className="flex gap-4 overflow-x-auto py-3">
+      <div className="flex gap-4 overflow-x-auto py-3 px-1">
         {stats.map((stat) => (
           <div className="snap-center" key={stat.id}>
             <HomeStatCard {...stat} />
