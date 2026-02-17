@@ -65,10 +65,12 @@ describe("PlayScreen", () => {
   });
 
   it("prevents duplicate submissions while creating a game", async () => {
-    let resolveCall: ((value: string) => void) | null = null;
+    let resolveCall: (value: string) => void = () => {
+      throw new Error("resolveCall not initialized");
+    };
     vi.mocked(findOrCreateGameUseCase).mockImplementation(
       () =>
-        new Promise((resolve) => {
+        new Promise<string>((resolve) => {
           resolveCall = resolve;
         }),
     );
@@ -90,7 +92,7 @@ describe("PlayScreen", () => {
     invokeReactClick(classicModeButton);
     expect(findOrCreateGameUseCase).toHaveBeenCalledTimes(1);
 
-    resolveCall?.("game-999");
+    resolveCall("game-999");
     await waitFor(() => {
       expect(navigateMock).toHaveBeenCalledWith({
         to: "/match",
