@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Three In Line",
+    "slug": "three-in-line-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#F4F7FA"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.donkijote.threeinline"
+    },
+    "android": {
+      "package": "com.donkijote.threeinline"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "experiments": {
+      "reactCompiler": true
+    }
+  }
+}

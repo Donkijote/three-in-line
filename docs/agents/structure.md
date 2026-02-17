@@ -1,21 +1,22 @@
 # Project Structure
 
-The codebase is organized for the web client only.
+The codebase is organized around shared domain/application/infrastructure layers with UI adapters by platform.
 
-- `src/ui/web/main.tsx` bootstraps the app with `RouterProvider`.
+- `src/ui/web/main.tsx` bootstraps the web app with `RouterProvider`.
 - `src/ui/web/router.tsx` defines the TanStack Router instance.
 - `src/ui/web/routes/` contains file-based routes (`__root.tsx`, `index.tsx`).
-- `src/ui/web/modules/` groups feature areas by screen and components.
-- `src/ui/web/components/` contains React components UI, including `components/ui`.
-- `src/ui/web/layout/` contains app-wide layout wrappers.
-- `src/ui/web/hooks/` contains reusable UI hooks for React.
-- `src/ui/web/lib/` is for shared UI utilities and helpers.
-- `src/ui/web/assets/` stores local images and static assets imported by the app.
-- `src/ui/web/styles/` stores global styling like `globals.css`.
+- `src/ui/web/modules/` groups web feature areas by screen and components.
+- `src/ui/mobile/App.tsx` is the mobile UI adapter entrypoint consumed by Expo.
+- `src/ui/mobile/application/providers/` contains mobile app-level providers.
+- `src/ui/mobile/modules/` contains mobile feature modules/screens.
+- `src/ui/mobile/styles/` stores mobile theme tokens and style primitives.
+- `src/ui/shared/` contains cross-platform UI primitives and assets.
 - `src/application/` contains use cases orchestrating domain logic.
+- `src/domain/` contains entities and ports.
 - `src/infrastructure/` contains repositories and external adapters (Convex, storage).
 - `src/infrastructure/convex/repository/` contains Convex-backed repository implementations.
 - `src/infrastructure/convex/GameApi.ts` and `src/infrastructure/convex/UserApi.ts` provide UI-safe Convex query hooks.
 - `src/infrastructure/convex/auth.ts` wraps Convex auth helpers for UI use.
-- `public/` holds static files served as-is.
+- `mobile/` contains Expo runtime/config files (`App.tsx`, `app.json`, `metro.config.js`, `tsconfig.json`).
+- `public/` holds static files served as-is for web.
 - `scripts/` contains repo automation (e.g., `scripts/ghi-pr.sh`).
