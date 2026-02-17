@@ -2,6 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Button } from "@/ui/mobile/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,7 +11,11 @@ import {
 } from "@/ui/mobile/components/ui/card";
 import { Text } from "@/ui/mobile/components/ui/text";
 
-export const MobileSetupScreen = () => {
+type MobileSetupScreenProps = {
+  onOpenMock?: () => void;
+};
+
+export const MobileSetupScreen = ({ onOpenMock }: MobileSetupScreenProps) => {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <StatusBar style="dark" />
@@ -41,6 +46,10 @@ export const MobileSetupScreen = () => {
             <Text variant="muted">- Infra adapters remain outside UI</Text>
           </CardContent>
         </Card>
+
+        <Button className="mt-2" onPress={onOpenMock}>
+          <Text>Open Mock Screen</Text>
+        </Button>
       </View>
     </SafeAreaView>
   );

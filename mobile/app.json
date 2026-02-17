@@ -8,7 +8,9 @@
     "splash": {
       "backgroundColor": "#F4F7FA"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.donkijote.threeinline"
@@ -21,6 +23,14 @@
     },
     "experiments": {
       "reactCompiler": true
-    }
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "root": "../src/ui/mobile/routes"
+        }
+      ]
+    ]
   }
 }
