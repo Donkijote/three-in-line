@@ -22,4 +22,4 @@ config.resolver.extraNodeModules = {
   "react-native": path.resolve(mobileNodeModules, "react-native")
 };
 
-module.exports = withNativeWind(config, { input: "./global.css"});
+module.exports = withNativeWind(config, { input: "../src/ui/mobile/styles/global.css" });

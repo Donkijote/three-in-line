@@ -5,7 +5,7 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "global.css",
+    "css": "../src/ui/mobile/styles/global.css",
     "baseColor": "neutral",
     "cssVariables": true
   },
