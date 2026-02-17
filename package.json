@@ -61,5 +61,8 @@
     "vite": "^7.2.4",
     "vitest": "^4.0.17",
     "wrangler": "^4.61.1"
+  },
+  "overrides": {
+    "lightningcss": "1.30.1"
   }
 }

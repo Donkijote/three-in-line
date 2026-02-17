@@ -1,6 +1,6 @@
 const path = require("node:path");
 const { getDefaultConfig } = require("expo/metro-config");
-const { withNativeWind } = require("nativewind/metro");
+const { withNativewind } = require("nativewind/metro");
 
 const projectRoot = __dirname;
 const workspaceRoot = path.resolve(projectRoot, "..");
@@ -22,6 +22,4 @@ config.resolver.extraNodeModules = {
   "react-native": path.resolve(mobileNodeModules, "react-native")
 };
 
-module.exports = withNativeWind(config, {
-  input: "./global.css"
-});
+module.exports = withNativewind(config);

@@ -6,5 +6,5 @@
 - Mobile Metro config lives in `mobile/metro.config.js`.
 - Mobile TypeScript config lives in `mobile/tsconfig.json`.
 - Styling for web uses Tailwind via `src/ui/web/styles/globals.css`.
-- Styling for mobile uses NativeWind (Tailwind) with `mobile/tailwind.config.js` and `mobile/global.css`.
+- Styling for mobile uses NativeWind (Tailwind v4) with `mobile/global.css`, reusing tokens from `src/ui/web/styles/globals.css`.
 - TanStack Router uses `@tanstack/router-plugin` in Vite and generates `src/ui/web/routeTree.gen.ts`.
