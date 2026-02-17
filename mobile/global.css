@@ -1,8 +1,80 @@
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
-@import "tailwindcss/utilities.css";
-@import "nativewind/theme";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@import "../src/ui/shared/styles/tokens.css";
+@layer base {
+  :root {
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(0 0% 3.94%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(0 0% 3.94%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(0 0% 3.94%);
+    --primary: hsl(161.9 99.85% 39.05%);
+    --primary-foreground: hsl(147.82 79.77% 96.11%);
+    --secondary: hsl(239.99 3.51% 95.79%);
+    --secondary-foreground: hsl(240.02 6.03% 9.98%);
+    --opponent: hsl(222.49 79.52% 62.37%);
+    --opponent-foreground: hsl(209.03 100% 97.42%);
+    --muted: hsl(0 0% 96.06%);
+    --muted-foreground: hsl(0 0% 45.15%);
+    --accent: hsl(0 0% 96.06%);
+    --accent-foreground: hsl(0 0% 9.05%);
+    --destructive: hsl(358.87 74.66% 50.34%);
+    --destructive-foreground: hsl(0 0% 97.37%);
+    --border: hsl(0 0% 89.82%);
+    --input: hsl(0 0% 89.82%);
+    --ring: hsl(0 0% 63.02%);
+    --chart-1: hsl(151.5 62.71% 73.67%);
+    --chart-2: hsl(153.33 56.16% 63.25%);
+    --chart-3: hsl(155.91 56.83% 53.99%);
+    --chart-4: hsl(161.9 99.85% 39.05%);
+    --chart-5: hsl(160.5 100% 35.62%);
+    --radius: 0.625rem;
+    --sidebar: hsl(0 0% 98.03%);
+    --sidebar-foreground: hsl(0 0% 3.94%);
+    --sidebar-primary: hsl(161.9 99.85% 39.05%);
+    --sidebar-primary-foreground: hsl(147.82 79.77% 96.11%);
+    --sidebar-accent: hsl(0 0% 96.06%);
+    --sidebar-accent-foreground: hsl(0 0% 9.05%);
+    --sidebar-border: hsl(0 0% 89.82%);
+    --sidebar-ring: hsl(0 0% 63.02%);
+  }
 
-@config "./tailwind.config.ts";
+  .dark {
+    --background: hsl(0 0% 3.94%);
+    --foreground: hsl(0 0% 98.03%);
+    --card: hsl(0 0% 9.05%);
+    --card-foreground: hsl(0 0% 98.03%);
+    --popover: hsl(0 0% 9.05%);
+    --popover-foreground: hsl(0 0% 98.03%);
+    --primary: hsl(161.9 99.85% 39.05%);
+    --primary-foreground: hsl(147.82 79.77% 96.11%);
+    --secondary: hsl(240.05 4.04% 15.93%);
+    --secondary-foreground: hsl(0 0% 98.03%);
+    --opponent: hsl(222.49 79.52% 62.37%);
+    --opponent-foreground: hsl(209.03 100% 97.42%);
+    --muted: hsl(0 0% 14.94%);
+    --muted-foreground: hsl(0 0% 63.02%);
+    --accent: hsl(0 0% 25.05%);
+    --accent-foreground: hsl(0 0% 98.03%);
+    --destructive: hsl(358.75 100% 69.56%);
+    --destructive-foreground: hsl(0 0% 97.37%);
+    --border: hsla(0, 0%, 100%, 0.1);
+    --input: hsla(0, 0%, 100%, 0.15);
+    --ring: hsl(0 0% 45.15%);
+    --chart-1: hsl(151.5 62.71% 73.67%);
+    --chart-2: hsl(153.33 56.16% 63.25%);
+    --chart-3: hsl(155.91 56.83% 53.99%);
+    --chart-4: hsl(161.9 99.85% 39.05%);
+    --chart-5: hsl(160.5 100% 35.62%);
+    --sidebar: hsl(0 0% 9.05%);
+    --sidebar-foreground: hsl(0 0% 98.03%);
+    --sidebar-primary: hsl(161.9 99.85% 39.05%);
+    --sidebar-primary-foreground: hsl(147.82 79.77% 96.11%);
+    --sidebar-accent: hsl(0 0% 14.94%);
+    --sidebar-accent-foreground: hsl(0 0% 98.03%);
+    --sidebar-border: hsla(0, 0%, 100%, 0.1);
+    --sidebar-ring: hsl(0 0% 45.15%);
+  }
+}

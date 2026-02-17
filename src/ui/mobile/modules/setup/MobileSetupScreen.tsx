@@ -4,9 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export const MobileSetupScreen = () => {
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1 bg-background">
       <StatusBar style="dark" />
-      <View className="h-screen gap-4 bg-background px-6 pt-8">
+      <View className="gap-4 bg-background px-6 pt-8">
         <View className="self-start rounded-full bg-primary px-3 py-1.5">
           <Text className="text-xs font-bold tracking-wide">
             MOBILE MILESTONE
@@ -20,7 +20,7 @@ export const MobileSetupScreen = () => {
           React Native + Expo foundation is ready.
         </Text>
 
-        <View className="mt-2 gap-2 rounded-[24px] border border-border bg-card p-4">
+        <View className="mt-2 gap-2 rounded-2xl border border-border bg-card p-4">
           <Text className="text-lg font-bold text-foreground">
             Architecture
           </Text>
