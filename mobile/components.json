@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "radix-maia",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "../src/ui/mobile/styles/global.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@/ui/mobile/components",
+    "utils": "@/ui/mobile/lib/utils",
+    "ui": "@/ui/mobile/components/ui",
+    "lib": "@/ui/mobile/lib",
+    "hooks": "@/ui/mobile/hooks"
+  },
+  "menuColor": "default",
+  "menuAccent": "subtle"
+}
