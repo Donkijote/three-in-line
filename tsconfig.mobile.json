@@ -1,9 +1,16 @@
 {
-  "extends": "./mobile/node_modules/expo/tsconfig.base",
   "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "noEmit": true,
     "strict": true,
     "baseUrl": "./mobile",
-    "moduleResolution": "bundler",
     "paths": {
       "@/*": ["../src/*"],
       "react-native": ["./node_modules/react-native"],
