@@ -13,7 +13,7 @@
     "mobile:web": "bun run --cwd mobile web",
     "mobile:typecheck": "bun run --cwd mobile typecheck",
     "mobile:build:ios": "bun run --cwd mobile expo run:ios",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b tsconfig.app.json tsconfig.node.json && vite build",
     "lint": "biome check --write",
     "test": "vitest run --coverage",
     "preview": "vite preview",
