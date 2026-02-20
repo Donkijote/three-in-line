@@ -1,6 +1,4 @@
-import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "@/ui/mobile/components/ui/button";
 import {
@@ -15,42 +13,56 @@ type MobileSetupScreenProps = {
   onOpenMock?: () => void;
 };
 
+const previewItems = Array.from({ length: 20 }, (_, index) => ({
+  id: index + 1,
+  title: `Preview Item ${index + 1}`,
+  subtitle: "Scrollable content to test navbar overlap and spacing.",
+}));
+
 export const MobileSetupScreen = ({ onOpenMock }: MobileSetupScreenProps) => {
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <StatusBar style="dark" />
-      <View className="flex-1 gap-4 bg-background px-6 pt-8">
-        <View className="self-start rounded-full bg-primary px-3 py-1.5">
-          <Text
-            variant="small"
-            className="font-bold tracking-wide text-primary-foreground"
-          >
-            MOBILE MILESTONE
-          </Text>
-        </View>
-
-        <Text variant="h1" className="text-left text-[34px]">
-          Three In Line
+    <View className="flex-1 gap-4">
+      <View className="self-start rounded-full bg-primary px-3 py-1.5">
+        <Text
+          variant="small"
+          className="font-bold tracking-wide text-primary-foreground"
+        >
+          MOBILE MILESTONE
         </Text>
-        <Text variant="lead" className="text-base">
-          React Native + Expo foundation is ready.
-        </Text>
-
-        <Card className="mt-2 gap-2 rounded-2xl py-2">
-          <CardHeader className="">
-            <CardTitle className="text-lg">Architecture</CardTitle>
-          </CardHeader>
-          <CardContent className="gap-2 pb-2">
-            <Text variant="muted">- UI mobile adapter in src/ui/mobile</Text>
-            <Text variant="muted">- Shared domain and application layers</Text>
-            <Text variant="muted">- Infra adapters remain outside UI</Text>
-          </CardContent>
-        </Card>
-
-        <Button className="mt-2" onPress={onOpenMock}>
-          <Text>Open Mock Screen</Text>
-        </Button>
       </View>
-    </SafeAreaView>
+
+      <Text variant="h1" className="text-left text-[34px]">
+        Three In Line
+      </Text>
+      <Text variant="lead" className="text-base">
+        React Native + Expo foundation is ready.
+      </Text>
+
+      <Card className="mt-2 gap-2 rounded-2xl py-2">
+        <CardHeader className="">
+          <CardTitle className="text-lg">Architecture</CardTitle>
+        </CardHeader>
+        <CardContent className="gap-2 pb-2">
+          <Text variant="muted">- UI mobile adapter in src/ui/mobile</Text>
+          <Text variant="muted">- Shared domain and application layers</Text>
+          <Text variant="muted">- Infra adapters remain outside UI</Text>
+        </CardContent>
+      </Card>
+
+      <Button className="mt-2" onPress={onOpenMock}>
+        <Text>Open Mock Screen</Text>
+      </Button>
+
+      <View className="mt-2 gap-2">
+        {previewItems.map((item) => (
+          <Card key={item.id} className="gap-1 rounded-xl py-4">
+            <CardContent className="gap-1 pb-0">
+              <Text className="font-semibold">{item.title}</Text>
+              <Text variant="muted">{item.subtitle}</Text>
+            </CardContent>
+          </Card>
+        ))}
+      </View>
+    </View>
   );
 };
