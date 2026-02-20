@@ -1,5 +1,8 @@
+import { useEffect } from "react";
+
 import { View } from "react-native";
 
+import { useMobileHeader } from "@/ui/mobile/application/providers/MobileHeaderProvider";
 import { useTheme } from "@/ui/mobile/application/providers/ThemeProvider";
 import { Button } from "@/ui/mobile/components/ui/button";
 import {
@@ -22,18 +25,21 @@ const previewItems = Array.from({ length: 20 }, (_, index) => ({
 
 export const MobileSetupScreen = ({ onOpenMock }: MobileSetupScreenProps) => {
   const { isDark, toggleTheme } = useTheme();
+  const { setHeader } = useMobileHeader();
+
+  useEffect(() => {
+    setHeader({
+      title: "Home",
+      eyebrow: "Mobile Milestone",
+    });
+
+    return () => {
+      setHeader(null);
+    };
+  }, [setHeader]);
 
   return (
     <View className="flex-1 gap-4">
-      <View className="self-start rounded-full bg-primary px-3 py-1.5">
-        <Text
-          variant="small"
-          className="font-bold tracking-wide text-primary-foreground"
-        >
-          MOBILE MILESTONE
-        </Text>
-      </View>
-
       <Text variant="h1" className="text-left text-[34px]">
         Three In Line
       </Text>

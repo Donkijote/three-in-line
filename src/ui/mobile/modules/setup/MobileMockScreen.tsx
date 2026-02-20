@@ -1,5 +1,8 @@
+import { useEffect } from "react";
+
 import { View } from "react-native";
 
+import { useMobileHeader } from "@/ui/mobile/application/providers/MobileHeaderProvider";
 import { Button } from "@/ui/mobile/components/ui/button";
 import { Text } from "@/ui/mobile/components/ui/text";
 
@@ -8,6 +11,23 @@ type MobileMockScreenProps = {
 };
 
 export const MobileMockScreen = ({ onGoBack }: MobileMockScreenProps) => {
+  const { setHeader } = useMobileHeader();
+
+  useEffect(() => {
+    setHeader({
+      title: "Mock",
+      leftSlot: (
+        <Button size="sm" variant="ghost" onPress={onGoBack}>
+          <Text>Back</Text>
+        </Button>
+      ),
+    });
+
+    return () => {
+      setHeader(null);
+    };
+  }, [onGoBack, setHeader]);
+
   return (
     <View className="flex-1 gap-4">
       <Text variant="h2">Mock Screen</Text>
