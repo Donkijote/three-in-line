@@ -20,13 +20,16 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
   const { header } = useMobileHeader();
   const insets = useSafeAreaInsets();
   const headerScrollOffset = header ? insets.top + 64 : insets.top + 16;
-  const fadeOpaque = isDark
-    ? "rgba(10, 10, 10, 0.92)"
-    : "rgba(245, 245, 247, 0.92)";
+  const topFadeOpaque = isDark
+    ? "rgba(10, 10, 10, 0.82)"
+    : "rgba(245, 245, 247, 0.82)";
+  const bottomFadeOpaque = isDark
+    ? "rgba(10, 10, 10, 0.9)"
+    : "rgba(245, 245, 247, 0.9)";
   const fadeTransparent = isDark
     ? "rgba(10, 10, 10, 0)"
     : "rgba(245, 245, 247, 0)";
-  const topFadeHeight = Math.max(insets.top + 56, 72);
+  const topFadeHeight = Math.max(insets.top + 18, 30);
   const bottomFadeHeight = Math.max(insets.bottom + 32, 44);
 
   return (
@@ -58,7 +61,7 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
       </SafeAreaView>
       <LinearGradient
         pointerEvents="none"
-        colors={[fadeOpaque, fadeTransparent]}
+        colors={[topFadeOpaque, fadeTransparent]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={{
@@ -67,12 +70,12 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
           position: "absolute",
           right: 0,
           top: 0,
-          zIndex: 30,
+          zIndex: 15,
         }}
       />
       <LinearGradient
         pointerEvents="none"
-        colors={[fadeTransparent, fadeOpaque]}
+        colors={[fadeTransparent, bottomFadeOpaque]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={{
