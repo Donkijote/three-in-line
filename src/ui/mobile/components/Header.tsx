@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { BlurView } from "expo-blur";
 import { Platform, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Text } from "@/ui/mobile/components/ui/text";
 import { cn } from "@/ui/mobile/lib/utils";
@@ -16,6 +17,7 @@ export type { HeaderProps };
 
 export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
   const isIOS = Platform.OS === "ios";
+  const insets = useSafeAreaInsets();
 
   return (
     <View>
@@ -29,7 +31,10 @@ export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
         ) : (
           <View className="absolute inset-0 bg-card/80" />
         )}
-        <View className="relative flex-row items-center justify-center px-4 py-3">
+        <View
+          className="relative flex-row items-center justify-center px-4 pb-3"
+          style={{ paddingTop: insets.top + 8 }}
+        >
           {leftSlot ? (
             <View className="absolute left-4 z-10 flex-row items-center">
               {leftSlot}

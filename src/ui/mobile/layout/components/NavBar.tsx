@@ -83,7 +83,7 @@ export const NavBar = () => {
   const isIOS = Platform.OS === "ios";
 
   return (
-    <View className="absolute inset-x-0 bottom-4 z-40 flex justify-center px-4">
+    <View className="absolute inset-x-0 bottom-12 z-40 flex justify-center px-4">
       {isIOS ? (
         <View
           className={cn(
