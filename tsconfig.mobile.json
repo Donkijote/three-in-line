@@ -24,6 +24,8 @@
       "expo-router/*": ["./node_modules/expo-router/*"],
       "expo-blur": ["./node_modules/expo-blur"],
       "expo-blur/*": ["./node_modules/expo-blur/*"],
+      "expo-linear-gradient": ["./node_modules/expo-linear-gradient"],
+      "expo-linear-gradient/*": ["./node_modules/expo-linear-gradient/*"],
       "lucide-react-native": ["./node_modules/lucide-react-native"],
       "@rn-primitives/slot": ["./node_modules/@rn-primitives/slot"]
     }
