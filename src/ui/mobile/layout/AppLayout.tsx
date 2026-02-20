@@ -1,16 +1,16 @@
 import type { PropsWithChildren } from "react";
 
 import { StatusBar } from "expo-status-bar";
-import { useColorScheme, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useTheme } from "@/ui/mobile/application/providers/ThemeProvider";
 import { ScrollArea } from "@/ui/mobile/components/ui/scroll-area";
 import { NavBar } from "@/ui/mobile/layout/components/NavBar";
 import { cn } from "@/ui/mobile/lib/utils";
 
 export const AppLayout = ({ children }: PropsWithChildren) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark } = useTheme();
 
   return (
     <SafeAreaView

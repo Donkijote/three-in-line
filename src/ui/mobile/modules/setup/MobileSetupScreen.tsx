@@ -1,5 +1,6 @@
 import { View } from "react-native";
 
+import { useTheme } from "@/ui/mobile/application/providers/ThemeProvider";
 import { Button } from "@/ui/mobile/components/ui/button";
 import {
   Card,
@@ -20,6 +21,8 @@ const previewItems = Array.from({ length: 20 }, (_, index) => ({
 }));
 
 export const MobileSetupScreen = ({ onOpenMock }: MobileSetupScreenProps) => {
+  const { isDark, toggleTheme } = useTheme();
+
   return (
     <View className="flex-1 gap-4">
       <View className="self-start rounded-full bg-primary px-3 py-1.5">
@@ -51,6 +54,9 @@ export const MobileSetupScreen = ({ onOpenMock }: MobileSetupScreenProps) => {
 
       <Button className="mt-2" onPress={onOpenMock}>
         <Text>Open Mock Screen</Text>
+      </Button>
+      <Button variant="outline" onPress={toggleTheme}>
+        <Text>{isDark ? "Switch to Light Theme" : "Switch to Dark Theme"}</Text>
       </Button>
 
       <View className="mt-2 gap-2">

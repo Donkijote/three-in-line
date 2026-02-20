@@ -41,7 +41,8 @@
     --sidebar-ring: 0 0% 63.02%;
   }
 
-  .dark {
+  .dark,
+  .theme-night {
     --background: 0 0% 3.94%;
     --foreground: 0 0% 98.03%;
     --card: 0 0% 9.05%;
