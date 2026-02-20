@@ -10,8 +10,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        border: "hsl(var(--border) / <alpha-value>)",
-        input: "hsl(var(--input) / <alpha-value>)",
+        border:
+          "hsl(var(--border) / calc(var(--border-alpha) * <alpha-value>))",
+        input: "hsl(var(--input) / calc(var(--input-alpha) * <alpha-value>))",
         ring: "hsl(var(--ring) / <alpha-value>)",
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
@@ -56,7 +57,8 @@ module.exports = {
           accent: "hsl(var(--sidebar-accent) / <alpha-value>)",
           "accent-foreground":
             "hsl(var(--sidebar-accent-foreground) / <alpha-value>)",
-          border: "hsl(var(--sidebar-border) / <alpha-value>)",
+          border:
+            "hsl(var(--sidebar-border) / calc(var(--sidebar-border-alpha) * <alpha-value>))",
           ring: "hsl(var(--sidebar-ring) / <alpha-value>)"
         },
         chart: {
