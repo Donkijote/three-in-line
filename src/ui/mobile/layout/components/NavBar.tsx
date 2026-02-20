@@ -3,6 +3,7 @@ import { router, usePathname } from "expo-router";
 import { Gamepad2, Home, Settings } from "lucide-react-native";
 import { Platform, Pressable, View } from "react-native";
 
+import { useTheme } from "@/ui/mobile/application/providers/ThemeProvider";
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import { Text } from "@/ui/mobile/components/ui/text";
 import { cn } from "@/ui/mobile/lib/utils";
@@ -77,13 +78,22 @@ const NavItemsContent = ({ pathname }: NavItemsContentProps) => {
 };
 
 export const NavBar = () => {
+  const { isDark } = useTheme();
   const pathname = usePathname();
   const isIOS = Platform.OS === "ios";
 
   return (
     <View className="absolute inset-x-0 bottom-4 z-40 flex justify-center px-4">
       {isIOS ? (
-        <View className="mx-auto w-full max-w-xs overflow-hidden rounded-full border border-border/45">
+        <View
+          className={cn(
+            "mx-auto w-full max-w-xs overflow-hidden rounded-full border",
+            {
+              "border-border/60": !isDark,
+              "border-border": isDark,
+            },
+          )}
+        >
           <BlurView
             intensity={25}
             tint="systemUltraThinMaterialLight"
