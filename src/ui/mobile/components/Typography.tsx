@@ -6,6 +6,8 @@ import { Text } from "@/ui/mobile/components/ui/text";
 import { cn } from "@/ui/mobile/lib/utils";
 
 type TypographyProps = ComponentProps<typeof Text>;
+type SmallProps = Omit<TypographyProps, "variant"> &
+  VariantProps<typeof smallVariants>;
 
 const H1 = ({ className, children, ...props }: TypographyProps) => (
   <Text
@@ -117,12 +119,7 @@ const smallVariants = cva("leading-none", {
   },
 });
 
-const Small = ({
-  className,
-  children,
-  variant,
-  ...props
-}: TypographyProps & VariantProps<typeof smallVariants>) => (
+const Small = ({ className, children, variant, ...props }: SmallProps) => (
   <Text className={cn(smallVariants({ variant }), className)} {...props}>
     {children}
   </Text>
