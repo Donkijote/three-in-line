@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import { View } from "react-native";
 
 import { useMobileHeader } from "@/ui/mobile/application/providers/MobileHeaderProvider";
+import { H2, Muted, P } from "@/ui/mobile/components/Typography";
 import { Button } from "@/ui/mobile/components/ui/button";
-import { Text } from "@/ui/mobile/components/ui/text";
 
 type MobileMockScreenProps = {
   onGoBack?: () => void;
@@ -30,13 +30,13 @@ export const MobileMockScreen = ({ onGoBack }: MobileMockScreenProps) => {
 
   return (
     <View className="flex-1 gap-4">
-      <Text variant="h2">Mock Screen</Text>
-      <Text variant="muted">
+      <H2>Mock Screen</H2>
+      <Muted>
         Expo Router navigation is working. This is a dummy destination screen.
-      </Text>
+      </Muted>
 
       <Button variant="secondary" onPress={onGoBack}>
-        <Text>Go Back</Text>
+        <P>Go Back</P>
       </Button>
     </View>
   );

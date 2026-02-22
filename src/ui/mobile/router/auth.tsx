@@ -8,7 +8,7 @@ import {
   Unauthenticated,
   useConvexAuth,
 } from "@/infrastructure/convex/auth";
-import { Text } from "@/ui/mobile/components/ui/text";
+import { Muted } from "@/ui/mobile/components/Typography";
 
 type MobileAuthLoaderProps = {
   message: string;
@@ -18,7 +18,7 @@ const MobileAuthLoader = ({ message }: MobileAuthLoaderProps) => {
   return (
     <View className="flex-1 items-center justify-center gap-3">
       <ActivityIndicator />
-      <Text variant="muted">{message}</Text>
+      <Muted>{message}</Muted>
     </View>
   );
 };

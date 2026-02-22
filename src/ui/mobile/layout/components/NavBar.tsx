@@ -4,8 +4,8 @@ import { Gamepad2, Home, Settings } from "lucide-react-native";
 import { Platform, Pressable, View } from "react-native";
 
 import { useTheme } from "@/ui/mobile/application/providers/ThemeProvider";
+import { Small } from "@/ui/mobile/components/Typography";
 import { Icon } from "@/ui/mobile/components/ui/icon";
-import { Text } from "@/ui/mobile/components/ui/text";
 import { cn } from "@/ui/mobile/lib/utils";
 
 type NavItem = {
@@ -60,7 +60,7 @@ const NavItemsContent = ({ pathname }: NavItemsContentProps) => {
               })}
             />
           </View>
-          <Text
+          <Small
             className={cn(
               "text-[10px] font-semibold uppercase tracking-[1.5px]",
               {
@@ -70,7 +70,7 @@ const NavItemsContent = ({ pathname }: NavItemsContentProps) => {
             )}
           >
             {item.label}
-          </Text>
+          </Small>
         </View>
       </Pressable>
     );

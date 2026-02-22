@@ -4,7 +4,7 @@ import { BlurView } from "expo-blur";
 import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Text } from "@/ui/mobile/components/ui/text";
+import { H6, Small } from "@/ui/mobile/components/Typography";
 import { cn } from "@/ui/mobile/lib/utils";
 
 type HeaderProps = {
@@ -42,11 +42,14 @@ export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
           ) : null}
           <View className="items-center">
             {eyebrow ? (
-              <Text className="text-[10px] font-semibold uppercase tracking-[1.5px] text-primary/80">
+              <Small
+                variant="label"
+                className="text-[10px] tracking-[1.5px] text-primary/80"
+              >
                 {eyebrow}
-              </Text>
+              </Small>
             ) : null}
-            <Text
+            <H6
               className={cn(
                 "font-semibold uppercase tracking-[2px] leading-none",
                 {
@@ -56,7 +59,7 @@ export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
               )}
             >
               {title}
-            </Text>
+            </H6>
           </View>
         </View>
       </View>
