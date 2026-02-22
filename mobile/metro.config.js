@@ -15,6 +15,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, "node_modules")
 ];
 config.resolver.extraNodeModules = {
+  "@/convex": path.resolve(workspaceRoot, "convex"),
   "@": path.resolve(workspaceRoot, "src"),
   react: path.resolve(mobileNodeModules, "react"),
   "react/jsx-runtime": path.resolve(mobileNodeModules, "react/jsx-runtime"),
