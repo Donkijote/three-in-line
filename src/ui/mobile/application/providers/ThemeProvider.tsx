@@ -55,9 +55,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <ThemeContext.Provider value={value}>
-      <View className={cn("flex-1", { "theme-night": isDark })}>
-        {children}
-      </View>
+      <View className={cn("flex-1")}>{children}</View>
     </ThemeContext.Provider>
   );
 };
