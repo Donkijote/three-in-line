@@ -1,16 +1,7 @@
 import type { PropsWithChildren } from "react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useContext, useState } from "react";
 
 import { useColorScheme } from "nativewind";
-import { View } from "react-native";
-
-import { cn } from "@/ui/mobile/lib/utils";
 
 type ThemeMode = "light" | "dark";
 
@@ -39,23 +30,18 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
       : fallbackMode;
   const isDark = mode === "dark";
 
-  const toggleTheme = useCallback(() => {
+  const toggleTheme = () => {
     toggleColorScheme();
     setFallbackMode((current) => (current === "dark" ? "light" : "dark"));
-  }, [toggleColorScheme]);
+  };
 
-  const value = useMemo<ThemeContextValue>(
-    () => ({
-      isDark,
-      mode,
-      toggleTheme,
-    }),
-    [isDark, mode, toggleTheme],
-  );
+  const value: ThemeContextValue = {
+    isDark,
+    mode,
+    toggleTheme,
+  };
 
   return (
-    <ThemeContext.Provider value={value}>
-      <View className={cn("flex-1")}>{children}</View>
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 };

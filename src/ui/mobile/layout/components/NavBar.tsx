@@ -96,7 +96,7 @@ export const NavBar = () => {
         >
           <BlurView
             intensity={25}
-            tint="systemUltraThinMaterialLight"
+            tint="default"
             className="absolute inset-0"
           />
           <View className="flex-row items-center justify-between px-4 py-2">

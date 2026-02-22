@@ -24,7 +24,7 @@ const previewItems = Array.from({ length: 20 }, (_, index) => ({
 }));
 
 export const MobileSetupScreen = ({ onOpenMock }: MobileSetupScreenProps) => {
-  const { isDark, toggleTheme } = useTheme();
+  const { mode, toggleTheme } = useTheme();
   const { setHeader } = useMobileHeader();
 
   useEffect(() => {
@@ -62,7 +62,9 @@ export const MobileSetupScreen = ({ onOpenMock }: MobileSetupScreenProps) => {
         <Text>Open Mock Screen</Text>
       </Button>
       <Button variant="outline" onPress={toggleTheme}>
-        <Text>{isDark ? "Switch to Light Theme" : "Switch to Dark Theme"}</Text>
+        <Text>
+          {mode === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
+        </Text>
       </Button>
 
       <View className="mt-2 gap-2">

@@ -4,7 +4,6 @@ import { BlurView } from "expo-blur";
 import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useTheme } from "@/ui/mobile/application/providers/ThemeProvider";
 import { Text } from "@/ui/mobile/components/ui/text";
 import { cn } from "@/ui/mobile/lib/utils";
 
@@ -19,7 +18,6 @@ export type { HeaderProps };
 export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
   const isIOS = Platform.OS === "ios";
   const insets = useSafeAreaInsets();
-  const { isDark } = useTheme();
 
   return (
     <View>
@@ -27,7 +25,7 @@ export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
         {isIOS ? (
           <BlurView
             intensity={25}
-            tint={isDark ? "dark" : "systemUltraThinMaterialLight"}
+            tint="default"
             className="absolute inset-0"
           />
         ) : (
