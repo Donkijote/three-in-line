@@ -11,13 +11,14 @@ import {
 } from "@/ui/shared/avatars";
 
 import { AvatarOptionItem } from "./AvatarOptionItem";
+import { AvatarMoreOptions } from "./AvatarMoreOptions";
 
 type AvatarOptionsProps = {
   onChange?: (avatar: AvatarPreset) => void;
 };
 
 export const AvatarOptions = ({ onChange }: AvatarOptionsProps) => {
-  const [avatarOptions] = useState<AvatarPreset[]>(() =>
+  const [avatarOptions, setAvatarOptions] = useState<AvatarPreset[]>(() =>
     pickRandomPresetAvatars(),
   );
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarPreset>(
@@ -29,15 +30,37 @@ export const AvatarOptions = ({ onChange }: AvatarOptionsProps) => {
     onChange?.(avatar);
   };
 
+  const onAcceptAvatar = (avatar: AvatarPreset) => {
+    setAvatarOptions((previousAvatars) => {
+      const existingAvatar = previousAvatars.find(
+        (currentAvatar) => currentAvatar.id === avatar.id,
+      );
+
+      if (existingAvatar) {
+        return [
+          existingAvatar,
+          ...previousAvatars.filter(
+            (currentAvatar) => currentAvatar.id !== existingAvatar.id,
+          ),
+        ];
+      }
+
+      return [avatar, ...previousAvatars.slice(1)];
+    });
+    onSelectAvatar(avatar);
+  };
+
   return (
     <View className="gap-4">
       <View className="flex-row items-center justify-between">
         <Small variant="label" className="text-primary/90">
           Select avatar
         </Small>
-        <Small variant="label" className="text-muted-foreground/70">
-          see more
-        </Small>
+        <AvatarMoreOptions onAccept={onAcceptAvatar}>
+          <Small variant="label" className="text-muted-foreground/70">
+            see more
+          </Small>
+        </AvatarMoreOptions>
       </View>
 
       <ScrollView
