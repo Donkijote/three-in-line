@@ -27,8 +27,12 @@
       "expo-blur/*": ["./node_modules/expo-blur/*"],
       "expo-linear-gradient": ["./node_modules/expo-linear-gradient"],
       "expo-linear-gradient/*": ["./node_modules/expo-linear-gradient/*"],
+      "expo-constants": ["./node_modules/expo-constants"],
+      "expo-constants/*": ["./node_modules/expo-constants/*"],
       "expo-secure-store": ["./node_modules/expo-secure-store"],
       "expo-secure-store/*": ["./node_modules/expo-secure-store/*"],
+      "react-native-svg": ["./node_modules/react-native-svg"],
+      "react-native-svg/*": ["./node_modules/react-native-svg/*"],
       "lucide-react-native": ["./node_modules/lucide-react-native"],
       "@rn-primitives/slot": ["./node_modules/@rn-primitives/slot"],
       "@rn-primitives/avatar": ["./node_modules/@rn-primitives/avatar"]
