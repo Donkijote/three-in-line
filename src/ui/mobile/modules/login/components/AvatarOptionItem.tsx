@@ -77,7 +77,7 @@ export const AvatarOptionItem = ({
 
       <Small
         className={cn("text-xs font-semibold", {
-          "text-foreground/90": isSelected,
+          "text-foreground": isSelected,
           "text-muted-foreground": !isSelected,
         })}
       >
