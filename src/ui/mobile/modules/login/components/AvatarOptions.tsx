@@ -10,8 +10,8 @@ import {
   pickRandomPresetAvatars,
 } from "@/ui/shared/avatars";
 
-import { AvatarOptionItem } from "./AvatarOptionItem";
 import { AvatarMoreOptions } from "./AvatarMoreOptions";
+import { AvatarOptionItem } from "./AvatarOptionItem";
 
 type AvatarOptionsProps = {
   onChange?: (avatar: AvatarPreset) => void;

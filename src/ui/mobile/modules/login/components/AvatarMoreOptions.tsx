@@ -3,7 +3,6 @@ import { type PropsWithChildren, useState } from "react";
 import { X } from "lucide-react-native";
 import { useWindowDimensions, View } from "react-native";
 
-import { Small } from "@/ui/mobile/components/Typography";
 import { Button } from "@/ui/mobile/components/ui/button";
 import {
   Drawer,
@@ -47,11 +46,7 @@ export const AvatarMoreOptions = ({
   };
 
   return (
-    <Drawer
-      direction={drawerDirection}
-      open={isOpen}
-      onOpenChange={setIsOpen}
-    >
+    <Drawer direction={drawerDirection} open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger>{children}</DrawerTrigger>
       <DrawerContent className="h-full max-h-[92%]">
         <DrawerHeader className="relative items-center pb-3">
