@@ -2,6 +2,8 @@ import { useEffect } from "react";
 
 import { View } from "react-native";
 
+import { useAuthActions } from "@convex-dev/auth/react";
+
 import { useMobileHeader } from "@/ui/mobile/application/providers/MobileHeaderProvider";
 import { useTheme } from "@/ui/mobile/application/providers/ThemeProvider";
 import { H1, H4, Lead, Muted, P } from "@/ui/mobile/components/Typography";
@@ -26,6 +28,7 @@ const previewItems = Array.from({ length: 20 }, (_, index) => ({
 export const SetupScreen = ({ onOpenMock }: SetupScreenProps) => {
   const { mode, toggleTheme } = useTheme();
   const { setHeader } = useMobileHeader();
+  const { signOut } = useAuthActions();
 
   useEffect(() => {
     setHeader({
@@ -65,6 +68,10 @@ export const SetupScreen = ({ onOpenMock }: SetupScreenProps) => {
         <P>
           {mode === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
         </P>
+      </Button>
+
+      <Button variant="destructive" onPress={signOut}>
+        <P>Sign Out</P>
       </Button>
 
       <View className="mt-2 gap-2">
