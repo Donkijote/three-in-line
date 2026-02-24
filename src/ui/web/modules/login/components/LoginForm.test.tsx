@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import type { AvatarPreset } from "@/ui/shared/avatars";
+import { validateAvatar, validatePassword } from "@/ui/shared/login/validators";
 
-import { LoginForm, validateAvatar, validatePassword } from "./LoginForm";
+import { LoginForm } from "./LoginForm";
 
 const signIn = vi.fn();
 const checkEmailExists = vi.fn();
@@ -16,7 +17,7 @@ vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn }),
 }));
 
-vi.mock("@/ui/web/hooks/useUser", () => ({
+vi.mock("@/ui/shared/login/useCheckEmailExists", () => ({
   useCheckEmailExists: () => ({
     checkEmailExists,
     isChecking,
@@ -273,7 +274,7 @@ describe("LoginForm", () => {
 
     await waitFor(() =>
       expect(consoleError).toHaveBeenCalledWith(
-        "Failed to verify codename",
+        "Failed to verify email",
         expect.any(Error),
       ),
     );
