@@ -18,6 +18,7 @@ import {
 } from "@/ui/shared/login/validators";
 
 import { AvatarOptions } from "./AvatarOptions";
+import { LoginErrorAlert } from "./LoginErrorAlert";
 
 export const LoginForm = () => {
   const {
@@ -130,24 +131,6 @@ export const LoginForm = () => {
           )}
         </form.Field>
 
-        <Visibility visible={Boolean(authError)}>
-          <View className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3">
-            <Small className="leading-5 text-destructive">
-              We couldn't get you into the arena. Please check your credentials
-              and try again.
-            </Small>
-            <Button
-              variant="ghost"
-              size="sm"
-              onPress={() => setAuthError(null)}
-              className="mt-2 h-8 self-start px-0"
-            >
-              <Text className="text-xs font-semibold uppercase tracking-wide text-destructive">
-                Try again
-              </Text>
-            </Button>
-          </View>
-        </Visibility>
       </View>
 
       <form.Subscribe
@@ -188,6 +171,8 @@ export const LoginForm = () => {
           );
         }}
       </form.Subscribe>
+
+      <LoginErrorAlert error={authError} onClose={() => setAuthError(null)} />
     </View>
   );
 };
