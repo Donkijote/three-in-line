@@ -9,6 +9,18 @@ import type { LoginFormValues } from "@/ui/shared/login/types";
 import { useCheckEmailExists } from "@/ui/shared/login/useCheckEmailExists";
 import { isValidEmail } from "@/ui/shared/login/validators";
 
+const toAuthError = (error: unknown, fallbackMessage: string) => {
+  if (error instanceof Error) {
+    return error;
+  }
+
+  if (typeof error === "string" && error.trim()) {
+    return new Error(error);
+  }
+
+  return new Error(fallbackMessage);
+};
+
 export const useLoginFlow = () => {
   const { signIn } = useAuthActions();
   const { checkEmailExists, isChecking } = useCheckEmailExists();
@@ -52,6 +64,7 @@ export const useLoginFlow = () => {
       }
 
       console.error("Failed to verify email", error);
+      setAuthError(toAuthError(error, "Failed to verify email."));
       setDoesEmailExist(null);
     } finally {
       if (latestRequestId.current === requestId) {
@@ -113,7 +126,9 @@ export const useLoginFlow = () => {
       await signIn("password", payload);
     } catch (error) {
       console.error("Authentication failed", error);
-      setAuthError(error);
+      setAuthError(
+        toAuthError(error, "We couldn't get you into the arena. Try again."),
+      );
     }
   };
 
