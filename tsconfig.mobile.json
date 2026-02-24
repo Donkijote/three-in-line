@@ -38,8 +38,6 @@
       "react-native-svg": ["./node_modules/react-native-svg"],
       "react-native-svg/*": ["./node_modules/react-native-svg/*"],
       "lucide-react-native": ["./node_modules/lucide-react-native"],
-      "@rn-primitives/alert-dialog": ["./node_modules/@rn-primitives/alert-dialog"],
-      "@rn-primitives/portal": ["./node_modules/@rn-primitives/portal"],
       "@rn-primitives/slot": ["./node_modules/@rn-primitives/slot"],
       "@rn-primitives/avatar": ["./node_modules/@rn-primitives/avatar"]
     }

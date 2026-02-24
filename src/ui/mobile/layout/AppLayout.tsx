@@ -1,11 +1,9 @@
 import type { PropsWithChildren } from "react";
 
-import { PortalHost } from "@rn-primitives/portal";
 import { LinearGradient } from "expo-linear-gradient";
 import { usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Platform, View } from "react-native";
-import { FullWindowOverlay } from "react-native-screens";
+import { View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -102,13 +100,6 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
           }}
         />
       </Visibility>
-      {Platform.OS === "ios" ? (
-        <FullWindowOverlay>
-          <PortalHost />
-        </FullWindowOverlay>
-      ) : (
-        <PortalHost />
-      )}
     </View>
   );
 };
