@@ -31,7 +31,7 @@ export const LoginScreen = () => {
           </Lead>
         </View>
 
-        <View className="flex-1 pt-8 pb-6">
+        <View className="flex-1 pt-8">
           <LoginForm />
         </View>
       </View>
