@@ -1,7 +1,6 @@
 import { Pencil } from "lucide-react-native";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
-import { useCurrentUserQuery } from "@/infrastructure/convex/UserApi";
 import { AvatarMoreOptions } from "@/ui/mobile/components/AvatarMoreOptions";
 import { Small } from "@/ui/mobile/components/Typography";
 import {
@@ -11,18 +10,12 @@ import {
   AvatarImage,
 } from "@/ui/mobile/components/ui/avatar";
 import { Icon } from "@/ui/mobile/components/ui/icon";
-import { useUpdateAvatar } from "@/ui/mobile/hooks/useUser";
 import { Visibility } from "@/ui/mobile/layout/components/Visibility";
-import { useAvatarSection } from "@/ui/shared/settings/useAvatarSection";
+import { useAvatarSection } from "@/ui/shared/settings/hooks/useAvatarSection";
 
 export const AvatarSection = () => {
-  const currentUser = useCurrentUserQuery();
-  const updateAvatar = useUpdateAvatar();
   const { avatarSrc, fallbackInitials, isUpdating, onAcceptAvatar } =
-    useAvatarSection({
-      currentUser,
-      updateAvatar,
-    });
+    useAvatarSection();
 
   return (
     <View className="items-center pb-2 pt-1">

@@ -4,6 +4,10 @@ import { Plus } from "lucide-react";
 
 import { isPresetAvatarId, type UserAvatar } from "@/domain/entities/Avatar";
 import { getPresetAvatarById } from "@/ui/shared/avatars";
+import {
+  useCurrentUser,
+  useUpdateAvatar,
+} from "@/ui/shared/user/hooks/useUser";
 import { Small } from "@/ui/web/components/Typography";
 import {
   Avatar,
@@ -11,7 +15,6 @@ import {
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
-import { useCurrentUser, useUpdateAvatar } from "@/ui/web/hooks/useUser";
 import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
 
 export const PreviousAvatarsSection = () => {

@@ -3,7 +3,10 @@ import type { ReactNode } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import type { AvatarPreset } from "@/ui/shared/avatars";
-import { validateAvatar, validatePassword } from "@/ui/shared/login/validators";
+import {
+  validateAvatar,
+  validatePassword,
+} from "@/ui/shared/login/validation/validators";
 
 import { LoginForm } from "./LoginForm";
 
@@ -17,7 +20,7 @@ vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn }),
 }));
 
-vi.mock("@/ui/shared/login/useCheckEmailExists", () => ({
+vi.mock("@/ui/shared/user/hooks/useUser", () => ({
   useCheckEmailExists: () => ({
     checkEmailExists,
     isChecking,

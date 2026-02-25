@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { act, renderHook } from "@testing-library/react";
 
-import type { LoginFormValues } from "@/ui/shared/login/types";
-import { useLoginFlow } from "@/ui/shared/login/useLoginFlow";
+import { useLoginFlow } from "@/ui/shared/login/hooks/useLoginFlow";
+import type { LoginFormValues } from "@/ui/shared/login/types/login";
 
 const signIn = vi.fn();
 const checkEmailExists = vi.fn();
@@ -13,7 +13,7 @@ vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn }),
 }));
 
-vi.mock("@/ui/shared/login/useCheckEmailExists", () => ({
+vi.mock("@/ui/shared/user/hooks/useUser", () => ({
   useCheckEmailExists: () => ({
     checkEmailExists,
     isChecking,

@@ -1,6 +1,6 @@
 import { Loader, Pencil } from "lucide-react";
 
-import { useAvatarSection } from "@/ui/shared/settings/useAvatarSection";
+import { useAvatarSection } from "@/ui/shared/settings/hooks/useAvatarSection";
 import { AvatarMoreOptions } from "@/ui/web/components/AvatarMoreOptions";
 import {
   Avatar,
@@ -8,17 +8,11 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
-import { useCurrentUser, useUpdateAvatar } from "@/ui/web/hooks/useUser";
 import { cn } from "@/ui/web/lib/utils";
 
 export const AvatarSection = () => {
-  const currentUser = useCurrentUser();
-  const updateAvatar = useUpdateAvatar();
   const { avatarSrc, fallbackInitials, isUpdating, onAcceptAvatar } =
-    useAvatarSection({
-      currentUser,
-      updateAvatar,
-    });
+    useAvatarSection();
 
   return (
     <div className="flex flex-col items-center gap-4">

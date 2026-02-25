@@ -1,20 +1,16 @@
 import { useRef, useState } from "react";
 
-import type { UserAvatar } from "@/domain/entities/Avatar";
 import { isPresetAvatarId } from "@/domain/entities/Avatar";
-import type { User } from "@/domain/entities/User";
 import { type AvatarPreset, getPresetAvatarById } from "@/ui/shared/avatars";
+import {
+  useCurrentUser,
+  useUpdateAvatar,
+} from "@/ui/shared/user/hooks/useUser";
 import { getFallbackInitials } from "@/ui/shared/user/initials";
 
-type UseAvatarSectionParams = {
-  currentUser?: User | null;
-  updateAvatar: (input: { avatar: UserAvatar }) => Promise<unknown>;
-};
-
-export const useAvatarSection = ({
-  currentUser,
-  updateAvatar,
-}: UseAvatarSectionParams) => {
+export const useAvatarSection = () => {
+  const currentUser = useCurrentUser();
+  const updateAvatar = useUpdateAvatar();
   const [isUpdating, setIsUpdating] = useState(false);
   const isUpdatingRef = useRef(false);
 

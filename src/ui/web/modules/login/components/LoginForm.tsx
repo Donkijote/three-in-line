@@ -4,13 +4,13 @@ import { ArrowRight, Loader, Pencil } from "lucide-react";
 
 import { getRandomPresetAvatarId } from "@/domain/entities/Avatar";
 import { toUserAvatar } from "@/ui/shared/avatars/presets";
-import { useLoginFlow } from "@/ui/shared/login/useLoginFlow";
+import { useLoginFlow } from "@/ui/shared/login/hooks/useLoginFlow";
 import {
   resolveLoginSubmitState,
   validateAvatar,
   validateEmail,
   validatePassword,
-} from "@/ui/shared/login/validators";
+} from "@/ui/shared/login/validation/validators";
 import { Small } from "@/ui/web/components/Typography";
 import { Button } from "@/ui/web/components/ui/button";
 import {

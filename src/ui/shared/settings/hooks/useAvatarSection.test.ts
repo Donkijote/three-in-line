@@ -10,45 +10,48 @@ const baseUser: User = {
   name: "Ada Lovelace",
 };
 
-describe("useAvatarSection", () => {
-  it("resolves fallback initials", () => {
-    const updateAvatar = vi.fn().mockResolvedValue({});
+const { useCurrentUserMock, useUpdateAvatarMock } = vi.hoisted(() => ({
+  useCurrentUserMock: vi.fn(),
+  useUpdateAvatarMock: vi.fn(),
+}));
 
-    const { result } = renderHook(() =>
-      useAvatarSection({
-        currentUser: baseUser,
-        updateAvatar,
-      }),
-    );
+vi.mock("@/ui/shared/user/hooks/useUser", () => ({
+  useCurrentUser: useCurrentUserMock,
+  useUpdateAvatar: useUpdateAvatarMock,
+}));
+
+describe("useAvatarSection", () => {
+  beforeEach(() => {
+    useCurrentUserMock.mockReset();
+    useUpdateAvatarMock.mockReset();
+    useCurrentUserMock.mockReturnValue(baseUser);
+  });
+
+  it("resolves fallback initials", () => {
+    useUpdateAvatarMock.mockReturnValue(vi.fn().mockResolvedValue({}));
+
+    const { result } = renderHook(() => useAvatarSection());
 
     expect(result.current.fallbackInitials).toBe("AL");
   });
 
   it("resolves preset avatar src", () => {
-    const updateAvatar = vi.fn().mockResolvedValue({});
+    useUpdateAvatarMock.mockReturnValue(vi.fn().mockResolvedValue({}));
+    useCurrentUserMock.mockReturnValue({
+      ...baseUser,
+      avatar: { type: "preset", value: "avatar-3" },
+    });
 
-    const { result } = renderHook(() =>
-      useAvatarSection({
-        currentUser: {
-          ...baseUser,
-          avatar: { type: "preset", value: "avatar-3" },
-        },
-        updateAvatar,
-      }),
-    );
+    const { result } = renderHook(() => useAvatarSection());
 
     expect(result.current.avatarSrc).toBe("/avatars/avatar-3.svg");
   });
 
   it("updates avatar with preset id", async () => {
     const updateAvatar = vi.fn().mockResolvedValue({});
+    useUpdateAvatarMock.mockReturnValue(updateAvatar);
 
-    const { result } = renderHook(() =>
-      useAvatarSection({
-        currentUser: baseUser,
-        updateAvatar,
-      }),
-    );
+    const { result } = renderHook(() => useAvatarSection());
 
     await act(async () => {
       await result.current.onAcceptAvatar({
@@ -72,13 +75,9 @@ describe("useAvatarSection", () => {
           resolveUpdate = resolve;
         }),
     );
+    useUpdateAvatarMock.mockReturnValue(updateAvatar);
 
-    const { result } = renderHook(() =>
-      useAvatarSection({
-        currentUser: baseUser,
-        updateAvatar,
-      }),
-    );
+    const { result } = renderHook(() => useAvatarSection());
 
     act(() => {
       void result.current.onAcceptAvatar({
@@ -107,13 +106,9 @@ describe("useAvatarSection", () => {
   it("logs errors and clears updating state on failure", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const updateAvatar = vi.fn().mockRejectedValue(new Error("boom"));
+    useUpdateAvatarMock.mockReturnValue(updateAvatar);
 
-    const { result } = renderHook(() =>
-      useAvatarSection({
-        currentUser: baseUser,
-        updateAvatar,
-      }),
-    );
+    const { result } = renderHook(() => useAvatarSection());
 
     await act(async () => {
       await result.current.onAcceptAvatar({
