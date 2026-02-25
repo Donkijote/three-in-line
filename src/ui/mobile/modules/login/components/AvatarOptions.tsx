@@ -4,13 +4,13 @@ import { Plus } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
 
 import { AvatarMoreOptions } from "@/ui/mobile/components/AvatarMoreOptions";
-import { AvatarOptionItem } from "@/ui/mobile/components/AvatarOptionItem";
 import { Small } from "@/ui/mobile/components/Typography";
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import {
   type AvatarPreset,
   pickRandomPresetAvatars,
 } from "@/ui/shared/avatars";
+import { AvatarOptionItem } from "@/ui/mobile/modules/login/components/AvatarOptionItem";
 
 type AvatarOptionsProps = {
   onChange?: (avatar: AvatarPreset) => void;
