@@ -100,6 +100,10 @@ describe("LoginForm", () => {
 
   it("validates the password requirement", () => {
     expect(validatePassword("")).toBe("Password is required");
+    expect(validatePassword("12345", true)).toBe(
+      "Password must be at least 6 characters",
+    );
+    expect(validatePassword("12345", false)).toBeUndefined();
     expect(validatePassword(" secret ")).toBeUndefined();
   });
 
@@ -258,6 +262,28 @@ describe("LoginForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Pick avatar" }));
 
     expect(screen.getByDisplayValue("avatar-1")).toBeInTheDocument();
+  });
+
+  it("shows min-length feedback for short sign-up passwords", async () => {
+    checkEmailExists.mockResolvedValue(false);
+
+    render(<LoginForm />);
+
+    fireEvent.change(screen.getByPlaceholderText("you@example.com"), {
+      target: { value: "new@example.com" },
+    });
+
+    await waitFor(() =>
+      expect(checkEmailExists).toHaveBeenCalledWith("new@example.com"),
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Enter password"), {
+      target: { value: "12345" },
+    });
+
+    expect(
+      screen.getByText("Password must be at least 6 characters"),
+    ).toBeInTheDocument();
   });
 
   it("handles failures when checking email existence", async () => {

@@ -17,8 +17,19 @@ export const validateEmail = (value: string) => {
   return undefined;
 };
 
-export const validatePassword = (value: string) =>
-  value.trim() ? undefined : "Password is required";
+export const validatePassword = (value: string, isSignUp = false) => {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return "Password is required";
+  }
+
+  if (isSignUp && trimmedValue.length < 6) {
+    return "Password must be at least 6 characters";
+  }
+
+  return undefined;
+};
 
 export const validateAvatar = (value?: UserAvatar) =>
   value?.value ? undefined : "Avatar is required";
@@ -41,7 +52,8 @@ export const resolveLoginSubmitState = ({
   isEmailCheckPending,
 }: ResolveSubmitStateArgs) => {
   const emailValid = validateEmail(values.email.trim()) === undefined;
-  const passwordValid = Boolean(values.password.trim());
+  const passwordValid =
+    validatePassword(values.password, values.flow === "signUp") === undefined;
   const requirePassword = doesEmailExist !== null;
   const isDisabled =
     !canSubmit ||

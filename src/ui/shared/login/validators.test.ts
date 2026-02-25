@@ -22,6 +22,10 @@ describe("login validators", () => {
 
   it("validates password", () => {
     expect(validatePassword("")).toBe("Password is required");
+    expect(validatePassword("12345", true)).toBe(
+      "Password must be at least 6 characters",
+    );
+    expect(validatePassword("12345", false)).toBeUndefined();
     expect(validatePassword(" secret ")).toBeUndefined();
   });
 
@@ -70,5 +74,20 @@ describe("login validators", () => {
     });
 
     expect(state.isDisabled).toBe(false);
+  });
+
+  it("disables submit when sign up password is shorter than 6 characters", () => {
+    const state = resolveLoginSubmitState({
+      values: { email: "user@example.com", password: "12345", flow: "signUp" },
+      canSubmit: true,
+      isSubmitting: false,
+      isChecking: false,
+      doesEmailExist: false,
+      isEmailCheckPending: false,
+    });
+
+    expect(state.requirePassword).toBe(true);
+    expect(state.passwordValid).toBe(false);
+    expect(state.isDisabled).toBe(true);
   });
 });

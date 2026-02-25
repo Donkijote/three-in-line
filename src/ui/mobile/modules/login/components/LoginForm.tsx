@@ -86,24 +86,37 @@ export const LoginForm = () => {
             <form.Field
               name="password"
               validators={{
-                onChange: ({ value }) => validatePassword(value),
+                onBlur: ({ value }) => validatePassword(value, isSignUp),
               }}
             >
-              {(field) => (
-                <Input
-                  placeholder="Enter password"
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  spellCheck={false}
-                  textContentType="password"
-                  autoComplete="password"
-                  value={field.state.value}
-                  onChangeText={field.handleChange}
-                  onBlur={field.handleBlur}
-                  className="h-14 bg-card text-foreground placeholder:text-muted-foreground/70"
-                />
-              )}
+              {(field) => {
+                const passwordError = field.state.meta.errors[0];
+                const passwordErrorMessage =
+                  typeof passwordError === "string" ? passwordError : undefined;
+
+                return (
+                  <View className="gap-2">
+                    <Input
+                      placeholder="Enter password"
+                      secureTextEntry
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      spellCheck={false}
+                      textContentType="password"
+                      autoComplete="password"
+                      value={field.state.value}
+                      onChangeText={field.handleChange}
+                      onBlur={field.handleBlur}
+                      className="h-14 bg-card text-foreground placeholder:text-muted-foreground/70"
+                    />
+                    <Visibility visible={Boolean(passwordErrorMessage)}>
+                      <Small className="text-destructive">
+                        {passwordErrorMessage}
+                      </Small>
+                    </Visibility>
+                  </View>
+                );
+              }}
             </form.Field>
           </View>
         </Visibility>

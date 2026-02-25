@@ -99,23 +99,36 @@ export const LoginForm = () => {
           <form.Field
             name="password"
             validators={{
-              onChange: ({ value }) => validatePassword(value),
+              onBlur: ({ value }) => validatePassword(value, isSignUp),
             }}
           >
-            {(field) => (
-              <InputGroup className="h-12 border-border bg-card">
-                <InputGroupInput
-                  id="login-password"
-                  type="password"
-                  placeholder="Enter password"
-                  autoComplete="current-password"
-                  className="text-base text-foreground placeholder:text-muted-foreground/70"
-                  value={field.state.value}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  onBlur={field.handleBlur}
-                />
-              </InputGroup>
-            )}
+            {(field) => {
+              const passwordError = field.state.meta.errors[0];
+              const passwordErrorMessage =
+                typeof passwordError === "string" ? passwordError : undefined;
+
+              return (
+                <div className="space-y-2">
+                  <InputGroup className="h-12 border-border bg-card">
+                    <InputGroupInput
+                      id="login-password"
+                      type="password"
+                      placeholder="Enter password"
+                      autoComplete="current-password"
+                      className="text-base text-foreground placeholder:text-muted-foreground/70"
+                      value={field.state.value}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      onBlur={field.handleBlur}
+                    />
+                  </InputGroup>
+                  {passwordErrorMessage ? (
+                    <Small className="text-destructive">
+                      {passwordErrorMessage}
+                    </Small>
+                  ) : null}
+                </div>
+              );
+            }}
           </form.Field>
         </div>
       </Activity>
