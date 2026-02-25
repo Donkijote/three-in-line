@@ -1,7 +1,12 @@
 import { router } from "expo-router";
 
-import { MobileMockScreen } from "@/ui/mobile/modules/setup/MobileMockScreen";
+import { MockScreen } from "@/ui/mobile/modules/setup/MockScreen";
+import { RequireAuth } from "@/ui/mobile/router/auth";
 
 export default function MockRoute() {
-  return <MobileMockScreen onGoBack={() => router.back()} />;
+  return (
+    <RequireAuth>
+      <MockScreen onGoBack={() => router.back()} />
+    </RequireAuth>
+  );
 }

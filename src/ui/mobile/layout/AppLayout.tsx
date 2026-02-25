@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from "react";
 
 import { LinearGradient } from "expo-linear-gradient";
+import { usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import {
@@ -13,13 +14,17 @@ import { useTheme } from "@/ui/mobile/application/providers/ThemeProvider";
 import { Header } from "@/ui/mobile/components/Header";
 import { ScrollArea } from "@/ui/mobile/components/ui/scroll-area";
 import { NavBar } from "@/ui/mobile/layout/components/NavBar";
+import { Visibility } from "@/ui/mobile/layout/components/Visibility";
 import { cn } from "@/ui/mobile/lib/utils";
 
 export const AppLayout = ({ children }: PropsWithChildren) => {
+  const pathname = usePathname();
   const { isDark } = useTheme();
   const { header } = useMobileHeader();
+  const shouldHideChrome = pathname === "/login";
   const insets = useSafeAreaInsets();
-  const headerScrollOffset = header ? insets.top + 64 : insets.top + 16;
+  const headerScrollOffset =
+    !shouldHideChrome && header ? insets.top + 64 : insets.top + 16;
   const topFadeOpaque = isDark
     ? "rgba(10, 10, 10, 0.82)"
     : "rgba(245, 245, 247, 0.82)";
@@ -40,53 +45,61 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
       })}
     >
       <StatusBar style={isDark ? "light" : "dark"} />
-      {header ? (
+      <Visibility visible={!shouldHideChrome && Boolean(header)}>
         <View className="absolute inset-x-0 top-0 z-20">
-          <Header {...header} />
+          {header ? <Header {...header} /> : null}
         </View>
-      ) : null}
+      </Visibility>
       <SafeAreaView className="flex-1" edges={["left", "right"]}>
         <ScrollArea
           automaticallyAdjustContentInsets={false}
           contentInsetAdjustmentBehavior="never"
-          contentContainerClassName="min-h-full px-6 pb-24"
+          contentContainerClassName="min-h-full px-6"
           contentContainerStyle={{
-            paddingBottom: insets.bottom + 96,
+            paddingBottom: shouldHideChrome
+              ? insets.bottom + 24
+              : insets.bottom + 96,
             paddingTop: headerScrollOffset,
           }}
         >
           <View className="flex-1">{children}</View>
         </ScrollArea>
-        <NavBar />
+        <Visibility visible={!shouldHideChrome}>
+          <NavBar />
+        </Visibility>
       </SafeAreaView>
-      <LinearGradient
-        pointerEvents="none"
-        colors={[topFadeOpaque, fadeTransparent]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={{
-          height: topFadeHeight,
-          left: 0,
-          position: "absolute",
-          right: 0,
-          top: 0,
-          zIndex: 15,
-        }}
-      />
-      <LinearGradient
-        pointerEvents="none"
-        colors={[fadeTransparent, bottomFadeOpaque]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={{
-          bottom: 0,
-          height: bottomFadeHeight,
-          left: 0,
-          position: "absolute",
-          right: 0,
-          zIndex: 30,
-        }}
-      />
+      <Visibility visible={!shouldHideChrome}>
+        <LinearGradient
+          key="top-fade"
+          pointerEvents="none"
+          colors={[topFadeOpaque, fadeTransparent]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{
+            height: topFadeHeight,
+            left: 0,
+            position: "absolute",
+            right: 0,
+            top: 0,
+            zIndex: 15,
+          }}
+        />
+        <LinearGradient
+          key="bottom-fade"
+          pointerEvents="none"
+          colors={[fadeTransparent, bottomFadeOpaque]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{
+            bottom: 0,
+            height: bottomFadeHeight,
+            left: 0,
+            position: "absolute",
+            right: 0,
+            zIndex: 30,
+          }}
+        />
+      </Visibility>
     </View>
   );
 };

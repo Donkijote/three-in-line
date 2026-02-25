@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import type { AvatarPreset } from "@/ui/shared/avatars";
+import { validateAvatar, validatePassword } from "@/ui/shared/login/validators";
 
-import { LoginForm, validateAvatar, validatePassword } from "./LoginForm";
+import { LoginForm } from "./LoginForm";
 
 const signIn = vi.fn();
 const checkEmailExists = vi.fn();
@@ -16,7 +17,7 @@ vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn }),
 }));
 
-vi.mock("@/ui/web/hooks/useUser", () => ({
+vi.mock("@/ui/shared/login/useCheckEmailExists", () => ({
   useCheckEmailExists: () => ({
     checkEmailExists,
     isChecking,
@@ -99,6 +100,10 @@ describe("LoginForm", () => {
 
   it("validates the password requirement", () => {
     expect(validatePassword("")).toBe("Password is required");
+    expect(validatePassword("12345", true)).toBe(
+      "Password must be at least 6 characters",
+    );
+    expect(validatePassword("12345", false)).toBeUndefined();
     expect(validatePassword(" secret ")).toBeUndefined();
   });
 
@@ -259,6 +264,29 @@ describe("LoginForm", () => {
     expect(screen.getByDisplayValue("avatar-1")).toBeInTheDocument();
   });
 
+  it("shows min-length feedback for short sign-up passwords", async () => {
+    checkEmailExists.mockResolvedValue(false);
+
+    render(<LoginForm />);
+
+    fireEvent.change(screen.getByPlaceholderText("you@example.com"), {
+      target: { value: "new@example.com" },
+    });
+
+    await waitFor(() =>
+      expect(checkEmailExists).toHaveBeenCalledWith("new@example.com"),
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Enter password"), {
+      target: { value: "12345" },
+    });
+    fireEvent.blur(screen.getByPlaceholderText("Enter password"));
+
+    await waitFor(() =>
+      screen.getByText("Password must be at least 6 characters"),
+    );
+  });
+
   it("handles failures when checking email existence", async () => {
     const consoleError = vi
       .spyOn(console, "error")
@@ -273,7 +301,7 @@ describe("LoginForm", () => {
 
     await waitFor(() =>
       expect(consoleError).toHaveBeenCalledWith(
-        "Failed to verify codename",
+        "Failed to verify email",
         expect.any(Error),
       ),
     );
