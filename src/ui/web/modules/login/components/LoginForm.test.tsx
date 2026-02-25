@@ -280,10 +280,11 @@ describe("LoginForm", () => {
     fireEvent.change(screen.getByPlaceholderText("Enter password"), {
       target: { value: "12345" },
     });
+    fireEvent.blur(screen.getByPlaceholderText("Enter password"));
 
-    expect(
+    await waitFor(() =>
       screen.getByText("Password must be at least 6 characters"),
-    ).toBeInTheDocument();
+    );
   });
 
   it("handles failures when checking email existence", async () => {
