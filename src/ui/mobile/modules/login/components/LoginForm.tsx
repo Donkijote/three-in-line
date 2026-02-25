@@ -143,7 +143,6 @@ export const LoginForm = () => {
             </Visibility>
           )}
         </form.Field>
-
       </View>
 
       <form.Subscribe

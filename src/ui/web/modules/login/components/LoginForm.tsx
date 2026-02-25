@@ -117,7 +117,9 @@ export const LoginForm = () => {
                       autoComplete="current-password"
                       className="text-base text-foreground placeholder:text-muted-foreground/70"
                       value={field.state.value}
-                      onChange={(event) => field.handleChange(event.target.value)}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
                       onBlur={field.handleBlur}
                     />
                   </InputGroup>
