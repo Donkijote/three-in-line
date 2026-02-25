@@ -3,7 +3,6 @@ import { type PropsWithChildren, useState } from "react";
 import { X } from "lucide-react-native";
 import { useWindowDimensions, View } from "react-native";
 
-import { AvatarOptionItem } from "@/ui/mobile/modules/login/components/AvatarOptionItem";
 import { Button } from "@/ui/mobile/components/ui/button";
 import {
   Drawer,
@@ -17,6 +16,7 @@ import {
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import { ScrollArea } from "@/ui/mobile/components/ui/scroll-area";
 import { Text } from "@/ui/mobile/components/ui/text";
+import { AvatarOptionItem } from "@/ui/mobile/modules/login/components/AvatarOptionItem";
 import { type AvatarPreset, PRESET_AVATARS } from "@/ui/shared/avatars";
 
 type AvatarMoreOptionsProps = {
