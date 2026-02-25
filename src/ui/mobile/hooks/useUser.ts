@@ -3,11 +3,6 @@ import { useCallback } from "react";
 import { updateAvatarUseCase } from "@/application/users/updateAvatarUseCase";
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import { userRepository } from "@/infrastructure/convex/repository/userRepository";
-import { useCurrentUserQuery } from "@/infrastructure/convex/UserApi";
-
-export function useCurrentUser() {
-  return useCurrentUserQuery();
-}
 
 export function useUpdateAvatar() {
   return useCallback(async ({ avatar }: { avatar: UserAvatar }) => {

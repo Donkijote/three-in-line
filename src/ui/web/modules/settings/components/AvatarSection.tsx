@@ -1,9 +1,6 @@
-import { useMemo, useState } from "react";
-
 import { Loader, Pencil } from "lucide-react";
 
-import { isPresetAvatarId } from "@/domain/entities/Avatar";
-import { type AvatarPreset, getPresetAvatarById } from "@/ui/shared/avatars";
+import { useAvatarSection } from "@/ui/shared/settings/useAvatarSection";
 import { AvatarMoreOptions } from "@/ui/web/components/AvatarMoreOptions";
 import {
   Avatar,
@@ -12,50 +9,20 @@ import {
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
 import { useCurrentUser, useUpdateAvatar } from "@/ui/web/hooks/useUser";
-import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
+import { cn } from "@/ui/web/lib/utils";
 
 export const AvatarSection = () => {
   const currentUser = useCurrentUser();
   const updateAvatar = useUpdateAvatar();
-
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  const avatar = currentUser?.avatar;
-  const avatarSrc =
-    avatar?.type === "preset" && isPresetAvatarId(avatar.value)
-      ? getPresetAvatarById(avatar.value).src
-      : (avatar?.value ?? currentUser?.image ?? null);
-
-  const fallbackInitials = useMemo(
-    () =>
-      getFallbackInitials({
-        name: currentUser?.name,
-        username: currentUser?.username,
-        email: currentUser?.email,
-      }),
-    [currentUser?.email, currentUser?.name, currentUser?.username],
-  );
-
-  const handleAccept = async (avatarPreset: AvatarPreset) => {
-    if (isUpdating) {
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      await updateAvatar({
-        avatar: { type: "preset", value: avatarPreset.id },
-      });
-    } catch (error) {
-      console.error("Failed to update avatar", error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  const { avatarSrc, fallbackInitials, isUpdating, onAcceptAvatar } =
+    useAvatarSection({
+      currentUser,
+      updateAvatar,
+    });
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <AvatarMoreOptions onAccept={handleAccept}>
+      <AvatarMoreOptions onAccept={onAcceptAvatar}>
         <div className="relative">
           <Avatar
             size="lg"

@@ -1,9 +1,7 @@
-import { useState } from "react";
-
 import { Pencil } from "lucide-react-native";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
-import { isPresetAvatarId } from "@/domain/entities/Avatar";
+import { useCurrentUserQuery } from "@/infrastructure/convex/UserApi";
 import { AvatarMoreOptions } from "@/ui/mobile/components/AvatarMoreOptions";
 import { Small } from "@/ui/mobile/components/Typography";
 import {
@@ -13,46 +11,22 @@ import {
   AvatarImage,
 } from "@/ui/mobile/components/ui/avatar";
 import { Icon } from "@/ui/mobile/components/ui/icon";
-import { useCurrentUser, useUpdateAvatar } from "@/ui/mobile/hooks/useUser";
+import { useUpdateAvatar } from "@/ui/mobile/hooks/useUser";
 import { Visibility } from "@/ui/mobile/layout/components/Visibility";
-import { type AvatarPreset, getPresetAvatarById } from "@/ui/shared/avatars";
-import { getFallbackInitials } from "@/ui/shared/user/initials";
+import { useAvatarSection } from "@/ui/shared/settings/useAvatarSection";
 
 export const AvatarSection = () => {
-  const currentUser = useCurrentUser();
+  const currentUser = useCurrentUserQuery();
   const updateAvatar = useUpdateAvatar();
-  const [isUpdating, setIsUpdating] = useState(false);
-  const avatar = currentUser?.avatar;
-  const avatarSrc =
-    avatar?.type === "preset" && isPresetAvatarId(avatar.value)
-      ? getPresetAvatarById(avatar.value).src
-      : (avatar?.value ?? currentUser?.image ?? null);
-  const fallbackInitials = getFallbackInitials({
-    name: currentUser?.name,
-    username: currentUser?.username,
-    email: currentUser?.email,
-  });
-
-  const handleAcceptAvatar = async (avatarPreset: AvatarPreset) => {
-    if (isUpdating) {
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      await updateAvatar({
-        avatar: { type: "preset", value: avatarPreset.id },
-      });
-    } catch (error) {
-      console.error("Failed to update avatar", error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  const { avatarSrc, fallbackInitials, isUpdating, onAcceptAvatar } =
+    useAvatarSection({
+      currentUser,
+      updateAvatar,
+    });
 
   return (
     <View className="items-center pb-2 pt-1">
-      <AvatarMoreOptions onAccept={handleAcceptAvatar} disabled={isUpdating}>
+      <AvatarMoreOptions onAccept={onAcceptAvatar} disabled={isUpdating}>
         <View className="relative">
           <View style={styles.avatarShadow}>
             <Avatar
