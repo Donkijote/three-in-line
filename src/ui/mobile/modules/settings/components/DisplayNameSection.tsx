@@ -1,120 +1,34 @@
-import { useEffect, useState } from "react";
-
-import { CircleCheck, CircleX, Pencil } from "lucide-react-native";
+import { CircleCheck, CircleX } from "lucide-react-native";
 import { ActivityIndicator, View } from "react-native";
-import { useDebouncedCallback } from "use-debounce";
 
 import { Small } from "@/ui/mobile/components/Typography";
 import { Button } from "@/ui/mobile/components/ui/button";
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import { Input } from "@/ui/mobile/components/ui/input";
 import { Text } from "@/ui/mobile/components/ui/text";
-import {
-  useCheckUsernameExists,
-  useCurrentUser,
-  useUpdateUsername,
-} from "@/ui/shared/user/hooks/useUser";
+import { useDisplayNameSection } from "@/ui/shared/settings/hooks/useDisplayNameSection";
 
 export const DisplayNameSection = () => {
-  const currentUser = useCurrentUser();
-  const currentUsername = currentUser?.username?.trim() ?? "";
-  const [displayName, setDisplayName] = useState("");
-  const [hasEdited, setHasEdited] = useState(false);
-  const [doesNameExist, setDoesNameExist] = useState<boolean | null>(null);
-  const { checkUsernameExists, isChecking } = useCheckUsernameExists();
-  const updateUsername = useUpdateUsername();
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  useEffect(() => {
-    if (hasEdited) {
-      return;
-    }
-
-    setDisplayName(currentUsername);
-    setDoesNameExist(currentUsername ? false : null);
-  }, [currentUsername, hasEdited]);
-
-  const trimmedDisplayName = displayName.trim();
-
-  const handleCheckUsername = async (value: string) => {
-    const trimmedValue = value.trim();
-
-    if (!trimmedValue) {
-      setDoesNameExist(null);
-      return;
-    }
-
-    if (trimmedValue === currentUsername) {
-      setDoesNameExist(false);
-      return;
-    }
-
-    try {
-      const exists = await checkUsernameExists(trimmedValue);
-      setDoesNameExist(exists);
-    } catch (error) {
-      console.error("Failed to verify username", error);
-      setDoesNameExist(null);
-    }
-  };
-
-  const debouncedCheckUsername = useDebouncedCallback((value: string) => {
-    void handleCheckUsername(value);
-  }, 600);
-
-  const handleChange = (nextValue: string) => {
-    setDisplayName(nextValue);
-    setHasEdited(true);
-
-    if (!nextValue.trim()) {
-      debouncedCheckUsername.cancel();
-      setDoesNameExist(null);
-      return;
-    }
-
-    if (nextValue.trim() === currentUsername) {
-      debouncedCheckUsername.cancel();
-      setDoesNameExist(false);
-      return;
-    }
-
-    debouncedCheckUsername(nextValue);
-  };
-
-  const handleAccept = async () => {
-    setIsUpdating(true);
-    try {
-      await updateUsername({ username: trimmedDisplayName });
-      setDisplayName(trimmedDisplayName);
-      setHasEdited(false);
-      setDoesNameExist(null);
-    } catch (error) {
-      console.error("Failed to update username", error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const shouldShowAccept =
-    Boolean(trimmedDisplayName) &&
-    trimmedDisplayName !== currentUsername &&
-    doesNameExist === false &&
-    !isUpdating;
+  const {
+    displayName,
+    isBusy,
+    isUpdating,
+    onAcceptDisplayName,
+    onDisplayNameChanged,
+    shouldShowAccept,
+    status,
+  } = useDisplayNameSection();
 
   const renderStatusIcon = () => {
-    if (isChecking || isUpdating) {
+    if (isBusy) {
       return <ActivityIndicator size="small" color="hsl(0 0% 45.15%)" />;
     }
 
-    if (!trimmedDisplayName) {
-      return <Icon as={Pencil} className="text-muted-foreground" size={16} />;
+    if (status === "empty" || status === "idle") {
+      return null;
     }
 
-    if (doesNameExist === null) {
-      return <Icon as={Pencil} className="text-muted-foreground" size={16} />;
-    }
-
-    return doesNameExist ? (
+    return status === "taken" ? (
       <Icon as={CircleX} className="text-destructive" size={18} />
     ) : (
       <Icon as={CircleCheck} className="text-primary" size={18} />
@@ -132,7 +46,7 @@ export const DisplayNameSection = () => {
             size="sm"
             variant="outline"
             className="h-8 rounded-full"
-            onPress={() => void handleAccept()}
+            onPress={() => void onAcceptDisplayName()}
             disabled={isUpdating}
           >
             <Text className="text-primary uppercase tracking-[1px]">
@@ -146,7 +60,7 @@ export const DisplayNameSection = () => {
         <Input
           placeholder="PixelMaster_99"
           value={displayName}
-          onChangeText={handleChange}
+          onChangeText={onDisplayNameChanged}
           editable={!isUpdating}
           autoCapitalize="none"
           autoCorrect={false}
