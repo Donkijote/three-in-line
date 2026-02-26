@@ -6,7 +6,7 @@ import {
   validateAvatar,
   validateEmail,
   validatePassword,
-} from "@/ui/shared/login/validators";
+} from "@/ui/shared/login/validation/validators";
 
 describe("login validators", () => {
   it("validates email format", () => {

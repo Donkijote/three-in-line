@@ -17,7 +17,7 @@ let debouncedFn:
   | (((value: string) => void) & { cancel: ReturnType<typeof vi.fn> })
   | null = null;
 
-vi.mock("@/ui/web/hooks/useUser", () => ({
+vi.mock("@/ui/shared/user/hooks/useUser", () => ({
   useCheckUsernameExists: () => ({ checkUsernameExists, isChecking: false }),
   useCurrentUser: () => currentUser,
   useUpdateUsername: () => updateUsername,

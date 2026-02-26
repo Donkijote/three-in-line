@@ -1,13 +1,18 @@
 import type { PropsWithChildren } from "react";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 
 import { useColorScheme } from "nativewind";
+
+import type { ThemePreference } from "@/domain/entities/UserPreferences";
+import { useUserPreferences } from "@/ui/mobile/application/providers/UserPreferencesProvider";
 
 type ThemeMode = "light" | "dark";
 
 type ThemeContextValue = {
   isDark: boolean;
   mode: ThemeMode;
+  setTheme: (theme: ThemePreference) => void;
+  theme: ThemePreference;
   toggleTheme: () => void;
 };
 
@@ -22,22 +27,37 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-  const { colorScheme, toggleColorScheme } = useColorScheme();
-  const [fallbackMode, setFallbackMode] = useState<ThemeMode>("light");
-  const mode: ThemeMode =
-    colorScheme === "dark" || colorScheme === "light"
-      ? colorScheme
-      : fallbackMode;
+  const { colorScheme, setColorScheme } = useColorScheme();
+  const { preferences, updatePreferences } = useUserPreferences();
+  const theme = preferences.theme;
+
+  useEffect(() => {
+    setColorScheme(theme);
+  }, [setColorScheme, theme]);
+
+  let mode: ThemeMode;
+  if (theme === "light" || theme === "dark") {
+    mode = theme;
+  } else if (colorScheme === "dark") {
+    mode = "dark";
+  } else {
+    mode = "light";
+  }
   const isDark = mode === "dark";
 
+  const setTheme = (nextTheme: ThemePreference) => {
+    updatePreferences({ theme: nextTheme });
+  };
+
   const toggleTheme = () => {
-    toggleColorScheme();
-    setFallbackMode((current) => (current === "dark" ? "light" : "dark"));
+    setTheme(mode === "dark" ? "light" : "dark");
   };
 
   const value: ThemeContextValue = {
     isDark,
     mode,
+    setTheme,
+    theme,
     toggleTheme,
   };
 

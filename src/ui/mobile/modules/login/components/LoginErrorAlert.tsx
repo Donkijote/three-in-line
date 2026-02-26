@@ -17,14 +17,22 @@ export const LoginErrorAlert = ({ error, onClose }: LoginErrorAlertProps) => {
   const insets = useSafeAreaInsets();
 
   return (
-    <Modal transparent visible={isOpen} animationType="fade" onRequestClose={onClose}>
+    <Modal
+      transparent
+      visible={isOpen}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <View className="flex-1 justify-end">
         <Pressable className="absolute inset-0 bg-black/50" onPress={onClose} />
         <View
           className="px-3"
           style={{
             paddingBottom: Math.max(insets.bottom, 12),
-            paddingHorizontal: Math.max(Math.max(insets.left, insets.right), 12),
+            paddingHorizontal: Math.max(
+              Math.max(insets.left, insets.right),
+              12,
+            ),
           }}
         >
           <View className="w-full rounded-4xl border border-destructive bg-card/95 px-5 pb-5 pt-5 shadow-[0_0_10px_rgba(255,64,64,0.35),0_0_24px_rgba(255,64,64,0.2)]">
@@ -36,7 +44,9 @@ export const LoginErrorAlert = ({ error, onClose }: LoginErrorAlertProps) => {
                 <Text className="w-full text-destructive text-lg font-semibold uppercase tracking-widest">
                   Authentication failed
                 </Text>
-                <Text className="leading-5 text-muted-foreground">{message}</Text>
+                <Text className="leading-5 text-muted-foreground">
+                  {message}
+                </Text>
               </View>
             </View>
 

@@ -1,5 +1,5 @@
 import type { UserAvatar } from "@/domain/entities/Avatar";
-import type { LoginFormValues } from "@/ui/shared/login/types";
+import type { LoginFormValues } from "@/ui/shared/login/types/login";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

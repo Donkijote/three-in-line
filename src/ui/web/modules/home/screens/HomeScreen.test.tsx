@@ -10,7 +10,7 @@ vi.mock("@/infrastructure/convex/GameApi", () => ({
   useRecentGamesQuery: () => useRecentGamesQueryMock(),
 }));
 
-vi.mock("@/ui/web/hooks/useUser", () => ({
+vi.mock("@/ui/shared/user/hooks/useUser", () => ({
   useCurrentUser: () => useCurrentUserMock(),
   useUserById: (userId?: string | null) => useUserByIdMock(userId),
 }));

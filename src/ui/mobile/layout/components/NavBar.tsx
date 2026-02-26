@@ -28,7 +28,7 @@ const navItems: NavItem[] = [
   {
     icon: Settings,
     label: "Settings",
-    path: "/mock",
+    path: "/settings",
   },
 ];
 

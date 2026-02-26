@@ -7,6 +7,7 @@ import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
 import type { GameId, PlayerSlot } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
+import { useCurrentUser, useUserById } from "@/ui/shared/user/hooks/useUser";
 import { useUserPreferences } from "@/ui/web/application/providers/UserPreferencesProvider";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
@@ -18,7 +19,6 @@ import {
 } from "@/ui/web/hooks/useGame";
 import { useMatchSound } from "@/ui/web/hooks/useMatchSound";
 import { useMediaQuery } from "@/ui/web/hooks/useMediaQuery";
-import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
 import {
   playInvalidMoveHaptic,
   playLightTapHaptic,

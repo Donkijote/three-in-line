@@ -1,6 +1,6 @@
 import type { Game, PlayerSlot } from "@/domain/entities/Game";
+import { useCurrentUser } from "@/ui/shared/user/hooks/useUser";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
-import { useCurrentUser } from "@/ui/web/hooks/useUser";
 import { HomeStatCard } from "@/ui/web/modules/home/components/HomeStatCard";
 import type { HomeStat } from "@/ui/web/modules/home/components/home.types";
 

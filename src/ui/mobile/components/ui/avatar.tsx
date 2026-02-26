@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
+import { View, type ViewProps } from "react-native";
 import { SvgUri } from "react-native-svg";
 
 import * as AvatarPrimitive from "@rn-primitives/avatar";
@@ -172,4 +173,16 @@ function AvatarFallback({
   );
 }
 
-export { Avatar, AvatarFallback, AvatarImage };
+function AvatarBadge({ className, ...props }: ViewProps) {
+  return (
+    <View
+      className={cn(
+        "absolute bottom-0 right-0 z-10 inline-flex size-7 items-center justify-center rounded-full border-2 border-border bg-primary",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export { Avatar, AvatarBadge, AvatarFallback, AvatarImage };
