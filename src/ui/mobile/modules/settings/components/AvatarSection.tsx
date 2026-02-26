@@ -18,7 +18,7 @@ export const AvatarSection = () => {
     useAvatarSection();
 
   return (
-    <View className="items-center pb-2 pt-1">
+    <View className="items-center pb-2 pt-4">
       <AvatarMoreOptions onAccept={onAcceptAvatar} disabled={isUpdating}>
         <View className="relative">
           <View style={styles.avatarShadow}>
