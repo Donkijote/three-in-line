@@ -5,6 +5,7 @@ import { View } from "react-native";
 import { useMobileHeader } from "@/ui/mobile/application/providers/MobileHeaderProvider";
 import { AvatarSection } from "@/ui/mobile/modules/settings/components/AvatarSection";
 import { DisplayNameSection } from "@/ui/mobile/modules/settings/components/DisplayNameSection";
+import { PreferencesSection } from "@/ui/mobile/modules/settings/components/PreferencesSection";
 import { PreviousAvatarsSection } from "@/ui/mobile/modules/settings/components/PreviousAvatarsSection";
 
 export const SettingsScreen = () => {
@@ -25,6 +26,7 @@ export const SettingsScreen = () => {
       <AvatarSection />
       <DisplayNameSection />
       <PreviousAvatarsSection />
+      <PreferencesSection />
     </View>
   );
 };
