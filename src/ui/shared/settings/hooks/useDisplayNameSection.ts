@@ -103,13 +103,16 @@ export const useDisplayNameSection = () => {
     !isUpdating;
 
   const isBusy = isChecking || isUpdating;
-  const status: DisplayNameStatus = !trimmedDisplayName
-    ? "empty"
-    : doesNameExist === null
-      ? "idle"
-      : doesNameExist
-        ? "taken"
-        : "available";
+  let status: DisplayNameStatus;
+  if (!trimmedDisplayName) {
+    status = "empty";
+  } else if (doesNameExist === null) {
+    status = "idle";
+  } else if (doesNameExist) {
+    status = "taken";
+  } else {
+    status = "available";
+  }
 
   return {
     displayName,
