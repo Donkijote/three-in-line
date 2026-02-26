@@ -1,7 +1,15 @@
-import { Moon, Sun, Vibrate, Volume2 } from "lucide-react-native";
+import {
+  Moon,
+  Sun,
+  Vibrate,
+  VibrateOff,
+  Volume2,
+  VolumeOff,
+} from "lucide-react-native";
 import { View } from "react-native";
 
 import { useTheme } from "@/ui/mobile/application/providers/ThemeProvider";
+import { useUserPreferences } from "@/ui/mobile/application/providers/UserPreferencesProvider";
 import { Small } from "@/ui/mobile/components/Typography";
 import { Card, CardContent } from "@/ui/mobile/components/ui/card";
 import { Icon } from "@/ui/mobile/components/ui/icon";
@@ -13,30 +21,35 @@ type PreferenceItem = {
   id: string;
   icon: typeof Moon;
   label: string;
-  value: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  checked: boolean;
 };
 
 export const PreferencesSection = () => {
-  const { isDark } = useTheme();
+  const { isDark, setTheme } = useTheme();
+  const { preferences, updatePreferences } = useUserPreferences();
 
   const preferenceItems: PreferenceItem[] = [
     {
       id: "game-sounds",
-      icon: Volume2,
+      icon: preferences.gameSounds ? Volume2 : VolumeOff,
       label: "Game Sounds",
-      value: true,
+      checked: preferences.gameSounds,
+      onCheckedChange: (checked) => updatePreferences({ gameSounds: checked }),
     },
     {
       id: "haptic-feedback",
-      icon: Vibrate,
+      icon: preferences.haptics ? Vibrate : VibrateOff,
       label: "Haptic Feedback",
-      value: true,
+      checked: preferences.haptics,
+      onCheckedChange: (checked) => updatePreferences({ haptics: checked }),
     },
     {
       id: "dark-theme",
       icon: isDark ? Moon : Sun,
       label: "Dark Theme",
-      value: isDark,
+      checked: isDark,
+      onCheckedChange: (checked) => setTheme(checked ? "dark" : "light"),
     },
   ];
 
@@ -66,8 +79,8 @@ export const PreferencesSection = () => {
                     </Text>
                   </View>
                   <Switch
-                    checked={preference.value}
-                    onCheckedChange={() => undefined}
+                    checked={preference.checked}
+                    onCheckedChange={preference.onCheckedChange}
                   />
                 </View>
                 {index < preferenceItems.length - 1 ? <Separator /> : null}

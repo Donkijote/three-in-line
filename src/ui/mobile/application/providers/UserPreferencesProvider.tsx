@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from "react";
 
-import { userPreferencesLocalStorageRepository } from "@/infrastructure/storage/userPreferencesLocalStorage";
+import { userPreferencesSecureStoreRepository } from "@/infrastructure/mobile/storage/userPreferencesSecureStore";
 import { UserPreferencesProvider as SharedUserPreferencesProvider } from "@/ui/shared/preferences/providers/UserPreferencesProvider";
 
 export { useUserPreferences } from "@/ui/shared/preferences/providers/UserPreferencesProvider";
@@ -8,7 +8,7 @@ export { useUserPreferences } from "@/ui/shared/preferences/providers/UserPrefer
 export const UserPreferencesProvider = ({ children }: PropsWithChildren) => {
   return (
     <SharedUserPreferencesProvider
-      repository={userPreferencesLocalStorageRepository}
+      repository={userPreferencesSecureStoreRepository}
     >
       {children}
     </SharedUserPreferencesProvider>
