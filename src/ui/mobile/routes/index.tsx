@@ -1,12 +1,10 @@
-import { router } from "expo-router";
-
-import { SetupScreen } from "@/ui/mobile/modules/setup/SetupScreen";
+import { HomeScreen } from "@/ui/mobile/modules/home/screens/HomeScreen";
 import { RequireAuth } from "@/ui/mobile/router/auth";
 
-export default function SetupRoute() {
+export default function HomeRoute() {
   return (
     <RequireAuth>
-      <SetupScreen onOpenMock={() => router.push("/mock")} />
+      <HomeScreen />
     </RequireAuth>
   );
 }

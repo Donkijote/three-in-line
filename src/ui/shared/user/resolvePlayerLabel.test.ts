@@ -1,4 +1,4 @@
-import { resolvePlayerLabel } from "./user";
+import { resolvePlayerLabel } from "./resolvePlayerLabel";
 
 describe("resolvePlayerLabel", () => {
   const fallback = "Player";

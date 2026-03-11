@@ -1,18 +1,23 @@
 import { Flame, Swords, Trophy } from "lucide-react";
 
+import {
+  type HomeStatIconName,
+  homeStatStyles,
+} from "@/ui/shared/home/style/homeStatStyles";
+import type { HomeStat } from "@/ui/shared/home/types/types";
 import { H4, Small } from "@/ui/web/components/Typography";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
 import { cn } from "@/ui/web/lib/utils";
-import type { HomeStat } from "@/ui/web/modules/home/components/home.types";
 
-const iconByAccent = {
-  primary: Trophy,
-  opponent: Swords,
-  warning: Flame,
+const iconByName: Record<HomeStatIconName, typeof Trophy> = {
+  flame: Flame,
+  swords: Swords,
+  trophy: Trophy,
 } as const;
 
 export const HomeStatCard = ({ label, value, accent }: HomeStat) => {
-  const Icon = iconByAccent[accent];
+  const statStyle = homeStatStyles[accent];
+  const Icon = iconByName[statStyle.icon];
 
   return (
     <Card
@@ -26,9 +31,8 @@ export const HomeStatCard = ({ label, value, accent }: HomeStat) => {
           <span
             className={cn(
               "grid size-5 place-items-center rounded-full",
-              accent === "primary" && "bg-primary/15 text-primary",
-              accent === "opponent" && "bg-opponent/15 text-opponent",
-              accent === "warning" && "bg-destructive/15 text-destructive",
+              statStyle.iconContainerClassName,
+              statStyle.iconClassName,
             )}
           >
             <Icon className="size-3" />

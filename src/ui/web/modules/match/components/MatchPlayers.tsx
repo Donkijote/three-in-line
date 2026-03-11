@@ -1,7 +1,7 @@
 import type { UserAvatar } from "@/domain/entities/Avatar";
 import { resolveAvatarSrc } from "@/domain/entities/Avatar";
 import type { MatchState } from "@/domain/entities/Game";
-import { resolvePlayerLabel } from "@/ui/web/lib/user";
+import { resolvePlayerLabel } from "@/ui/shared/user/resolvePlayerLabel";
 import { cn } from "@/ui/web/lib/utils";
 import { PlayerCard } from "@/ui/web/modules/match/components/PlayerCard";
 

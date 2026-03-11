@@ -1,55 +1,14 @@
-import type { Game, PlayerSlot } from "@/domain/entities/Game";
-import { useCurrentUser } from "@/ui/shared/user/hooks/useUser";
+import type { Game } from "@/domain/entities/Game";
+import { useHomeStats } from "@/ui/shared/home/hooks/useHomeStats";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
 import { HomeStatCard } from "@/ui/web/modules/home/components/HomeStatCard";
-import type { HomeStat } from "@/ui/web/modules/home/components/home.types";
 
 type HomeStatsProps = {
   endedGames: Game[];
 };
 
 export const HomeStats = ({ endedGames }: HomeStatsProps) => {
-  const currentUser = useCurrentUser();
-  const currentUserId = currentUser?.id;
-  const wins = endedGames.filter((game) => {
-    if (!currentUserId) {
-      return false;
-    }
-    const viewerSlot: PlayerSlot =
-      game.p1UserId === currentUserId ? "P1" : "P2";
-    return game.winner === viewerSlot;
-  }).length;
-  const total = endedGames.length;
-  const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-
-  let streak = 0;
-  for (const game of endedGames) {
-    if (!currentUserId) {
-      break;
-    }
-    const viewerSlot: PlayerSlot =
-      game.p1UserId === currentUserId ? "P1" : "P2";
-    if (game.winner !== viewerSlot) {
-      break;
-    }
-    streak += 1;
-  }
-
-  const stats: HomeStat[] = [
-    { id: "wins", label: "Wins", value: String(wins), accent: "primary" },
-    {
-      id: "win-rate",
-      label: "Win Rate",
-      value: `${winRate}%`,
-      accent: "opponent",
-    },
-    {
-      id: "streak",
-      label: "Streak",
-      value: String(streak),
-      accent: "warning",
-    },
-  ];
+  const stats = useHomeStats(endedGames);
 
   return (
     <ScrollArea>

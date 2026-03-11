@@ -1,4 +1,4 @@
-import { getFallbackInitials } from "@/ui/web/lib/utils";
+import { getFallbackInitials } from "@/ui/shared/user/initials";
 
 type UserLabelInput = {
   username?: string | null;
@@ -24,7 +24,9 @@ export const resolvePlayerLabel = (
       username: user?.username,
       email: user?.email,
     });
+
     return initials || fallback;
   }
+
   return fallback;
 };

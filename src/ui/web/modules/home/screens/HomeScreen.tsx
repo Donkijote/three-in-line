@@ -1,6 +1,7 @@
 import { ScrollText } from "lucide-react";
 
 import { useRecentGamesQuery } from "@/infrastructure/convex/GameApi";
+import { HOME_SCREEN_COPY } from "@/ui/shared/home/constants/constants";
 import { Header } from "@/ui/web/components/Header";
 import { P } from "@/ui/web/components/Typography";
 import { HomeMatches } from "@/ui/web/modules/home/components/HomeMatches";
@@ -12,7 +13,10 @@ export function HomeScreen() {
 
   return (
     <section className="mx-auto flex max-w-[calc(100svw-2rem)] w-full h-full md:max-w-xl flex-col gap-10 pb-12">
-      <Header title="Match History" eyebrow="Mission Logs" />
+      <Header
+        title={HOME_SCREEN_COPY.title}
+        eyebrow={HOME_SCREEN_COPY.eyebrow}
+      />
 
       <HomeStats endedGames={endedGames} />
 
@@ -23,7 +27,7 @@ export function HomeScreen() {
           <ScrollText className="size-8 text-foreground/80" />
         </div>
         <P className="text-md font-semibold text-muted-foreground mt-0!">
-          No more logs found
+          {HOME_SCREEN_COPY.noMoreLogs}
         </P>
       </div>
     </section>
