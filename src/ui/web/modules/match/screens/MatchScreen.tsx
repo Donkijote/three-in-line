@@ -8,6 +8,7 @@ import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
 import type { GameId, PlayerSlot } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { useCurrentUser, useUserById } from "@/ui/shared/user/hooks/useUser";
+import { resolvePlayerLabel } from "@/ui/shared/user/resolvePlayerLabel";
 import { useUserPreferences } from "@/ui/web/application/providers/UserPreferencesProvider";
 import { FullPageLoader } from "@/ui/web/components/FullPageLoader";
 import { Header } from "@/ui/web/components/Header";
@@ -24,7 +25,6 @@ import {
   playLightTapHaptic,
 } from "@/ui/web/lib/haptics";
 import { playPlayerMarkSound } from "@/ui/web/lib/sound";
-import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { MatchActions } from "@/ui/web/modules/match/components/MatchActions";
 import { MatchBoard } from "@/ui/web/modules/match/components/MatchBoard";
 import { MatchPlayers } from "@/ui/web/modules/match/components/MatchPlayers";
