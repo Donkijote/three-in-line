@@ -57,5 +57,6 @@
     "../src/ui/web/**/*",
     "../src/**/*.test.ts",
     "../src/**/*.test.tsx"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }
