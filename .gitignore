@@ -11,6 +11,9 @@ node_modules
 web/node_modules
 mobile/node_modules
 mobile/.expo
+mobile/.expo-export
+mobile/.expo-export-ios
+mobile/.expo-export-android
 web/dist
 mobile/dist
 dist
