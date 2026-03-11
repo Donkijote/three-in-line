@@ -81,9 +81,9 @@ jobs:
       - name: Detect package manager
         id: pm
         run: |
-          if [ -f bun.lock ] || [ -f bun.lockb ] || [ -f bunfig.toml ]; then
+          if [ -f web/bun.lock ] || [ -f web/bun.lockb ] || [ -f web/bunfig.toml ]; then
             echo "pm=bun" >> "$GITHUB_OUTPUT"
-          elif [ -f pnpm-lock.yaml ]; then
+          elif [ -f web/pnpm-lock.yaml ]; then
             echo "pm=pnpm" >> "$GITHUB_OUTPUT"
           else
             echo "pm=npm" >> "$GITHUB_OUTPUT"
@@ -97,12 +97,13 @@ jobs:
       - name: Bump version (force)
         if: steps.labels.outputs.force == 'true'
         run: |
+          cd web
           npm version "${{ steps.labels.outputs.bump }}" --no-git-tag-version
 
       - name: Read version
         id: version
         run: |
-          node -e "const p=require('./package.json'); console.log('version=' + p.version)" >> "$GITHUB_OUTPUT"
+          node -e "const p=require('./web/package.json'); console.log('version=' + p.version)" >> "$GITHUB_OUTPUT"
 
       - name: Set build metadata
         id: build_meta
@@ -133,14 +134,11 @@ jobs:
               export PATH="$BUN_INSTALL/bin:$PATH"
             fi
             (cd web && bun install --frozen-lockfile)
-            (cd mobile && bun install --frozen-lockfile)
           elif [ "${{ steps.pm.outputs.pm }}" = "pnpm" ]; then
             corepack enable
             pnpm --dir web install --frozen-lockfile
-            pnpm --dir mobile install --frozen-lockfile
           else
             npm --prefix web ci
-            npm --prefix mobile ci
           fi
 
       - name: Build
