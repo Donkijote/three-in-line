@@ -24,5 +24,6 @@
     "mobile:build:ios": "bun run --cwd mobile expo run:ios",
     "lint": "bunx @biomejs/biome check --write .",
     "typecheck": "bun run web:typecheck && bun run mobile:typecheck"
-  }
+  },
+  "version": "0.0.1"
 }
