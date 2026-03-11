@@ -1,5 +1,5 @@
 import type { Game, PlayerSlot } from "@/domain/entities/Game";
-import type { HomeStat } from "@/ui/shared/home/types";
+import type { HomeStat } from "@/ui/shared/home/types/types";
 import { useCurrentUser } from "@/ui/shared/user/hooks/useUser";
 
 const resolveViewerSlot = (

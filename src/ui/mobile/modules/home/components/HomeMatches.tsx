@@ -5,35 +5,36 @@ import { Muted } from "@/ui/mobile/components/Typography";
 import { Visibility } from "@/ui/mobile/layout/components/Visibility";
 import { HomeMatchCard } from "@/ui/mobile/modules/home/components/HomeMatchCard";
 import { HomeSectionLabel } from "@/ui/mobile/modules/home/components/HomeSectionLabel";
-import { useHomeMatches } from "@/ui/shared/home/hooks/useHomeMatches";
+import { useHomeMatchSections } from "@/ui/shared/home/hooks/useHomeMatchSections";
 
 type HomeMatchesProps = {
   endedGames: Game[];
 };
 
 export const HomeMatches = ({ endedGames }: HomeMatchesProps) => {
-  const { recentMatches, previousWeekMatches } = useHomeMatches(endedGames);
+  const sections = useHomeMatchSections(endedGames);
 
   return (
     <View className="gap-5 pr-1">
-      <HomeSectionLabel text="Recent Matches" />
-      <View className="gap-4">
-        {recentMatches.map((match) => (
-          <HomeMatchCard key={match.id} {...match} />
-        ))}
-        <Visibility visible={recentMatches.length === 0}>
-          <Muted className="mt-0 text-sm font-semibold text-muted-foreground">
-            No recent matches in the last 7 days.
-          </Muted>
-        </Visibility>
-      </View>
-
-      <HomeSectionLabel text="Previous Week" />
-      <View className="gap-4">
-        {previousWeekMatches.map((match) => (
-          <HomeMatchCard key={match.id} {...match} />
-        ))}
-      </View>
+      {sections.map((section) => (
+        <View className="gap-5" key={section.id}>
+          <HomeSectionLabel text={section.title} />
+          <View className="gap-4">
+            {section.matches.map((match) => (
+              <HomeMatchCard key={match.id} {...match} />
+            ))}
+            <Visibility
+              visible={Boolean(
+                section.emptyMessage && section.matches.length === 0,
+              )}
+            >
+              <Muted className="mt-0 text-sm font-semibold text-muted-foreground">
+                {section.emptyMessage}
+              </Muted>
+            </Visibility>
+          </View>
+        </View>
+      ))}
     </View>
   );
 };

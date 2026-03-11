@@ -5,16 +5,21 @@ import { H4, Small } from "@/ui/mobile/components/Typography";
 import { Card, CardContent } from "@/ui/mobile/components/ui/card";
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import { cn } from "@/ui/mobile/lib/utils";
-import type { HomeStat } from "@/ui/shared/home/types";
+import {
+  type HomeStatIconName,
+  homeStatStyles,
+} from "@/ui/shared/home/style/homeStatStyles";
+import type { HomeStat } from "@/ui/shared/home/types/types";
 
-const iconByAccent = {
-  primary: Trophy,
-  opponent: Swords,
-  warning: Flame,
+const iconByName: Record<HomeStatIconName, typeof Trophy> = {
+  flame: Flame,
+  swords: Swords,
+  trophy: Trophy,
 } as const;
 
 export const HomeStatCard = ({ label, value, accent }: HomeStat) => {
-  const IconComponent = iconByAccent[accent];
+  const statStyle = homeStatStyles[accent];
+  const IconComponent = iconByName[statStyle.icon];
 
   return (
     <Card
@@ -28,19 +33,12 @@ export const HomeStatCard = ({ label, value, accent }: HomeStat) => {
           <View
             className={cn(
               "size-6 items-center justify-center rounded-full",
-              accent === "primary" && "bg-primary/15",
-              accent === "opponent" && "bg-opponent/15",
-              accent === "warning" && "bg-destructive/15",
+              statStyle.iconContainerClassName,
             )}
           >
             <Icon
               as={IconComponent}
-              className={cn(
-                "size-3.5",
-                accent === "primary" && "text-primary",
-                accent === "opponent" && "text-opponent",
-                accent === "warning" && "text-destructive",
-              )}
+              className={cn("size-3.5", statStyle.iconClassName)}
             />
           </View>
           <Small variant="label" className="text-[10px] text-muted-foreground">

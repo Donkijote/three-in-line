@@ -1,5 +1,5 @@
 import type { Game, PlayerSlot } from "@/domain/entities/Game";
-import type { HomeMatch } from "@/ui/shared/home/types";
+import type { HomeMatch } from "@/ui/shared/home/types/types";
 import { useCurrentUser } from "@/ui/shared/user/hooks/useUser";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;

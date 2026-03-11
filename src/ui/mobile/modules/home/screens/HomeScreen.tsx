@@ -9,6 +9,7 @@ import { P } from "@/ui/mobile/components/Typography";
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import { HomeMatches } from "@/ui/mobile/modules/home/components/HomeMatches";
 import { HomeStats } from "@/ui/mobile/modules/home/components/HomeStats";
+import { HOME_SCREEN_COPY } from "@/ui/shared/home/constants/constants";
 
 export const HomeScreen = () => {
   const { setHeader } = useMobileHeader();
@@ -17,8 +18,8 @@ export const HomeScreen = () => {
 
   useEffect(() => {
     setHeader({
-      title: "Match History",
-      eyebrow: "Mission Logs",
+      title: HOME_SCREEN_COPY.title,
+      eyebrow: HOME_SCREEN_COPY.eyebrow,
     });
 
     return () => {
@@ -37,7 +38,7 @@ export const HomeScreen = () => {
           <Icon as={ScrollText} className="size-7 text-foreground/80" />
         </View>
         <P className="mt-0 text-base font-semibold text-muted-foreground">
-          No more logs found
+          {HOME_SCREEN_COPY.noMoreLogs}
         </P>
       </View>
     </View>

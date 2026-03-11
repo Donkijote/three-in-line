@@ -1,7 +1,8 @@
 import { ChevronRight } from "lucide-react";
 
 import { useHomeMatchCard } from "@/ui/shared/home/hooks/useHomeMatchCard";
-import type { HomeMatch, HomeMatchStatus } from "@/ui/shared/home/types";
+import { homeMatchStatusStyles } from "@/ui/shared/home/style/homeMatchStatusStyles";
+import type { HomeMatch } from "@/ui/shared/home/types/types";
 import { H6, Muted, Small } from "@/ui/web/components/Typography";
 import {
   Avatar,
@@ -11,37 +12,13 @@ import {
 import { Card, CardContent } from "@/ui/web/components/ui/card";
 import { cn } from "@/ui/web/lib/utils";
 
-const statusStyles: Record<
-  HomeMatchStatus,
-  { badge: string; ring: string; text: string; rail: string }
-> = {
-  victory: {
-    badge: "bg-primary/20 text-primary",
-    ring: "ring-primary/70",
-    text: "Victory",
-    rail: "bg-primary/90",
-  },
-  defeat: {
-    badge: "bg-destructive/20 text-destructive",
-    ring: "ring-destructive/70",
-    text: "Defeat",
-    rail: "bg-destructive/90",
-  },
-  stalemate: {
-    badge: "bg-muted text-muted-foreground",
-    ring: "ring-muted-foreground/60",
-    text: "Stalemate",
-    rail: "bg-muted-foreground/90",
-  },
-};
-
 export const HomeMatchCard = ({
   status,
   subtitle,
   time,
   opponentUserId,
 }: HomeMatch) => {
-  const statusStyle = statusStyles[status];
+  const statusStyle = homeMatchStatusStyles[status];
   const {
     currentAvatar,
     currentInitials,
@@ -86,7 +63,7 @@ export const HomeMatchCard = ({
                 size="lg"
                 className={cn(
                   "border border-background bg-card text-foreground ring-2",
-                  statusStyle.ring,
+                  statusStyle.web.emphasis,
                 )}
               >
                 <AvatarImage src={currentAvatar} alt={currentName} />
