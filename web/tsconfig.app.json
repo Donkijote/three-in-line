@@ -1,0 +1,58 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2023",
+    "useDefineForClassFields": true,
+    "lib": ["ES2023", "DOM", "DOM.Iterable", "ESNext.Disposable"],
+    "module": "ESNext",
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "@testing-library/jest-dom/vitest",
+      "react",
+      "react-dom"
+    ],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": "..",
+    "paths": {
+      "@/convex/*": ["./convex/*"],
+      "@/*": ["./src/*"],
+      "@convex-dev/auth/server": ["./web/node_modules/@convex-dev/auth/dist/server/index.d.ts"],
+      "@convex-dev/auth/react": ["./web/node_modules/@convex-dev/auth/dist/react/index.d.ts"],
+      "@convex-dev/auth/providers/*": ["./web/node_modules/@convex-dev/auth/dist/providers/*"],
+      "react": ["./web/node_modules/@types/react/index.d.ts"],
+      "react/jsx-runtime": ["./web/node_modules/@types/react/jsx-runtime.d.ts"],
+      "react/jsx-dev-runtime": ["./web/node_modules/@types/react/jsx-dev-runtime.d.ts"],
+      "react/compiler-runtime": ["./web/node_modules/@types/react/compiler-runtime.d.ts"],
+      "react-dom": ["./web/node_modules/@types/react-dom/index.d.ts"],
+      "react-dom/*": ["./web/node_modules/@types/react-dom/*", "./web/node_modules/react-dom/*"],
+      "*": ["./web/node_modules/*", "./web/node_modules/@types/*"]
+    }
+  },
+  "include": [
+    "../src",
+    "./setupTests.ts",
+    "./vitest.d.ts",
+    "./vite-env.d.ts"
+  ],
+  "exclude": [
+    "../src/ui/mobile/**/*",
+    "../src/infrastructure/mobile/**/*"
+  ]
+}

@@ -10,10 +10,7 @@ const mobileNodeModules = path.resolve(projectRoot, "node_modules");
 
 config.watchFolders = [workspaceRoot];
 config.resolver.disableHierarchicalLookup = true;
-config.resolver.nodeModulesPaths = [
-  mobileNodeModules,
-  path.resolve(workspaceRoot, "node_modules")
-];
+config.resolver.nodeModulesPaths = [mobileNodeModules];
 config.resolver.extraNodeModules = {
   "@/convex": path.resolve(workspaceRoot, "convex"),
   "@": path.resolve(workspaceRoot, "src"),
