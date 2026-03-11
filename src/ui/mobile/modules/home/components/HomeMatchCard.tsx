@@ -1,7 +1,6 @@
 import { ChevronRight } from "lucide-react-native";
 import { View } from "react-native";
 
-import { resolveAvatarSrc } from "@/domain/entities/Avatar";
 import { H6, Muted, Small } from "@/ui/mobile/components/Typography";
 import {
   Avatar,
@@ -11,10 +10,8 @@ import {
 import { Card, CardContent } from "@/ui/mobile/components/ui/card";
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import { cn } from "@/ui/mobile/lib/utils";
+import { useHomeMatchCard } from "@/ui/shared/home/hooks/useHomeMatchCard";
 import type { HomeMatch, HomeMatchStatus } from "@/ui/shared/home/types";
-import { useCurrentUser, useUserById } from "@/ui/shared/user/hooks/useUser";
-import { getFallbackInitials } from "@/ui/shared/user/initials";
-import { resolvePlayerLabel } from "@/ui/shared/user/resolvePlayerLabel";
 
 const statusStyles: Record<
   HomeMatchStatus,
@@ -47,23 +44,14 @@ export const HomeMatchCard = ({
   opponentUserId,
 }: HomeMatch) => {
   const statusStyle = statusStyles[status];
-  const currentUser = useCurrentUser();
-  const opponentUser = useUserById(opponentUserId);
-
-  const currentName = resolvePlayerLabel(currentUser ?? {}, "You");
-  const opponentName = resolvePlayerLabel(opponentUser ?? {}, "Opponent");
-  const currentInitials = getFallbackInitials({
-    name: currentUser?.name,
-    username: currentUser?.username,
-    email: currentUser?.email,
-  });
-  const opponentInitials = getFallbackInitials({
-    name: opponentUser?.name,
-    username: opponentUser?.username,
-    email: opponentUser?.email,
-  });
-  const currentAvatar = resolveAvatarSrc(currentUser?.avatar);
-  const opponentAvatar = resolveAvatarSrc(opponentUser?.avatar);
+  const {
+    currentAvatar,
+    currentInitials,
+    currentName,
+    opponentAvatar,
+    opponentInitials,
+    opponentName,
+  } = useHomeMatchCard(opponentUserId);
 
   return (
     <Card className="relative gap-0 overflow-hidden rounded-3xl border-border/60 py-0 shadow-sm shadow-black/5">

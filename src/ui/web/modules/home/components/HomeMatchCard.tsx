@@ -1,8 +1,7 @@
 import { ChevronRight } from "lucide-react";
 
-import { resolveAvatarSrc } from "@/domain/entities/Avatar";
+import { useHomeMatchCard } from "@/ui/shared/home/hooks/useHomeMatchCard";
 import type { HomeMatch, HomeMatchStatus } from "@/ui/shared/home/types";
-import { useCurrentUser, useUserById } from "@/ui/shared/user/hooks/useUser";
 import { H6, Muted, Small } from "@/ui/web/components/Typography";
 import {
   Avatar,
@@ -10,15 +9,14 @@ import {
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
-import { resolvePlayerLabel } from "@/ui/web/lib/user";
-import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
+import { cn } from "@/ui/web/lib/utils";
 
 const statusStyles: Record<
   HomeMatchStatus,
   { badge: string; ring: string; text: string; rail: string }
 > = {
   victory: {
-    badge: "bg-primary/18 text-primary",
+    badge: "bg-primary/20 text-primary",
     ring: "ring-primary/70",
     text: "Victory",
     rail: "bg-primary/90",
@@ -44,23 +42,14 @@ export const HomeMatchCard = ({
   opponentUserId,
 }: HomeMatch) => {
   const statusStyle = statusStyles[status];
-  const currentUser = useCurrentUser();
-  const opponentUser = useUserById(opponentUserId);
-
-  const currentName = resolvePlayerLabel(currentUser ?? {}, "You");
-  const opponentName = resolvePlayerLabel(opponentUser ?? {}, "Opponent");
-  const currentInitials = getFallbackInitials({
-    name: currentUser?.name,
-    username: currentUser?.username,
-    email: currentUser?.email,
-  });
-  const opponentInitials = getFallbackInitials({
-    name: opponentUser?.name,
-    username: opponentUser?.username,
-    email: opponentUser?.email,
-  });
-  const currentAvatar = resolveAvatarSrc(currentUser?.avatar);
-  const opponentAvatar = resolveAvatarSrc(opponentUser?.avatar);
+  const {
+    currentAvatar,
+    currentInitials,
+    currentName,
+    opponentAvatar,
+    opponentInitials,
+    opponentName,
+  } = useHomeMatchCard(opponentUserId);
 
   return (
     <Card className="group relative gap-0 overflow-hidden rounded-4xl py-0 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.35)] transition-colors hover:bg-card/80 dark:shadow-[0_20px_48px_-36px_rgba(0,0,0,0.75)]">
