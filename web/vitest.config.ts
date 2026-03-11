@@ -51,7 +51,10 @@ export default defineConfig({
         __dirname,
         "node_modules/@fontsource-variable/noto-sans/index.css",
       ),
-      tailwindcss: path.resolve(__dirname, "node_modules/tailwindcss/index.css"),
+      tailwindcss: path.resolve(
+        __dirname,
+        "node_modules/tailwindcss/index.css",
+      ),
       "tw-animate-css": path.resolve(
         __dirname,
         "node_modules/tw-animate-css/dist/tw-animate.css",
