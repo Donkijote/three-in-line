@@ -6,7 +6,6 @@
     "install:web": "cd web && bun install --frozen-lockfile",
     "install:mobile": "cd mobile && bun install --frozen-lockfile",
     "install:contexts": "bun run install:web && bun run install:mobile",
-    "dev": "bun run --cwd web dev",
     "web:dev": "bun run --cwd web dev",
     "web:build": "bun run --cwd web build",
     "web:preview": "bun run --cwd web preview",
@@ -23,12 +22,7 @@
     "mobile:web": "bun run --cwd mobile web",
     "mobile:typecheck": "bun run --cwd mobile typecheck",
     "mobile:build:ios": "bun run --cwd mobile expo run:ios",
-    "build": "bun run web:build",
     "lint": "bunx @biomejs/biome check --write .",
-    "test": "bun run web:test",
-    "test:watch": "bun run web:test:watch",
-    "preview": "bun run web:preview",
-    "typecheck": "bun run web:typecheck && bun run mobile:typecheck",
-    "deploy": "bun run web:deploy"
+    "typecheck": "bun run web:typecheck && bun run mobile:typecheck"
   }
 }
