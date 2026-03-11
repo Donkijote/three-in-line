@@ -58,10 +58,16 @@ Recommended layout:
 ├── package.json
 ├── tsconfig.json
 ├── tsconfig.paths.json
-├── vite.config.ts
-├── tailwind.config.ts
-├── components.json
-├── index.html
+├── web
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── vitest.config.ts
+│   ├── tsconfig.json
+│   ├── tsconfig.app.json
+│   ├── tsconfig.node.json
+│   ├── components.json
+│   ├── index.html
+│   └── wrangler.toml
 ├── public
 │   └── (web static assets)
 ├── convex

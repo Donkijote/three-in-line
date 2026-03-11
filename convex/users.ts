@@ -97,11 +97,28 @@ export const updateAvatar = mutation({
 
     const user = await ctx.db.get(userId);
     const previousAvatars = user?.avatars ?? [];
-    const deduped = previousAvatars.filter(
-      (item) =>
-        !(item.type === args.avatar.type && item.value === args.avatar.value),
-    );
-    const nextAvatars = [args.avatar, ...deduped].slice(0, 10);
+    const currentAvatar = user?.avatar;
+    const historyCandidates = currentAvatar
+      ? [currentAvatar, ...previousAvatars]
+      : previousAvatars;
+    const dedupedHistory = [];
+    const seen = new Set<string>();
+
+    for (const item of historyCandidates) {
+      if (item.type === args.avatar.type && item.value === args.avatar.value) {
+        continue;
+      }
+
+      const avatarKey = `${item.type}:${item.value}`;
+      if (seen.has(avatarKey)) {
+        continue;
+      }
+
+      seen.add(avatarKey);
+      dedupedHistory.push(item);
+    }
+
+    const nextAvatars = [args.avatar, ...dedupedHistory].slice(0, 10);
 
     await ctx.db.patch(userId, { avatar: args.avatar, avatars: nextAvatars });
     return await ctx.db.get(userId);

@@ -19,6 +19,8 @@ import type {
 export const HEARTBEAT_FRESH_MS = 60000;
 export const PAUSE_TIMEOUT_MS = 5 * 60_000;
 export const DEFAULT_TURN_DURATION_MS = 3000;
+export const RECENT_GAMES_LIMIT = 30;
+export const RECENT_GAMES_FETCH_LIMIT = RECENT_GAMES_LIMIT + 1;
 
 type Ctx = MutationCtx | QueryCtx;
 type GameDoc = Doc<"games">;

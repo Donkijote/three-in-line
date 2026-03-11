@@ -16,6 +16,7 @@ type MatchBoardProps = {
   isTimeUp?: boolean;
   isPlacing?: boolean;
   onCellClick?: (index: number) => void;
+  onInvalidMoveAttempt?: () => void;
   className?: string;
 };
 
@@ -29,16 +30,11 @@ export const MatchBoard = ({
   isTimeUp = false,
   isPlacing,
   onCellClick,
+  onInvalidMoveAttempt,
   className,
 }: MatchBoardProps) => {
   const resolvedGridSize = gridSize ?? DEFAULT_GRID_SIZE;
   const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
-  const isInteractive =
-    status === "playing" &&
-    Boolean(currentSlot) &&
-    currentTurn === currentSlot &&
-    !isPlacing &&
-    !isTimeUp;
   const isCurrentUserP1 = currentSlot ? currentSlot === "P1" : true;
   const playerColors = {
     P1: isCurrentUserP1 ? "text-primary" : "text-opponent",
@@ -72,13 +68,23 @@ export const MatchBoard = ({
           {displayBoard.flatMap((row, rowIndex) =>
             row.map((cell, colIndex) => {
               const key = `${rowIndex}-${colIndex}`;
-              const isDisabled = !isInteractive || cell !== "";
+              const isCellTaken = cell !== "";
+              const isKnownUser = Boolean(currentSlot);
+              const isNotYourTurn =
+                status === "playing" &&
+                isKnownUser &&
+                currentTurn !== currentSlot &&
+                !isTimeUp;
+              const isHardDisabled =
+                status !== "playing" || !isKnownUser || isPlacing || isTimeUp;
+              const isDisabled = isHardDisabled || isCellTaken || isNotYourTurn;
               const index = rowIndex * resolvedGridSize + colIndex;
               return (
                 <button
                   type="button"
                   key={key}
-                  disabled={isDisabled}
+                  disabled={isHardDisabled}
+                  aria-disabled={isDisabled}
                   className={cn(
                     "grid aspect-square place-items-center rounded-2xl border border-border/70 bg-secondary font-semibold transition",
                     {
@@ -88,7 +94,13 @@ export const MatchBoard = ({
                     },
                   )}
                   style={{ fontSize: cellFontSize }}
-                  onClick={() => onCellClick?.(index)}
+                  onClick={() => {
+                    if (isCellTaken || isNotYourTurn) {
+                      onInvalidMoveAttempt?.();
+                      return;
+                    }
+                    onCellClick?.(index);
+                  }}
                 >
                   <span
                     className={cn({

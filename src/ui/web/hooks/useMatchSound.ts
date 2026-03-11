@@ -1,0 +1,450 @@
+import { useEffect, useRef } from "react";
+
+import type { Game, GameId, PlayerSlot } from "@/domain/entities/Game";
+import {
+  playAbandonedWinHaptic,
+  playDefeatOverlayHaptic,
+  playOpponentDisconnectedHaptic,
+  playOpponentReconnectedHaptic,
+  playTimeStoppedHaptic,
+  playVictoryOverlayHaptic,
+} from "@/ui/web/lib/haptics";
+import {
+  playConnectedSound,
+  playDefeatSound,
+  playDisconnectedSound,
+  playPlayerMarkSound,
+  playSurrenderSound,
+  playTimesUpSound,
+  playVictorySound,
+  startTimerTickSound,
+  stopResultSound,
+  stopTimerTickSound,
+} from "@/ui/web/lib/sound";
+
+type UseMatchSoundParams = {
+  gameId: GameId;
+  status: Game["status"] | undefined;
+  lastMove: Game["lastMove"] | undefined;
+  currentSlot: PlayerSlot | null;
+  isGameReady: boolean;
+  isMoveSoundEnabled: boolean;
+  soundEnabled: boolean;
+  hapticsEnabled: boolean;
+  isTimedMode: boolean;
+  isOwnTurnTimerActive: boolean;
+  isTimeUpVisible: boolean;
+  deadlineTime: number | null | undefined;
+};
+
+type UseMatchResultOverlaySoundParams = {
+  soundEnabled?: boolean;
+  hapticsEnabled?: boolean;
+  status: Game["status"];
+  endedReason: Game["endedReason"];
+  winner: PlayerSlot | null;
+  abandonedBy: PlayerSlot | null;
+  p1UserId: string;
+  currentUserId?: string;
+};
+
+type ResultSoundAction = {
+  key: string;
+  play: () => void;
+} | null;
+type ResultHapticAction = {
+  key: string;
+  play: () => void;
+} | null;
+type ConnectionTransition = "none" | "disconnected" | "reconnected";
+
+export const useMatchSound = ({
+  gameId,
+  status,
+  lastMove,
+  currentSlot,
+  isGameReady,
+  isMoveSoundEnabled,
+  soundEnabled,
+  hapticsEnabled,
+  isTimedMode,
+  isOwnTurnTimerActive,
+  isTimeUpVisible,
+  deadlineTime,
+}: UseMatchSoundParams): void => {
+  const lastObservedMoveKeyRef = useRef<string | null>(null);
+  const observedMoveGameIdRef = useRef<string | null>(null);
+  const hasInitializedMoveRef = useRef(false);
+  const observedConnectionGameIdRef = useRef<string | null>(null);
+  const previousStatusRef = useRef<Game["status"] | null>(null);
+  const lastTimesUpKeyRef = useRef<string | null>(null);
+  const lastTimesUpHapticKeyRef = useRef<string | null>(null);
+  const observedTimesUpGameIdRef = useRef<GameId | null>(null);
+
+  useEffect(() => {
+    if (observedMoveGameIdRef.current !== gameId) {
+      observedMoveGameIdRef.current = gameId;
+      lastObservedMoveKeyRef.current = null;
+      hasInitializedMoveRef.current = false;
+    }
+
+    if (!isGameReady) {
+      return;
+    }
+
+    if (!isMoveSoundEnabled) {
+      if (lastMove) {
+        lastObservedMoveKeyRef.current = `${lastMove.at}:${lastMove.index}:${lastMove.by}`;
+      }
+      return;
+    }
+
+    if (!hasInitializedMoveRef.current) {
+      hasInitializedMoveRef.current = true;
+      if (lastMove) {
+        lastObservedMoveKeyRef.current = `${lastMove.at}:${lastMove.index}:${lastMove.by}`;
+      }
+      return;
+    }
+
+    if (!lastMove) {
+      return;
+    }
+
+    const moveKey = `${lastMove.at}:${lastMove.index}:${lastMove.by}`;
+    if (lastObservedMoveKeyRef.current === moveKey) {
+      return;
+    }
+
+    lastObservedMoveKeyRef.current = moveKey;
+    if (lastMove.by === currentSlot) {
+      return;
+    }
+
+    playPlayerMarkSound(lastMove.by === "P1" ? "X" : "O");
+  }, [currentSlot, gameId, isGameReady, isMoveSoundEnabled, lastMove]);
+
+  useEffect(() => {
+    if (observedConnectionGameIdRef.current !== gameId) {
+      observedConnectionGameIdRef.current = gameId;
+      previousStatusRef.current = null;
+    }
+
+    if (!isGameReady || !status) {
+      return;
+    }
+
+    const previousStatus = previousStatusRef.current;
+    if (!previousStatus) {
+      previousStatusRef.current = status;
+      return;
+    }
+
+    if (previousStatus === status) {
+      return;
+    }
+
+    const transition = resolveConnectionTransition(previousStatus, status);
+    previousStatusRef.current = status;
+    playConnectionFeedback({
+      transition,
+      soundEnabled,
+      hapticsEnabled,
+    });
+  }, [gameId, hapticsEnabled, isGameReady, soundEnabled, status]);
+
+  useEffect(() => {
+    const shouldTick =
+      soundEnabled && isTimedMode && isOwnTurnTimerActive && !isTimeUpVisible;
+
+    if (shouldTick) {
+      startTimerTickSound();
+      return;
+    }
+
+    stopTimerTickSound();
+  }, [isOwnTurnTimerActive, isTimeUpVisible, isTimedMode, soundEnabled]);
+
+  useEffect(() => {
+    if (observedTimesUpGameIdRef.current !== gameId) {
+      observedTimesUpGameIdRef.current = gameId;
+      lastTimesUpKeyRef.current = null;
+      lastTimesUpHapticKeyRef.current = null;
+    }
+
+    if (!isTimedMode || !isOwnTurnTimerActive || !isTimeUpVisible) {
+      return;
+    }
+
+    const timesUpKey = `${gameId}:${deadlineTime ?? "none"}`;
+
+    if (soundEnabled && lastTimesUpKeyRef.current !== timesUpKey) {
+      lastTimesUpKeyRef.current = timesUpKey;
+      playTimesUpSound();
+    }
+
+    if (hapticsEnabled && lastTimesUpHapticKeyRef.current !== timesUpKey) {
+      lastTimesUpHapticKeyRef.current = timesUpKey;
+      playTimeStoppedHaptic();
+    }
+  }, [
+    deadlineTime,
+    gameId,
+    hapticsEnabled,
+    isOwnTurnTimerActive,
+    isTimeUpVisible,
+    isTimedMode,
+    soundEnabled,
+  ]);
+
+  useEffect(() => () => stopTimerTickSound(), []);
+};
+
+export const useMatchResultOverlaySound = ({
+  soundEnabled,
+  hapticsEnabled,
+  status,
+  endedReason,
+  winner,
+  abandonedBy,
+  p1UserId,
+  currentUserId,
+}: UseMatchResultOverlaySoundParams): void => {
+  const resultSoundKeyRef = useRef<string | null>(null);
+  const resultHapticKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (shouldResetResultSound(soundEnabled, status)) {
+      resetResultSound(resultSoundKeyRef);
+      return;
+    }
+
+    const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+    const action = resolveResultSoundAction({
+      abandonedBy,
+      currentSlot,
+      currentUserId,
+      endedReason,
+      winner,
+    });
+
+    if (!action) {
+      resetResultSound(resultSoundKeyRef);
+      return;
+    }
+
+    if (resultSoundKeyRef.current === action.key) {
+      return;
+    }
+
+    resultSoundKeyRef.current = action.key;
+    action.play();
+  }, [
+    abandonedBy,
+    currentUserId,
+    endedReason,
+    p1UserId,
+    soundEnabled,
+    status,
+    winner,
+  ]);
+
+  useEffect(() => {
+    if (shouldResetResultHaptic(hapticsEnabled, status)) {
+      resultHapticKeyRef.current = null;
+      return;
+    }
+
+    const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
+    const action = resolveResultHapticAction({
+      abandonedBy,
+      currentSlot,
+      currentUserId,
+      endedReason,
+      winner,
+    });
+
+    if (!action) {
+      resultHapticKeyRef.current = null;
+      return;
+    }
+
+    if (resultHapticKeyRef.current === action.key) {
+      return;
+    }
+
+    resultHapticKeyRef.current = action.key;
+    action.play();
+  }, [
+    abandonedBy,
+    currentUserId,
+    endedReason,
+    hapticsEnabled,
+    p1UserId,
+    status,
+    winner,
+  ]);
+
+  useEffect(() => () => stopResultSound(), []);
+};
+
+const shouldResetResultSound = (
+  soundEnabled: boolean | undefined,
+  status: Game["status"],
+): boolean => soundEnabled === false || status !== "ended";
+
+const resetResultSound = (resultSoundKeyRef: { current: string | null }) => {
+  stopResultSound();
+  resultSoundKeyRef.current = null;
+};
+
+const shouldResetResultHaptic = (
+  hapticsEnabled: boolean | undefined,
+  status: Game["status"],
+): boolean => hapticsEnabled === false || status !== "ended";
+
+const resolveResultSoundAction = ({
+  abandonedBy,
+  currentSlot,
+  currentUserId,
+  endedReason,
+  winner,
+}: {
+  abandonedBy: PlayerSlot | null;
+  currentSlot: PlayerSlot | undefined;
+  currentUserId: string | undefined;
+  endedReason: Game["endedReason"];
+  winner: PlayerSlot | null;
+}): ResultSoundAction => {
+  if (!winner) {
+    return null;
+  }
+
+  const isWinner = currentSlot ? winner === currentSlot : false;
+  const userKey = currentUserId ?? "unknown";
+
+  if (endedReason === "win") {
+    const type = isWinner ? "victory" : "defeat";
+    return {
+      key: `${userKey}:${winner}:${type}`,
+      play: isWinner ? playVictorySound : playDefeatSound,
+    };
+  }
+
+  if (endedReason !== "abandoned" || !currentSlot || !abandonedBy) {
+    return null;
+  }
+
+  const didCurrentUserAbandon = abandonedBy === currentSlot;
+  if (didCurrentUserAbandon || !isWinner) {
+    return null;
+  }
+
+  return {
+    key: `${userKey}:${winner}:surrender`,
+    play: playSurrenderSound,
+  };
+};
+
+const resolveResultHapticAction = ({
+  abandonedBy,
+  currentSlot,
+  currentUserId,
+  endedReason,
+  winner,
+}: {
+  abandonedBy: PlayerSlot | null;
+  currentSlot: PlayerSlot | undefined;
+  currentUserId: string | undefined;
+  endedReason: Game["endedReason"];
+  winner: PlayerSlot | null;
+}): ResultHapticAction => {
+  if (!winner || !currentSlot) {
+    return null;
+  }
+
+  const userKey = currentUserId ?? "unknown";
+  const isWinner = winner === currentSlot;
+
+  if (endedReason === "abandoned") {
+    if (!abandonedBy || abandonedBy === currentSlot || !isWinner) {
+      return null;
+    }
+
+    return {
+      key: `${userKey}:${winner}:abandoned-win`,
+      play: playAbandonedWinHaptic,
+    };
+  }
+
+  if (endedReason !== "win") {
+    return null;
+  }
+
+  if (isWinner) {
+    return {
+      key: `${userKey}:${winner}:victory`,
+      play: playVictoryOverlayHaptic,
+    };
+  }
+
+  return {
+    key: `${userKey}:${winner}:defeat`,
+    play: playDefeatOverlayHaptic,
+  };
+};
+
+const resolveCurrentSlot = (
+  currentUserId: string | undefined,
+  p1UserId: string,
+): PlayerSlot | undefined => {
+  if (!currentUserId) {
+    return undefined;
+  }
+
+  return currentUserId === p1UserId ? "P1" : "P2";
+};
+
+const resolveConnectionTransition = (
+  previousStatus: Game["status"],
+  nextStatus: Game["status"],
+): ConnectionTransition => {
+  if (previousStatus === "playing" && nextStatus === "paused") {
+    return "disconnected";
+  }
+
+  if (previousStatus === "paused" && nextStatus === "playing") {
+    return "reconnected";
+  }
+
+  return "none";
+};
+
+const playConnectionFeedback = ({
+  transition,
+  soundEnabled,
+  hapticsEnabled,
+}: {
+  transition: ConnectionTransition;
+  soundEnabled: boolean;
+  hapticsEnabled: boolean;
+}) => {
+  if (transition === "disconnected") {
+    if (soundEnabled) {
+      playDisconnectedSound();
+    }
+    if (hapticsEnabled) {
+      playOpponentDisconnectedHaptic();
+    }
+    return;
+  }
+
+  if (transition === "reconnected") {
+    if (soundEnabled) {
+      playConnectedSound();
+    }
+    if (hapticsEnabled) {
+      playOpponentReconnectedHaptic();
+    }
+  }
+};

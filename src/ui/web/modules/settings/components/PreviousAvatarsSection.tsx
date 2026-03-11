@@ -1,9 +1,6 @@
-import { useMemo, useState } from "react";
-
 import { Plus } from "lucide-react";
 
-import { isPresetAvatarId, type UserAvatar } from "@/domain/entities/Avatar";
-import { getPresetAvatarById } from "@/ui/shared/avatars";
+import { usePreviousAvatarsSection } from "@/ui/shared/settings/hooks/usePreviousAvatarsSection";
 import { Small } from "@/ui/web/components/Typography";
 import {
   Avatar,
@@ -11,39 +8,11 @@ import {
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
 import { ScrollArea, ScrollBar } from "@/ui/web/components/ui/scroll-area";
-import { useCurrentUser, useUpdateAvatar } from "@/ui/web/hooks/useUser";
-import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
+import { cn } from "@/ui/web/lib/utils";
 
 export const PreviousAvatarsSection = () => {
-  const currentUser = useCurrentUser();
-  const updateAvatar = useUpdateAvatar();
-  const [isUpdating, setIsUpdating] = useState(false);
-  const avatars = currentUser?.avatars ?? [];
-
-  const fallbackInitials = useMemo(
-    () =>
-      getFallbackInitials({
-        name: currentUser?.name,
-        username: currentUser?.username,
-        email: currentUser?.email,
-      }),
-    [currentUser?.email, currentUser?.name, currentUser?.username],
-  );
-
-  const handleSelectAvatar = async (avatar: UserAvatar) => {
-    if (isUpdating) {
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      await updateAvatar({ avatar });
-    } catch (error) {
-      console.error("Failed to update avatar", error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  const { isUpdating, onSelectPreviousAvatar, previousAvatars } =
+    usePreviousAvatarsSection();
 
   return (
     <div className="flex flex-col justify-center">
@@ -54,33 +23,26 @@ export const PreviousAvatarsSection = () => {
       </div>
       <ScrollArea className={"w-full"}>
         <div className="flex gap-4 overflow-x-auto p-3 md:flex-wrap md:overflow-visible">
-          {avatars.map((avatar, index) => {
-            const preset =
-              avatar.type === "preset" && isPresetAvatarId(avatar.value)
-                ? getPresetAvatarById(avatar.value)
-                : null;
-            const src = preset?.src ?? avatar.value;
-            const initials = preset?.initials ?? fallbackInitials;
-
+          {previousAvatars.map((item) => {
             return (
               <Avatar
-                key={`${avatar.type}-${avatar.value}`}
+                key={item.key}
                 size={"lg"}
                 className={cn(
                   "size-16! rounded-xl after:content-none cursor-pointer",
                   {
                     "ring-1 ring-primary shadow-[0_0_10px_0_var(--chart-1)]":
-                      index === 0,
+                      item.isCurrent,
                     "pointer-events-none opacity-60": isUpdating,
                   },
                 )}
-                onClick={() => void handleSelectAvatar(avatar)}
+                onClick={() => void onSelectPreviousAvatar(item.avatar)}
               >
-                {src ? (
-                  <AvatarImage src={src} className={"rounded-xl"} />
+                {item.src ? (
+                  <AvatarImage src={item.src} className={"rounded-xl"} />
                 ) : null}
                 <AvatarFallback className={"rounded-xl"}>
-                  {initials}
+                  {item.initials}
                 </AvatarFallback>
               </Avatar>
             );

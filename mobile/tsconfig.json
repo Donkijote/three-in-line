@@ -1,0 +1,62 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "../node_modules/@types"
+    ],
+    "baseUrl": "..",
+    "paths": {
+      "@/convex/*": [
+        "./convex/*"
+      ],
+      "@/*": [
+        "./src/*"
+      ],
+      "@convex-dev/auth/server": [
+        "./mobile/node_modules/@convex-dev/auth/dist/server/index.d.ts"
+      ],
+      "@convex-dev/auth/react": [
+        "./mobile/node_modules/@convex-dev/auth/dist/react/index.d.ts"
+      ],
+      "@convex-dev/auth/providers/*": [
+        "./mobile/node_modules/@convex-dev/auth/dist/providers/*"
+      ],
+      "react": [
+        "./mobile/node_modules/@types/react/index.d.ts"
+      ],
+      "react/jsx-runtime": [
+        "./mobile/node_modules/@types/react/jsx-runtime.d.ts"
+      ],
+      "react/jsx-dev-runtime": [
+        "./mobile/node_modules/@types/react/jsx-dev-runtime.d.ts"
+      ],
+      "*": [
+        "./mobile/node_modules/*",
+        "./mobile/node_modules/@types/*"
+      ]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "../src/**/*.ts",
+    "../src/**/*.tsx",
+    "nativewind-env.d.ts"
+  ],
+  "exclude": [
+    "../src/ui/web/**/*",
+    "../src/**/*.test.ts",
+    "../src/**/*.test.tsx"
+  ],
+  "extends": "expo/tsconfig.base"
+}

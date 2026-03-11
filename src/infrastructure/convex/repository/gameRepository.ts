@@ -3,7 +3,7 @@ import type { GameId as ConvexGameId, GameDoc } from "@/convex/schemas/game";
 import type { Game, GameId } from "@/domain/entities/Game";
 import type { GameConfig } from "@/domain/entities/GameConfig";
 import type { GameRepository } from "@/domain/ports/GameRepository";
-import { convexClient } from "@/infrastructure/convex/client";
+import { mutation } from "@/infrastructure/convex/mutation";
 
 const toConvexGameId = (id: GameId) => id as unknown as ConvexGameId;
 
@@ -34,32 +34,29 @@ export const toDomainGame = (game: GameDoc): Game => ({
 
 export const gameRepository: GameRepository = {
   findOrCreateGame: async (config: GameConfig) => {
-    const result = await convexClient.mutation(
-      api.games.findOrCreateGame,
-      config,
-    );
+    const result = await mutation(api.games.findOrCreateGame, config);
     return result.gameId as GameId;
   },
   placeMark: async (params) => {
-    await convexClient.mutation(api.games.placeMark, {
+    await mutation(api.games.placeMark, {
       ...params,
       gameId: toConvexGameId(params.gameId),
     });
   },
   abandonGame: async (params) => {
-    await convexClient.mutation(api.games.abandonGame, {
+    await mutation(api.games.abandonGame, {
       ...params,
       gameId: toConvexGameId(params.gameId),
     });
   },
   heartbeat: async (params) => {
-    await convexClient.mutation(api.games.heartbeat, {
+    await mutation(api.games.heartbeat, {
       ...params,
       gameId: toConvexGameId(params.gameId),
     });
   },
   timeoutTurn: async (params) => {
-    await convexClient.mutation(api.games.timeoutTurn, {
+    await mutation(api.games.timeoutTurn, {
       ...params,
       gameId: toConvexGameId(params.gameId),
     });

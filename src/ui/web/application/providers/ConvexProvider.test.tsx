@@ -12,7 +12,7 @@ vi.mock("@convex-dev/auth/react", () => ({
 }));
 
 vi.mock("@/infrastructure/convex/client", () => ({
-  convexClient: mockConvexClient,
+  initConvexClient: vi.fn(() => mockConvexClient),
 }));
 
 import { ConvexProvider } from "./ConvexProvider";

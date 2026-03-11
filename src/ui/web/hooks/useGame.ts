@@ -56,14 +56,9 @@ export const useGameHeartbeat = ({
       return;
     }
 
-    const heartbeatFn = heartbeatRef.current;
-    if (!heartbeatFn) {
-      return;
-    }
-
     inFlightRef.current = true;
     try {
-      await heartbeatFn({ gameId: currentGameId });
+      await heartbeatRef.current({ gameId: currentGameId });
     } catch (error) {
       console.debug("Game heartbeat failed.", error);
     } finally {
@@ -214,7 +209,6 @@ export const useTurnTimer = ({
     };
   }, [intervalMs, isActive]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: need to clean up when these deps update
   useEffect(() => {
     hasTriggeredRef.current = false;
     if (timeoutRef.current !== null) {
