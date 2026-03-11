@@ -5,9 +5,9 @@ import { useDebouncedCallback } from "use-debounce";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useForm } from "@tanstack/react-form";
 
-import type { LoginFormValues } from "@/ui/shared/login/types";
-import { useCheckEmailExists } from "@/ui/shared/login/useCheckEmailExists";
-import { isValidEmail } from "@/ui/shared/login/validators";
+import type { LoginFormValues } from "@/ui/shared/login/types/login";
+import { isValidEmail } from "@/ui/shared/login/validation/validators";
+import { useCheckEmailExists } from "@/ui/shared/user/hooks/useUser";
 
 const toAuthError = (error: unknown, fallbackMessage: string) => {
   if (error instanceof Error) {

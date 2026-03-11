@@ -6,7 +6,7 @@ import { HomeStats } from "./HomeStats";
 
 const useCurrentUserMock = vi.fn();
 
-vi.mock("@/ui/web/hooks/useUser", () => ({
+vi.mock("@/ui/shared/user/hooks/useUser", () => ({
   useCurrentUser: () => useCurrentUserMock(),
 }));
 

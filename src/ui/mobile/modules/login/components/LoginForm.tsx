@@ -9,13 +9,13 @@ import { Input } from "@/ui/mobile/components/ui/input";
 import { Text } from "@/ui/mobile/components/ui/text";
 import { Visibility } from "@/ui/mobile/layout/components/Visibility";
 import { toUserAvatar } from "@/ui/shared/avatars/presets";
-import { useLoginFlow } from "@/ui/shared/login/useLoginFlow";
+import { useLoginFlow } from "@/ui/shared/login/hooks/useLoginFlow";
 import {
   resolveLoginSubmitState,
   validateAvatar,
   validateEmail,
   validatePassword,
-} from "@/ui/shared/login/validators";
+} from "@/ui/shared/login/validation/validators";
 
 import { AvatarOptions } from "./AvatarOptions";
 import { LoginErrorAlert } from "./LoginErrorAlert";
@@ -143,7 +143,6 @@ export const LoginForm = () => {
             </Visibility>
           )}
         </form.Field>
-
       </View>
 
       <form.Subscribe

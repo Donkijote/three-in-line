@@ -12,7 +12,7 @@ let currentUser: {
   avatar?: { type: "preset" | "custom" | "generated"; value: string };
 } | null = null;
 
-vi.mock("@/ui/web/hooks/useUser", () => ({
+vi.mock("@/ui/shared/user/hooks/useUser", () => ({
   useCurrentUser: () => currentUser,
   useUpdateAvatar: () => updateAvatar,
 }));

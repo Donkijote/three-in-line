@@ -62,7 +62,7 @@ vi.mock("@/ui/web/hooks/useMediaQuery", () => ({
   useMediaQuery: () => ({ isDesktop }),
 }));
 
-vi.mock("@/ui/web/hooks/useUser", () => ({
+vi.mock("@/ui/shared/user/hooks/useUser", () => ({
   useCurrentUser: () => currentUser,
   useUserById: useUserByIdMock,
 }));

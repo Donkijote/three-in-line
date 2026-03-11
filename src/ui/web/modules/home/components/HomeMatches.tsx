@@ -1,8 +1,8 @@
 import { Activity } from "react";
 
 import type { Game, PlayerSlot } from "@/domain/entities/Game";
+import { useCurrentUser } from "@/ui/shared/user/hooks/useUser";
 import { P } from "@/ui/web/components/Typography";
-import { useCurrentUser } from "@/ui/web/hooks/useUser";
 import { HomeMatchCard } from "@/ui/web/modules/home/components/HomeMatchCard";
 import { HomeSectionLabel } from "@/ui/web/modules/home/components/HomeSectionLabel";
 import type { HomeMatch } from "@/ui/web/modules/home/components/home.types";

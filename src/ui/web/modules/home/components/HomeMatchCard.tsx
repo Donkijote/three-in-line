@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 
 import { resolveAvatarSrc } from "@/domain/entities/Avatar";
+import { useCurrentUser, useUserById } from "@/ui/shared/user/hooks/useUser";
 import { H6, Muted, Small } from "@/ui/web/components/Typography";
 import {
   Avatar,
@@ -8,7 +9,6 @@ import {
   AvatarImage,
 } from "@/ui/web/components/ui/avatar";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
-import { useCurrentUser, useUserById } from "@/ui/web/hooks/useUser";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
 import type {

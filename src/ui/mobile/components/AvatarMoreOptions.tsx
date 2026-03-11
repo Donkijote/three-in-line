@@ -16,16 +16,17 @@ import {
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import { ScrollArea } from "@/ui/mobile/components/ui/scroll-area";
 import { Text } from "@/ui/mobile/components/ui/text";
+import { AvatarOptionItem } from "@/ui/mobile/modules/login/components/AvatarOptionItem";
 import { type AvatarPreset, PRESET_AVATARS } from "@/ui/shared/avatars";
-
-import { AvatarOptionItem } from "./AvatarOptionItem";
 
 type AvatarMoreOptionsProps = {
   onAccept: (avatar: AvatarPreset) => void;
+  disabled?: boolean;
 };
 
 export const AvatarMoreOptions = ({
   onAccept,
+  disabled = false,
   children,
 }: PropsWithChildren<AvatarMoreOptionsProps>) => {
   const { width } = useWindowDimensions();
@@ -47,7 +48,7 @@ export const AvatarMoreOptions = ({
 
   return (
     <Drawer direction={drawerDirection} open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerTrigger>{children}</DrawerTrigger>
+      <DrawerTrigger disabled={disabled}>{children}</DrawerTrigger>
       <DrawerContent className="h-full max-h-[92%]">
         <DrawerHeader className="relative items-center pb-3">
           <DrawerTitle className="text-center text-lg">Avatars</DrawerTitle>

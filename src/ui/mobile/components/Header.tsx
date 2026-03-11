@@ -41,14 +41,16 @@ export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
             </View>
           ) : null}
           <View className="items-center">
-            {eyebrow ? (
-              <Small
-                variant="label"
-                className="text-[10px] tracking-[1.5px] text-primary/80"
-              >
-                {eyebrow}
-              </Small>
-            ) : null}
+            <View className="h-[14px] items-center justify-center">
+              {eyebrow ? (
+                <Small
+                  variant="label"
+                  className="text-[10px] tracking-[1.5px] text-primary/80"
+                >
+                  {eyebrow}
+                </Small>
+              ) : null}
+            </View>
             <H6
               className={cn(
                 "font-semibold uppercase tracking-[2px] leading-none",

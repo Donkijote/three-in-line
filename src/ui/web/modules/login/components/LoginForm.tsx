@@ -4,13 +4,13 @@ import { ArrowRight, Loader, Pencil } from "lucide-react";
 
 import { getRandomPresetAvatarId } from "@/domain/entities/Avatar";
 import { toUserAvatar } from "@/ui/shared/avatars/presets";
-import { useLoginFlow } from "@/ui/shared/login/useLoginFlow";
+import { useLoginFlow } from "@/ui/shared/login/hooks/useLoginFlow";
 import {
   resolveLoginSubmitState,
   validateAvatar,
   validateEmail,
   validatePassword,
-} from "@/ui/shared/login/validators";
+} from "@/ui/shared/login/validation/validators";
 import { Small } from "@/ui/web/components/Typography";
 import { Button } from "@/ui/web/components/ui/button";
 import {
@@ -117,7 +117,9 @@ export const LoginForm = () => {
                       autoComplete="current-password"
                       className="text-base text-foreground placeholder:text-muted-foreground/70"
                       value={field.state.value}
-                      onChange={(event) => field.handleChange(event.target.value)}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
                       onBlur={field.handleBlur}
                     />
                   </InputGroup>

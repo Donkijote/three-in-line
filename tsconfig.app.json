@@ -33,6 +33,7 @@
     "src"
   ],
   "exclude": [
-    "src/ui/mobile/**/*"
+    "src/ui/mobile/**/*",
+    "src/infrastructure/mobile/**/*"
   ]
 }
