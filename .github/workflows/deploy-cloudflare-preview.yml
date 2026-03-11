@@ -49,7 +49,7 @@ jobs:
         env:
           BUILD_NUMBER: ${{ steps.build_tag.outputs.value }}
           VITE_BUILD_NUMBER: ${{ steps.build_tag.outputs.value }}
-        run: bun run build
+        run: bun run --cwd web build
 
       - name: Deploy to Cloudflare Pages
-        run: bun run web:deploy:pages
+        run: bun run --cwd web deploy:pages

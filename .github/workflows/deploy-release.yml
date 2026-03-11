@@ -148,11 +148,11 @@ jobs:
           if [ "${{ steps.pm.outputs.pm }}" = "bun" ]; then
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"
-            bun run build
+            bun run --cwd web build
           elif [ "${{ steps.pm.outputs.pm }}" = "pnpm" ]; then
-            pnpm run build
+            pnpm --dir web run build
           else
-            npm run build
+            npm --prefix web run build
           fi
 
       - name: Deploy (template)
@@ -160,7 +160,7 @@ jobs:
           if [ "${{ steps.pm.outputs.pm }}" = "bun" ]; then
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"
-            bun run web:deploy:pages
+            bun run --cwd web deploy:pages
           elif [ "${{ steps.pm.outputs.pm }}" = "pnpm" ]; then
             pnpm --dir web run deploy:pages
           else
