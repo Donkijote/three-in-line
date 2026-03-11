@@ -27,8 +27,8 @@ jobs:
         with:
           bun-version: 1.3.6
 
-      - name: Install
-        run: bun install
+      - name: Install web dependencies
+        run: cd web && bun install --frozen-lockfile
 
       - name: Tests
         run: bun run test

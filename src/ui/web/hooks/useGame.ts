@@ -209,7 +209,6 @@ export const useTurnTimer = ({
     };
   }, [intervalMs, isActive]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: need to clean up when these deps update
   useEffect(() => {
     hasTriggeredRef.current = false;
     if (timeoutRef.current !== null) {

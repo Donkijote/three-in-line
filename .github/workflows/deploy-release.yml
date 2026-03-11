@@ -132,12 +132,15 @@ jobs:
               export BUN_INSTALL="$HOME/.bun"
               export PATH="$BUN_INSTALL/bin:$PATH"
             fi
-            bun install --frozen-lockfile
+            (cd web && bun install --frozen-lockfile)
+            (cd mobile && bun install --frozen-lockfile)
           elif [ "${{ steps.pm.outputs.pm }}" = "pnpm" ]; then
             corepack enable
-            pnpm install --frozen-lockfile
+            pnpm --dir web install --frozen-lockfile
+            pnpm --dir mobile install --frozen-lockfile
           else
-            npm ci
+            npm --prefix web ci
+            npm --prefix mobile ci
           fi
 
       - name: Build
@@ -158,12 +161,12 @@ jobs:
         run: |
           if [ "${{ steps.pm.outputs.pm }}" = "bun" ]; then
             export BUN_INSTALL="$HOME/.bun"
-            export PATH="$BUN_INSTALL/bin:$PATH"          
-            bunx wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+            bun run web:deploy:pages
           elif [ "${{ steps.pm.outputs.pm }}" = "pnpm" ]; then
-            pnpm dlx wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT"
+            pnpm --dir web run deploy:pages
           else
-            npx wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT"
+            npm --prefix web run deploy:pages
           fi
 
       - name: Update changelog

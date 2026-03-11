@@ -8,14 +8,17 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+web/node_modules
 mobile/node_modules
 mobile/.expo
+web/dist
 mobile/dist
 dist
 dist-ssr
 *.local
 .npmrc
 coverage
+web/coverage
 
 # Editor directories and files
 .vscode/*
