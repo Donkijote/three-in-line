@@ -1,9 +1,9 @@
 import { Flame, Swords, Trophy } from "lucide-react";
 
+import type { HomeStat } from "@/ui/shared/home/types";
 import { H4, Small } from "@/ui/web/components/Typography";
 import { Card, CardContent } from "@/ui/web/components/ui/card";
 import { cn } from "@/ui/web/lib/utils";
-import type { HomeStat } from "@/ui/web/modules/home/components/home.types";
 
 const iconByAccent = {
   primary: Trophy,

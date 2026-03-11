@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 
 import { resolveAvatarSrc } from "@/domain/entities/Avatar";
+import type { HomeMatch, HomeMatchStatus } from "@/ui/shared/home/types";
 import { useCurrentUser, useUserById } from "@/ui/shared/user/hooks/useUser";
 import { H6, Muted, Small } from "@/ui/web/components/Typography";
 import {
@@ -11,10 +12,6 @@ import {
 import { Card, CardContent } from "@/ui/web/components/ui/card";
 import { resolvePlayerLabel } from "@/ui/web/lib/user";
 import { cn, getFallbackInitials } from "@/ui/web/lib/utils";
-import type {
-  HomeMatch,
-  HomeMatchStatus,
-} from "@/ui/web/modules/home/components/home.types";
 
 const statusStyles: Record<
   HomeMatchStatus,
