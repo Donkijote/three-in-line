@@ -274,7 +274,7 @@ jobs:
         run: |
           git add CHANGELOG.md
           if [ "${{ steps.labels.outputs.force }}" = "true" ]; then
-            git add package.json
+            git add web/package.json
           fi
           if git diff --staged --quiet; then
             echo "No release changes to commit."
