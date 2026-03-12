@@ -1,88 +1,26 @@
+import { createElement } from "react";
+
+import { renderToString } from "react-dom/server";
+
 import { act, renderHook } from "@testing-library/react";
+
+import { setupResponsiveMatchMedia } from "@/test/utils/matchMedia";
 
 import { useMediaQuery } from "./useMediaQuery";
 
-type MatchMediaController = {
-  setWidth: (width: number) => void;
-};
+describe("useMediaQuery", () => {
+  it("returns sm for medium-small viewports", () => {
+    setupResponsiveMatchMedia(700);
+    const { result } = renderHook(() => useMediaQuery());
 
-const setupMatchMedia = (initialWidth: number): MatchMediaController => {
-  let width = initialWidth;
-  const mqls = new Map<
-    MediaQueryList,
-    Set<(event: MediaQueryListEvent) => void>
-  >();
-
-  const getQueryMatch = (query: string) => {
-    const maxMatch = query.match(/max-width:\s*(\d+)px/);
-    if (maxMatch) {
-      return width <= Number(maxMatch[1]);
-    }
-
-    const minMatch = query.match(/min-width:\s*(\d+)px/);
-    if (minMatch) {
-      return width >= Number(minMatch[1]);
-    }
-
-    return false;
-  };
-
-  const matchMedia = (query: string): MediaQueryList => {
-    const mql = {
-      media: query,
-      matches: getQueryMatch(query),
-      onchange: null,
-      addEventListener: (
-        type: string,
-        listener: (event: MediaQueryListEvent) => void,
-      ) => {
-        if (type !== "change") return;
-        const listeners = mqls.get(mql as MediaQueryList) ?? new Set();
-        listeners.add(listener);
-        mqls.set(mql as MediaQueryList, listeners);
-      },
-      removeEventListener: (
-        type: string,
-        listener: (event: MediaQueryListEvent) => void,
-      ) => {
-        if (type !== "change") return;
-        const listeners = mqls.get(mql as MediaQueryList);
-        listeners?.delete(listener);
-      },
-      addListener: () => undefined,
-      removeListener: () => undefined,
-      dispatchEvent: () => false,
-    } as MediaQueryList;
-
-    return mql;
-  };
-
-  Object.defineProperty(window, "matchMedia", {
-    writable: true,
-    value: matchMedia,
+    expect(result.current.breakpoint).toBe("sm");
+    expect(result.current.isMobile).toBe(false);
+    expect(result.current.isTablet).toBe(false);
+    expect(result.current.isDesktop).toBe(false);
   });
 
-  return {
-    setWidth: (nextWidth) => {
-      width = nextWidth;
-      for (const [mql, listeners] of mqls.entries()) {
-        const nextMatch = getQueryMatch(mql.media);
-        if (nextMatch === mql.matches) continue;
-        const event = {
-          matches: nextMatch,
-          media: mql.media,
-        } as MediaQueryListEvent;
-        listeners.forEach((listener) => {
-          listener(event);
-        });
-      }
-    },
-  };
-};
-
-describe("useMediaQuery", () => {
   it("returns mobile for small viewports", () => {
-    setupMatchMedia(480);
+    setupResponsiveMatchMedia(480);
     const { result } = renderHook(() => useMediaQuery());
 
     expect(result.current.isMobile).toBe(true);
@@ -90,15 +28,30 @@ describe("useMediaQuery", () => {
   });
 
   it("returns desktop for large viewports", () => {
-    setupMatchMedia(1200);
+    setupResponsiveMatchMedia(1200);
     const { result } = renderHook(() => useMediaQuery());
 
     expect(result.current.isDesktop).toBe(true);
     expect(result.current.breakpoint).toBe("lg");
   });
 
+  it("returns xl and 2xl for extra-wide viewports", () => {
+    const { setWidth } = setupResponsiveMatchMedia(1400);
+    const { result } = renderHook(() => useMediaQuery());
+
+    expect(result.current.breakpoint).toBe("xl");
+    expect(result.current.isDesktop).toBe(true);
+
+    act(() => {
+      setWidth(1600);
+    });
+
+    expect(result.current.breakpoint).toBe("2xl");
+    expect(result.current.isDesktop).toBe(true);
+  });
+
   it("updates breakpoint on viewport changes", () => {
-    const { setWidth } = setupMatchMedia(500);
+    const { setWidth } = setupResponsiveMatchMedia(500);
     const { result } = renderHook(() => useMediaQuery());
 
     expect(result.current.isMobile).toBe(true);
@@ -111,4 +64,54 @@ describe("useMediaQuery", () => {
     expect(result.current.isTablet).toBe(true);
     expect(result.current.breakpoint).toBe("md");
   });
+
+  it("falls back to mobile when window is unavailable", () => {
+    const originalWindow = window;
+    vi.stubGlobal("window", undefined);
+
+    try {
+      const markup = renderToString(createElement(ServerConsumer));
+
+      expect(markup).toContain('data-breakpoint="mobile"');
+      expect(markup).toContain('data-mobile="true"');
+    } finally {
+      vi.stubGlobal("window", originalWindow);
+    }
+  });
+
+  it("removes listeners on unmount", () => {
+    const addEventListener = vi.fn();
+    const removeEventListener = vi.fn();
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: (query: string) =>
+        ({
+          media: query,
+          matches: false,
+          onchange: null,
+          addEventListener,
+          removeEventListener,
+          addListener: () => undefined,
+          removeListener: () => undefined,
+          dispatchEvent: () => false,
+        }) as MediaQueryList,
+    });
+
+    const { unmount } = renderHook(() => useMediaQuery());
+
+    expect(addEventListener).toHaveBeenCalledTimes(6);
+
+    unmount();
+
+    expect(removeEventListener).toHaveBeenCalledTimes(6);
+  });
 });
+
+const ServerConsumer = () => {
+  const { breakpoint, isMobile } = useMediaQuery();
+
+  return createElement("div", {
+    "data-breakpoint": breakpoint,
+    "data-mobile": String(isMobile),
+  });
+};

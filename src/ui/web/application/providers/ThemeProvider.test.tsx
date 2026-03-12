@@ -10,58 +10,10 @@ import {
   waitFor,
 } from "@testing-library/react";
 
+import { setupColorSchemeMatchMedia } from "@/test/utils/matchMedia";
+
 import { ThemeProvider, useTheme } from "./ThemeProvider";
 import { UserPreferencesProvider } from "./UserPreferencesProvider";
-
-type MatchMediaController = {
-  setMatches: (matches: boolean) => void;
-};
-
-const setupMatchMedia = (initialMatches: boolean): MatchMediaController => {
-  let matches = initialMatches;
-  const listeners = new Set<(event: MediaQueryListEvent) => void>();
-
-  const mql = {
-    media: "(prefers-color-scheme: dark)",
-    matches,
-    onchange: null,
-    addEventListener: (
-      type: string,
-      listener: (event: MediaQueryListEvent) => void,
-    ) => {
-      if (type === "change") listeners.add(listener);
-    },
-    removeEventListener: (
-      type: string,
-      listener: (event: MediaQueryListEvent) => void,
-    ) => {
-      if (type === "change") listeners.delete(listener);
-    },
-    addListener: () => undefined,
-    removeListener: () => undefined,
-    dispatchEvent: () => false,
-  } as MediaQueryList;
-
-  Object.defineProperty(window, "matchMedia", {
-    writable: true,
-    value: () => mql,
-  });
-
-  return {
-    setMatches: (nextMatches) => {
-      matches = nextMatches;
-      // @ts-expect-error: override for test
-      mql.matches = nextMatches;
-      const event = {
-        matches: nextMatches,
-        media: mql.media,
-      } as MediaQueryListEvent;
-      listeners.forEach((listener) => {
-        listener(event);
-      });
-    },
-  };
-};
 
 const ThemeConsumer = () => {
   const { theme, resolvedTheme } = useTheme();
@@ -88,7 +40,7 @@ describe("ThemeProvider", () => {
   });
 
   it("uses system preference and applies the matching class", () => {
-    setupMatchMedia(true);
+    setupColorSchemeMatchMedia(true);
     render(
       <UserPreferencesProvider>
         <ThemeProvider>
@@ -104,7 +56,7 @@ describe("ThemeProvider", () => {
   });
 
   it("updates theme, resolves it, and persists the preference", () => {
-    setupMatchMedia(true);
+    setupColorSchemeMatchMedia(true);
     const { result } = renderHook(() => useTheme(), {
       wrapper,
     });
@@ -130,7 +82,7 @@ describe("ThemeProvider", () => {
       "userPreferences",
       JSON.stringify({ theme: "dark", gameSounds: true, haptics: true }),
     );
-    setupMatchMedia(false);
+    setupColorSchemeMatchMedia(false);
 
     const { result } = renderHook(() => useTheme(), {
       wrapper,
@@ -161,7 +113,7 @@ describe("ThemeProvider", () => {
   });
 
   it("responds to system theme changes while in system mode", async () => {
-    const { setMatches } = setupMatchMedia(false);
+    const { setMatches } = setupColorSchemeMatchMedia(false);
     const { result } = renderHook(() => useTheme(), {
       wrapper,
     });

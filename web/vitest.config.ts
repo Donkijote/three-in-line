@@ -70,6 +70,7 @@ export default defineConfig({
     setupFiles: ["./web/setupTests.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     exclude: [
+      "src/test/**",
       "src/ui/mobile/**",
       "src/infrastructure/mobile/**",
       "src/ui/web/components/ui/**",
@@ -85,6 +86,7 @@ export default defineConfig({
       reportsDirectory: "./web/coverage",
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
+        "src/test/**",
         "src/ui/mobile/**",
         "src/infrastructure/mobile/**",
         "src/ui/web/components/ui/**",

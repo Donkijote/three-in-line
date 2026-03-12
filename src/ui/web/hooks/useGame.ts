@@ -104,22 +104,6 @@ export const useGameHeartbeat = ({
   }, [intervalMs, jitterMs]);
 
   useEffect(() => {
-    if (intervalIdRef.current === null) {
-      return;
-    }
-
-    if (
-      typeof document === "undefined" ||
-      document.visibilityState !== "visible"
-    ) {
-      return;
-    }
-
-    stopInterval();
-    startInterval();
-  }, [startInterval, stopInterval]);
-
-  useEffect(() => {
     if (!gameId) {
       stopInterval();
       return;
