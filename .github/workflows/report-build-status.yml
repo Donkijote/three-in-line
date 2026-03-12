@@ -3,7 +3,7 @@ name: Report Build Status
 on:
   pull_request:
     branches: [develop]
-    types: [ready_for_review, synchronize]
+    types: [opened, reopened, ready_for_review, synchronize]
 
 permissions:
   contents: read
