@@ -63,9 +63,16 @@ describe("PreferencesSection", () => {
 
   it("updates preferences and theme from the switch controls", () => {
     const screen = renderMobile(<PreferencesSection />);
+    const enabledToggles = screen.getAllByText("on");
+    const gameSoundsToggle = enabledToggles.at(0);
+    const hapticsToggle = enabledToggles.at(1);
 
-    fireEvent.press(screen.getAllByText("on")[0]!);
-    fireEvent.press(screen.getAllByText("on")[1]!);
+    if (!gameSoundsToggle || !hapticsToggle) {
+      throw new Error("Expected game sounds and haptics toggles");
+    }
+
+    fireEvent.press(gameSoundsToggle);
+    fireEvent.press(hapticsToggle);
     fireEvent.press(screen.getByText("off"));
 
     expect(mockUpdatePreferences).toHaveBeenNthCalledWith(1, {

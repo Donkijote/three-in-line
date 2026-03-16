@@ -8,7 +8,6 @@ const mockUseConvexAuth = jest.fn();
 
 jest.mock("@/infrastructure/convex/auth", () => {
   const React = require("react") as typeof import("react");
-  const { Text } = require("react-native") as typeof import("react-native");
 
   return {
     Authenticated: ({ children }: { children: React.ReactNode }) =>
