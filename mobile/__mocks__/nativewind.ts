@@ -1,3 +1,4 @@
+// @ts-nocheck
 module.exports = {
   useColorScheme: jest.fn(() => ({
     colorScheme: "light",

@@ -22,7 +22,7 @@ module.exports = {
   rootDir: path.resolve(__dirname, ".."),
   roots: ["<rootDir>/mobile", "<rootDir>/src"],
   testEnvironment: "node",
-  setupFilesAfterEnv: ["<rootDir>/mobile/setupTests.js"],
+  setupFilesAfterEnv: ["<rootDir>/mobile/setupTests.ts"],
   moduleDirectories: ["node_modules", "<rootDir>/mobile/node_modules"],
   modulePaths: ["<rootDir>/mobile/node_modules"],
   moduleNameMapper: {

@@ -1,5 +1,6 @@
-require("react-native-gesture-handler/jestSetup");
-const { format } = require("node:util");
+/// <reference types="jest" />
+
+import "react-native-gesture-handler/jestSetup";
 
 jest.mock("react-native-reanimated");
 jest.mock("nativewind");
@@ -13,8 +14,25 @@ jest.mock("lucide-react-native");
 
 process.env.EXPO_PUBLIC_PUBLIC_ASSETS_URL = "https://assets.example.com";
 
-const failOnUnexpectedConsole = (method, args) => {
-  throw new Error(`Unexpected console.${method}: ${format(...args)}`);
+const failOnUnexpectedConsole = (
+  method: "error" | "warn",
+  args: unknown[],
+) => {
+  const message = args
+    .map((arg) => {
+      if (typeof arg === "string") {
+        return arg;
+      }
+
+      try {
+        return JSON.stringify(arg);
+      } catch {
+        return String(arg);
+      }
+    })
+    .join(" ");
+
+  throw new Error(`Unexpected console.${method}: ${message}`);
 };
 
 beforeEach(() => {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const React = require("react");
 const { Pressable, Text, View } = require("react-native");
 
