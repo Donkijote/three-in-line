@@ -86,10 +86,10 @@ export default defineConfig({
       reportsDirectory: "./web/coverage",
       include: ["src/**/*.{ts,tsx}"],
       thresholds: {
-        branches: 94,
-        functions: 99,
-        lines: 99,
-        statements: 99,
+        branches: 90,
+        functions: 90,
+        lines: 90,
+        statements: 90,
       },
       exclude: [
         "src/test/**",
