@@ -1,7 +1,7 @@
+import { useColorScheme } from "nativewind";
 import { Pressable, Text } from "react-native";
 
 import { fireEvent } from "@testing-library/react-native";
-import { useColorScheme } from "nativewind";
 
 import { createUserPreferences } from "@/test/mobile/fixtures/preferences";
 import { renderMobile } from "@/test/mobile/render";

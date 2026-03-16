@@ -62,11 +62,7 @@ jest.mock("@/ui/mobile/application/providers/MobileHeaderProvider", () => {
   const React = require("react") as typeof import("react");
 
   return {
-    MobileHeaderProvider: ({
-      children,
-    }: {
-      children: React.ReactNode;
-    }) => {
+    MobileHeaderProvider: ({ children }: { children: React.ReactNode }) => {
       mockLayers.push("header");
       return React.createElement(React.Fragment, null, children);
     },

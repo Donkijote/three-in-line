@@ -1,8 +1,8 @@
+import * as SecureStore from "expo-secure-store";
 import { Text } from "react-native";
 
-import * as SecureStore from "expo-secure-store";
-import { renderMobile } from "@/test/mobile/render";
 import { initConvexClient } from "@/infrastructure/convex/client";
+import { renderMobile } from "@/test/mobile/render";
 
 import { ConvexProvider } from "./ConvexProvider";
 

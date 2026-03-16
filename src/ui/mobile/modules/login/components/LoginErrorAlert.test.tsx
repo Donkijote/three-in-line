@@ -35,9 +35,7 @@ describe("LoginErrorAlert", () => {
     );
 
     expect(
-      screen.getByText(
-        "We couldn't get you into the arena. Please try again.",
-      ),
+      screen.getByText("We couldn't get you into the arena. Please try again."),
     ).toBeTruthy();
   });
 });

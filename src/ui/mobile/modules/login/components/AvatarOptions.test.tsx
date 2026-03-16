@@ -1,7 +1,7 @@
 import { fireEvent } from "@testing-library/react-native";
 
-import type { AvatarPreset } from "@/ui/shared/avatars";
 import { renderMobile } from "@/test/mobile/render";
+import type { AvatarPreset } from "@/ui/shared/avatars";
 
 import { AvatarOptions } from "./AvatarOptions";
 
@@ -33,7 +33,8 @@ jest.mock("@/ui/shared/avatars", () => ({
 
 jest.mock("@/ui/mobile/components/AvatarMoreOptions", () => {
   const React = require("react") as typeof import("react");
-  const { Pressable, Text, View } = require("react-native") as typeof import("react-native");
+  const { Pressable, Text, View } =
+    require("react-native") as typeof import("react-native");
 
   return {
     AvatarMoreOptions: ({

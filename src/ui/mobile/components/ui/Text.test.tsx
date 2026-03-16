@@ -8,12 +8,8 @@ jest.mock("@rn-primitives/slot", () => {
   const React = require("react") as typeof import("react");
 
   return {
-    Text: ({
-      children,
-      ...props
-    }: {
-      children: React.ReactElement;
-    }) => React.cloneElement(children, props),
+    Text: ({ children, ...props }: { children: React.ReactElement }) =>
+      React.cloneElement(children, props),
   };
 });
 

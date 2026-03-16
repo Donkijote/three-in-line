@@ -1,5 +1,6 @@
-import { fireEvent } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
+
+import { fireEvent } from "@testing-library/react-native";
 
 import { renderMobile } from "@/test/mobile/render";
 
@@ -7,7 +8,8 @@ import { AvatarMoreOptions } from "./AvatarMoreOptions";
 
 jest.mock("@/ui/mobile/modules/login/components/AvatarOptionItem", () => {
   const React = require("react") as typeof import("react");
-  const { Pressable, Text } = require("react-native") as typeof import("react-native");
+  const { Pressable, Text } =
+    require("react-native") as typeof import("react-native");
 
   return {
     AvatarOptionItem: ({

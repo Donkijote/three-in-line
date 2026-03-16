@@ -12,8 +12,7 @@ export const createTextStub = <Props extends object>(
   const TextStub = (props: Props) => {
     onRender?.(props);
 
-    const content =
-      typeof renderer === "function" ? renderer(props) : renderer;
+    const content = typeof renderer === "function" ? renderer(props) : renderer;
 
     return React.createElement(Text, null, content);
   };
@@ -50,7 +49,8 @@ export const createVisibilityStub = () => {
 
 export const createSwitchStub = () => {
   const React = require("react") as typeof import("react");
-  const { Pressable, Text } = require("react-native") as typeof import("react-native");
+  const { Pressable, Text } =
+    require("react-native") as typeof import("react-native");
 
   const SwitchStub = ({
     checked,

@@ -11,9 +11,9 @@ describe("Input", () => {
       </>,
     );
 
-    expect(screen.getByPlaceholderText("Enabled").props.className).not.toContain(
-      "opacity-50",
-    );
+    expect(
+      screen.getByPlaceholderText("Enabled").props.className,
+    ).not.toContain("opacity-50");
     expect(screen.getByPlaceholderText("Disabled").props.className).toContain(
       "opacity-50",
     );

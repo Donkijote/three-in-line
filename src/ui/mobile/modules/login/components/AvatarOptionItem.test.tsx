@@ -1,7 +1,7 @@
 import { fireEvent } from "@testing-library/react-native";
 
-import { getPresetAvatarById } from "@/ui/shared/avatars";
 import { renderMobile } from "@/test/mobile/render";
+import { getPresetAvatarById } from "@/ui/shared/avatars";
 
 import { AvatarOptionItem } from "./AvatarOptionItem";
 
@@ -35,8 +35,6 @@ describe("AvatarOptionItem", () => {
     );
 
     expect(screen.getByText(avatar.name)).toBeTruthy();
-    expect(
-      screen.getByLabelText(`Select avatar ${avatar.name}`),
-    ).toBeTruthy();
+    expect(screen.getByLabelText(`Select avatar ${avatar.name}`)).toBeTruthy();
   });
 });

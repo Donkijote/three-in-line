@@ -129,7 +129,9 @@ describe("MatchActions", () => {
   it("falls back to default round copy when match data is unavailable", () => {
     render(<MatchActions gameId={gameId} match={null} variant="hud" />);
 
-    expect(screen.getByRole("button", { name: /abandon match/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /abandon match/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Round 1")).toBeInTheDocument();
     expect(screen.getByText("Best of 1")).toBeInTheDocument();
   });

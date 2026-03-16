@@ -1,5 +1,6 @@
-import { act, fireEvent } from "@testing-library/react-native";
 import { Text } from "react-native";
+
+import { act, fireEvent } from "@testing-library/react-native";
 
 import { renderMobile } from "@/test/mobile/render";
 
@@ -7,7 +8,8 @@ import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "./avatar";
 
 jest.mock("@rn-primitives/avatar", () => {
   const React = require("react") as typeof import("react");
-  const { Text, View } = require("react-native") as typeof import("react-native");
+  const { Text, View } =
+    require("react-native") as typeof import("react-native");
 
   return {
     Root: ({ children, ...props }: { children: React.ReactNode }) =>
@@ -123,7 +125,9 @@ describe("Avatar", () => {
     });
 
     expect(screen.getByText("SVG")).toBeTruthy();
-    expect(screen.getByText("https://assets.example.com/avatars/avatar-1.svg")).toBeTruthy();
+    expect(
+      screen.getByText("https://assets.example.com/avatars/avatar-1.svg"),
+    ).toBeTruthy();
   });
 
   it("keeps array entries without uris untouched while mapping valid image uris", () => {

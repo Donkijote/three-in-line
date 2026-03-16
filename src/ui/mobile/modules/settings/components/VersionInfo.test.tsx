@@ -13,7 +13,8 @@ describe("VersionInfo", () => {
         },
       }));
 
-      const { VersionInfo } = require("./VersionInfo") as typeof import("./VersionInfo");
+      const { VersionInfo } =
+        require("./VersionInfo") as typeof import("./VersionInfo");
       const element = VersionInfo() as {
         props: { children: ReactNode };
       };
@@ -36,7 +37,8 @@ describe("VersionInfo", () => {
         },
       }));
 
-      const { VersionInfo } = require("./VersionInfo") as typeof import("./VersionInfo");
+      const { VersionInfo } =
+        require("./VersionInfo") as typeof import("./VersionInfo");
       const element = VersionInfo() as {
         props: { children: ReactNode };
       };
@@ -54,7 +56,8 @@ describe("VersionInfo", () => {
         default: {},
       }));
 
-      const { VersionInfo } = require("./VersionInfo") as typeof import("./VersionInfo");
+      const { VersionInfo } =
+        require("./VersionInfo") as typeof import("./VersionInfo");
       const element = VersionInfo() as {
         props: { children: ReactNode };
       };

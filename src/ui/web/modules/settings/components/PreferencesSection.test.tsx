@@ -9,9 +9,8 @@ const useUserPreferencesMock = vi.fn();
 const renderedIcons: string[] = [];
 
 vi.mock("lucide-react", async () => {
-  const actual = await vi.importActual<typeof import("lucide-react")>(
-    "lucide-react",
-  );
+  const actual =
+    await vi.importActual<typeof import("lucide-react")>("lucide-react");
   const createIcon = (name: string) => () => {
     renderedIcons.push(name);
     return <svg data-testid={`icon-${name}`} />;

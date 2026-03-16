@@ -1,5 +1,4 @@
 import { Platform, Text } from "react-native";
-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { renderMobile } from "@/test/mobile/render";

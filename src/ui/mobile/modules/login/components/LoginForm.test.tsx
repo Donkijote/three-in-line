@@ -16,7 +16,8 @@ const mockUseLoginFlow = jest.fn();
 
 jest.mock("./AvatarOptions", () => {
   const React = require("react") as typeof import("react");
-  const { Pressable, Text } = require("react-native") as typeof import("react-native");
+  const { Pressable, Text } =
+    require("react-native") as typeof import("react-native");
 
   return {
     AvatarOptions: ({ onChange }: { onChange: (avatar: unknown) => void }) =>
@@ -38,7 +39,8 @@ jest.mock("./AvatarOptions", () => {
 
 jest.mock("./LoginErrorAlert", () => {
   const React = require("react") as typeof import("react");
-  const { Pressable, Text, View } = require("react-native") as typeof import("react-native");
+  const { Pressable, Text, View } =
+    require("react-native") as typeof import("react-native");
 
   return {
     LoginErrorAlert: ({

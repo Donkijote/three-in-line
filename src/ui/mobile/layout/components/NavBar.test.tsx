@@ -1,6 +1,7 @@
-import { fireEvent } from "@testing-library/react-native";
 import { router, usePathname } from "expo-router";
 import { Platform } from "react-native";
+
+import { fireEvent } from "@testing-library/react-native";
 
 import { renderMobile } from "@/test/mobile/render";
 

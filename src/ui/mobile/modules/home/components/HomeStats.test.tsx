@@ -26,7 +26,10 @@ describe("HomeStats", () => {
   });
 
   it("maps the shared home stats view model into stat cards", () => {
-    const endedGames = [createGame({ id: "game-1" }), createGame({ id: "game-2" })];
+    const endedGames = [
+      createGame({ id: "game-1" }),
+      createGame({ id: "game-2" }),
+    ];
     mockUseHomeStats.mockReturnValue([
       { id: "wins", label: "Wins", value: "4", accent: "primary" },
       { id: "streak", label: "Streak", value: "2", accent: "warning" },

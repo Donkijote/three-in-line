@@ -4,10 +4,7 @@ import { fireEvent } from "@testing-library/react-native";
 
 import { renderMobile } from "@/test/mobile/render";
 
-import {
-  MobileHeaderProvider,
-  useMobileHeader,
-} from "./MobileHeaderProvider";
+import { MobileHeaderProvider, useMobileHeader } from "./MobileHeaderProvider";
 
 const HeaderConsumer = () => {
   const { header, setHeader } = useMobileHeader();

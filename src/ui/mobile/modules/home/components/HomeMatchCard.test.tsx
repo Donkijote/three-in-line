@@ -5,7 +5,8 @@ import { HomeMatchCard } from "./HomeMatchCard";
 const mockUseHomeMatchCard = jest.fn();
 
 jest.mock("@/ui/shared/home/hooks/useHomeMatchCard", () => ({
-  useHomeMatchCard: (opponentUserId: string) => mockUseHomeMatchCard(opponentUserId),
+  useHomeMatchCard: (opponentUserId: string) =>
+    mockUseHomeMatchCard(opponentUserId),
 }));
 
 describe("HomeMatchCard", () => {
