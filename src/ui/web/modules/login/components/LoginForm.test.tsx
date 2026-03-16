@@ -149,6 +149,9 @@ describe("LoginForm", () => {
   });
 
   it("shows an alert when authentication fails", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     checkEmailExists.mockResolvedValue(true);
     signIn.mockRejectedValue(new Error("Invalid credentials"));
 
@@ -183,6 +186,8 @@ describe("LoginForm", () => {
         ),
       ).not.toBeInTheDocument(),
     );
+
+    consoleError.mockRestore();
   });
 
   it("short-circuits the email check when the debounced callback receives an empty value", () => {

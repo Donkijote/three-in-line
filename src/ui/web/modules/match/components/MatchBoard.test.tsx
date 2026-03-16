@@ -142,4 +142,60 @@ describe("MatchBoard", () => {
     expect(onInvalidMoveAttempt).toHaveBeenCalledTimes(1);
     expect(onCellClick).not.toHaveBeenCalled();
   });
+
+  it("uses the default grid size when none is provided", () => {
+    const board = Array.from({ length: 9 }, () => null) as Array<
+      "P1" | "P2" | null
+    >;
+
+    render(
+      <MatchBoard
+        board={board}
+        status="playing"
+        currentTurn="P1"
+        currentUserId="user-1"
+        p1UserId="user-1"
+      />,
+    );
+
+    expect(screen.getAllByRole("button")).toHaveLength(9);
+  });
+
+  it("swaps player colors when the current user is P2", () => {
+    render(
+      <MatchBoard
+        board={["P1", "P2", null, null, null, null, null, null, null]}
+        gridSize={3}
+        status="playing"
+        currentTurn="P2"
+        currentUserId="user-2"
+        p1UserId="user-1"
+      />,
+    );
+
+    expect(screen.getByText("X").className).toContain("text-opponent");
+    expect(screen.getByText("O").className).toContain("text-primary");
+  });
+
+  it("renders large boards and the time-up overlay", () => {
+    const board = Array.from({ length: 25 }, () => null) as Array<
+      "P1" | "P2" | null
+    >;
+
+    render(
+      <MatchBoard
+        board={board}
+        gridSize={5}
+        status="playing"
+        currentTurn="P1"
+        currentUserId="user-1"
+        p1UserId="user-1"
+        isTimeUp
+      />,
+    );
+
+    expect(screen.getAllByRole("button")).toHaveLength(25);
+    expect(screen.getByText("time's")).toBeInTheDocument();
+    expect(screen.getByText("up!")).toBeInTheDocument();
+  });
 });

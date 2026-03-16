@@ -24,11 +24,13 @@ vi.mock("@/ui/web/components/ui/button", () => ({
   Button: ({
     onClick,
     children,
+    disabled,
   }: {
     onClick?: () => void;
     children: ReactNode;
+    disabled?: boolean;
   }) => (
-    <button type="button" onClick={onClick}>
+    <button type="button" onClick={onClick} disabled={disabled}>
       {children}
     </button>
   ),
@@ -99,5 +101,36 @@ describe("MatchActions", () => {
       resolveAbandon?.();
       await abandonPromise;
     });
+  });
+
+  it("disables the action when there is no game id", () => {
+    render(<MatchActions gameId={"" as GameId} match={match} />);
+
+    expect(
+      screen.getByRole("button", { name: /abandon match/i }),
+    ).toBeDisabled();
+  });
+
+  it("hides the round counter for single-round matches", () => {
+    render(
+      <MatchActions
+        gameId={gameId}
+        match={{
+          ...match,
+          format: "single",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Round 2")).toBeInTheDocument();
+    expect(screen.getByText("Best of 3")).toBeInTheDocument();
+  });
+
+  it("falls back to default round copy when match data is unavailable", () => {
+    render(<MatchActions gameId={gameId} match={null} variant="hud" />);
+
+    expect(screen.getByRole("button", { name: /abandon match/i })).toBeInTheDocument();
+    expect(screen.getByText("Round 1")).toBeInTheDocument();
+    expect(screen.getByText("Best of 1")).toBeInTheDocument();
   });
 });
