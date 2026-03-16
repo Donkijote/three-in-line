@@ -1,6 +1,11 @@
-// @ts-nocheck
-const Reanimated = require("react-native-reanimated/mock");
+import Reanimated from "react-native-reanimated/mock";
 
-Reanimated.default.call = () => undefined;
+const mockedReanimated = Reanimated as typeof Reanimated & {
+  default: {
+    call: () => undefined;
+  };
+};
 
-module.exports = Reanimated;
+mockedReanimated.default.call = () => undefined;
+
+export default mockedReanimated;

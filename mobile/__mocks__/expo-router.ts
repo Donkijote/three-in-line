@@ -1,17 +1,17 @@
-// @ts-nocheck
-const React = require("react");
-const { View } = require("react-native");
+import { createElement } from "react";
+import { View } from "react-native";
 
-module.exports = {
-  Redirect: ({ href }) =>
-    React.createElement(View, {
-      testID: "redirect",
-      accessibilityLabel: href,
-    }),
-  Slot: () => null,
-  router: {
-    back: jest.fn(),
-    replace: jest.fn(),
-  },
-  usePathname: jest.fn(() => "/"),
+export const router = {
+  back: jest.fn(),
+  replace: jest.fn(),
 };
+
+export const usePathname = jest.fn(() => "/");
+
+export const Redirect = ({ href }: { href: string }) =>
+  createElement(View, {
+    testID: "redirect",
+    accessibilityLabel: href,
+  });
+
+export const Slot = () => null;

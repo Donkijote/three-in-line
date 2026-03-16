@@ -1,4 +1,1 @@
-// @ts-nocheck
-module.exports = {
-  StatusBar: () => null,
-};
+export const StatusBar = () => null;

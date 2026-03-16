@@ -2,6 +2,8 @@
 const React = require("react");
 const { Pressable, Text, View } = require("react-native");
 
+// Keep this proxy-based CommonJS mock because SVG primitives can be imported by
+// many different names, and Jest manual mocks need dynamic named exports here.
 const createSvgPrimitive = (name) =>
   ({ children, ...props }) =>
     React.createElement(

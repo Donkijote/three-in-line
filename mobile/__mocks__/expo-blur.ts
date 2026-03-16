@@ -1,7 +1,4 @@
-// @ts-nocheck
-const React = require("react");
-const { View } = require("react-native");
+import { createElement } from "react";
+import { View, type ViewProps } from "react-native";
 
-module.exports = {
-  BlurView: (props) => React.createElement(View, props),
-};
+export const BlurView = (props: ViewProps) => createElement(View, props);
