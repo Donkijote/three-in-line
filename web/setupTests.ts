@@ -1,5 +1,4 @@
 import "@testing-library/jest-dom/vitest";
-import { format } from "node:util";
 
 vi.stubEnv("VITE_CONVEX_URL", "http://localhost:3210");
 
@@ -16,7 +15,21 @@ const failOnUnexpectedConsole = (
   method: "error" | "warn",
   args: unknown[],
 ) => {
-  throw new Error(`Unexpected console.${method}: ${format(...args)}`);
+  const message = args
+    .map((arg) => {
+      if (typeof arg === "string") {
+        return arg;
+      }
+
+      try {
+        return JSON.stringify(arg);
+      } catch {
+        return String(arg);
+      }
+    })
+    .join(" ");
+
+  throw new Error(`Unexpected console.${method}: ${message}`);
 };
 
 beforeEach(() => {

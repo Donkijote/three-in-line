@@ -3,7 +3,14 @@ const { Pressable, Text, View } = require("react-native");
 
 const createSvgPrimitive = (name) =>
   ({ children, ...props }) =>
-    React.createElement(View, { ...props, accessibilityLabel: props.accessibilityLabel ?? name }, children);
+    React.createElement(
+      View,
+      {
+        ...props,
+        accessibilityLabel: props.accessibilityLabel ?? name,
+      },
+      children,
+    );
 
 const SvgUri = ({ onError, onLoad, uri, ...props }) =>
   React.createElement(
