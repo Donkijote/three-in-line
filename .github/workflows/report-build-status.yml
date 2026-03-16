@@ -92,6 +92,20 @@ jobs:
         if: ${{ steps.platforms.outputs.run_web == 'true' }}
         run: cd web && bun install --frozen-lockfile
 
+      - name: Prepare web-only root tsconfig
+        if: ${{ steps.platforms.outputs.run_web == 'true' }}
+        run: |
+          cp tsconfig.json tsconfig.ci.backup.json
+          cat > tsconfig.json <<'EOF'
+          {
+            "files": [],
+            "references": [
+              { "path": "./web/tsconfig.app.json" },
+              { "path": "./web/tsconfig.node.json" }
+            ]
+          }
+          EOF
+
       - name: Run web tests
         if: ${{ steps.platforms.outputs.run_web == 'true' }}
         run: bun run web:test
@@ -99,6 +113,10 @@ jobs:
       - name: Run web build
         if: ${{ steps.platforms.outputs.run_web == 'true' }}
         run: bun run web:build
+
+      - name: Restore root tsconfig
+        if: ${{ always() && steps.platforms.outputs.run_web == 'true' }}
+        run: mv tsconfig.ci.backup.json tsconfig.json
 
       - name: Install mobile dependencies
         if: ${{ steps.platforms.outputs.run_mobile == 'true' }}
