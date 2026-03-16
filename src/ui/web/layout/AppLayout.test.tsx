@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
 
+import { setupColorSchemeMatchMedia } from "@/test/utils/matchMedia";
+
 import { AppLayout } from "./AppLayout";
 
 const { useConvexAuthMock } = vi.hoisted(() => ({
@@ -16,20 +18,7 @@ vi.mock("@/ui/web/layout/components/NavBar", () => ({
 
 describe("AppLayout", () => {
   beforeAll(() => {
-    Object.defineProperty(window, "matchMedia", {
-      writable: true,
-      value: () =>
-        ({
-          matches: false,
-          media: "",
-          onchange: null,
-          addEventListener: () => undefined,
-          removeEventListener: () => undefined,
-          addListener: () => undefined,
-          removeListener: () => undefined,
-          dispatchEvent: () => false,
-        }) as MediaQueryList,
-    });
+    setupColorSchemeMatchMedia(false);
   });
 
   it("renders children inside the main container", () => {

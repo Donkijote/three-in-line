@@ -53,6 +53,7 @@
   ],
   "exclude": [
     "../src/ui/mobile/**/*",
-    "../src/infrastructure/mobile/**/*"
+    "../src/infrastructure/mobile/**/*",
+    "../src/test/mobile/**/*"
   ]
 }

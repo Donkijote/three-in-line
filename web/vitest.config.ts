@@ -70,6 +70,7 @@ export default defineConfig({
     setupFiles: ["./web/setupTests.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     exclude: [
+      "src/test/**",
       "src/ui/mobile/**",
       "src/infrastructure/mobile/**",
       "src/ui/web/components/ui/**",
@@ -84,7 +85,14 @@ export default defineConfig({
       provider: "v8",
       reportsDirectory: "./web/coverage",
       include: ["src/**/*.{ts,tsx}"],
+      thresholds: {
+        branches: 90,
+        functions: 90,
+        lines: 90,
+        statements: 90,
+      },
       exclude: [
+        "src/test/**",
         "src/ui/mobile/**",
         "src/infrastructure/mobile/**",
         "src/ui/web/components/ui/**",

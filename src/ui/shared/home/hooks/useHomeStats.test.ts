@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 
-import type { Game } from "@/domain/entities/Game";
+import { createGame } from "@/test/factories/game";
 
 import { useHomeStats } from "./useHomeStats";
 
@@ -9,42 +9,6 @@ const useCurrentUserMock = vi.fn();
 vi.mock("@/ui/shared/user/hooks/useUser", () => ({
   useCurrentUser: () => useCurrentUserMock(),
 }));
-
-const createGame = (overrides: Partial<Game>): Game => {
-  const now = Date.now();
-  return {
-    id: "game-id",
-    status: "ended",
-    board: [],
-    gridSize: 3,
-    winLength: 3,
-    match: {
-      format: "single",
-      targetWins: 1,
-      roundIndex: 1,
-      score: { P1: 0, P2: 0 },
-      matchWinner: null,
-      rounds: [],
-    },
-    p1UserId: "u1",
-    p2UserId: "u2",
-    currentTurn: "P1",
-    turnDurationMs: null,
-    turnDeadlineTime: null,
-    winner: null,
-    winningLine: null,
-    endedReason: "draw",
-    endedTime: now,
-    pausedTime: null,
-    abandonedBy: null,
-    presence: { P1: { lastSeenTime: now }, P2: { lastSeenTime: now } },
-    movesCount: 0,
-    version: 1,
-    lastMove: null,
-    updatedTime: now,
-    ...overrides,
-  };
-};
 
 describe("useHomeStats", () => {
   it("returns zeroed stats when current user is not available", () => {

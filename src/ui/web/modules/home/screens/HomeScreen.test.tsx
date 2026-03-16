@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
 
+import { createGame } from "@/test/factories/game";
+
 import { HomeScreen } from "./HomeScreen";
 
 const useRecentGamesQueryMock = vi.fn();
@@ -47,12 +49,8 @@ describe("HomeScreen", () => {
   it("renders stat cards and match cards from recent games data", () => {
     const now = Date.now();
     useRecentGamesQueryMock.mockReturnValue([
-      {
+      createGame({
         id: "game-1",
-        status: "ended",
-        board: [],
-        gridSize: 3,
-        winLength: 3,
         match: {
           format: "single",
           targetWins: 1,
@@ -63,27 +61,13 @@ describe("HomeScreen", () => {
         },
         p1UserId: "user-1",
         p2UserId: "user-2",
-        currentTurn: "P1",
-        turnDurationMs: null,
-        turnDeadlineTime: null,
         winner: "P1",
-        winningLine: null,
         endedReason: "win",
-        endedTime: now,
-        pausedTime: null,
-        abandonedBy: null,
-        presence: { P1: { lastSeenTime: now }, P2: { lastSeenTime: now } },
         movesCount: 5,
-        version: 1,
-        lastMove: null,
         updatedTime: now,
-      },
-      {
+      }),
+      createGame({
         id: "game-2",
-        status: "ended",
-        board: [],
-        gridSize: 3,
-        winLength: 3,
         match: {
           format: "single",
           targetWins: 1,
@@ -95,20 +79,11 @@ describe("HomeScreen", () => {
         p1UserId: "user-2",
         p2UserId: "user-1",
         currentTurn: "P2",
-        turnDurationMs: null,
-        turnDeadlineTime: null,
         winner: "P2",
-        winningLine: null,
         endedReason: "win",
-        endedTime: now,
-        pausedTime: null,
-        abandonedBy: null,
-        presence: { P1: { lastSeenTime: now }, P2: { lastSeenTime: now } },
         movesCount: 6,
-        version: 1,
-        lastMove: null,
         updatedTime: now - 2 * 24 * 60 * 60 * 1000,
-      },
+      }),
     ]);
 
     render(<HomeScreen />);
