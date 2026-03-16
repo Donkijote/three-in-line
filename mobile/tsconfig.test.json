@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest", "react", "react-native"]
+  },
+  "include": [
+    "../src/ui/mobile/**/*.test.ts",
+    "../src/ui/mobile/**/*.test.tsx",
+    "../src/infrastructure/mobile/**/*.test.ts",
+    "../src/infrastructure/mobile/**/*.test.tsx",
+    "../src/test/mobile/**/*.ts",
+    "../src/test/mobile/**/*.tsx"
+  ]
+}

@@ -85,6 +85,12 @@ export default defineConfig({
       provider: "v8",
       reportsDirectory: "./web/coverage",
       include: ["src/**/*.{ts,tsx}"],
+      thresholds: {
+        branches: 94,
+        functions: 99,
+        lines: 99,
+        statements: 99,
+      },
       exclude: [
         "src/test/**",
         "src/ui/mobile/**",
