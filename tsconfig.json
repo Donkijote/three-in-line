@@ -3,6 +3,7 @@
   "references": [
     { "path": "./web/tsconfig.app.json" },
     { "path": "./web/tsconfig.node.json" },
-    { "path": "./mobile/tsconfig.json" }
+    { "path": "./mobile/tsconfig.json" },
+    { "path": "./mobile/tsconfig.test.json" },
   ]
 }
