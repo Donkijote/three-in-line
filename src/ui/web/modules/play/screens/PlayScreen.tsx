@@ -11,7 +11,11 @@ import {
 
 import { useNavigate } from "@tanstack/react-router";
 
-import { PLAY_MODES, type PlayMode } from "@/ui/shared/play/constants/modes";
+import {
+  PLAY_MODES,
+  PLAY_SCREEN_CONTENT,
+  type PlayMode,
+} from "@/ui/shared/play/constants/modes";
 import { useCreateGame } from "@/ui/shared/play/hooks/useCreateGame";
 import { Header } from "@/ui/web/components/Header";
 import { H3, H6, Muted } from "@/ui/web/components/Typography";
@@ -79,11 +83,14 @@ export const PlayScreen = () => {
 
   return (
     <section className="mx-auto flex w-full max-w-xl flex-col gap-8 md:gap-20 pb-12 h-full">
-      <Header title="Select Mode" eyebrow="New Game" />
+      <Header
+        title={PLAY_SCREEN_CONTENT.title}
+        eyebrow={PLAY_SCREEN_CONTENT.eyebrow}
+      />
       <div className="flex flex-col gap-2 text-center">
-        <H3 className="text-xl">Choose your challenge</H3>
+        <H3 className="text-xl">{PLAY_SCREEN_CONTENT.heading}</H3>
         <Muted className="text-sm text-muted-foreground">
-          Pick a mode to jump into a match with unique rules and stakes.
+          {PLAY_SCREEN_CONTENT.description}
         </Muted>
       </div>
       <ItemGroup className="gap-4 md:grid md:grid-cols-2">

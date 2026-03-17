@@ -18,6 +18,13 @@ type PlayMode = {
   config: GameConfig;
 };
 
+const PLAY_SCREEN_CONTENT = {
+  eyebrow: "New Game",
+  title: "Select Mode",
+  heading: "Choose your challenge",
+  description: "Pick a mode to jump into a match with unique rules and stakes.",
+} as const;
+
 const PLAY_MODES: readonly PlayMode[] = [
   {
     id: "classic",
@@ -75,4 +82,4 @@ const PLAY_MODES: readonly PlayMode[] = [
 ] as const;
 
 export type { PlayMode, PlayModeIcon, PlayModeTone };
-export { PLAY_MODES };
+export { PLAY_MODES, PLAY_SCREEN_CONTENT };
