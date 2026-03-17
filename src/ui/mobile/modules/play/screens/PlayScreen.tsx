@@ -135,7 +135,7 @@ export const PlayScreen = () => {
                 disabled={isCreating}
                 onPress={() => handleSelectMode(mode)}
               >
-                <CardContent className="flex-row items-center gap-4 px-4 py-4">
+                <CardContent className="min-h-20 flex-row items-center gap-4 px-4 py-4">
                   <View
                     className={cn(
                       "size-10 items-center justify-center rounded-xl",
@@ -147,7 +147,7 @@ export const PlayScreen = () => {
                       className={cn("size-4", styles.badgeIcon)}
                     />
                   </View>
-                  <View className="min-w-0 flex-1 gap-1">
+                  <View className="min-w-0 flex-1 items-center justify-center gap-1">
                     <H6 className="text-center text-sm font-semibold text-foreground">
                       {mode.title}
                     </H6>
@@ -155,14 +155,16 @@ export const PlayScreen = () => {
                       {mode.description}
                     </Muted>
                   </View>
-                  {isPending ? (
-                    <ActivityIndicator style={stylesheets.spinner} />
-                  ) : (
-                    <Icon
-                      as={ChevronRight}
-                      className="size-5 text-muted-foreground"
-                    />
-                  )}
+                  <View className="size-5 items-center justify-center">
+                    {isPending ? (
+                      <ActivityIndicator style={stylesheets.spinner} />
+                    ) : (
+                      <Icon
+                        as={ChevronRight}
+                        className="size-5 text-muted-foreground"
+                      />
+                    )}
+                  </View>
                 </CardContent>
               </Pressable>
             </Card>
