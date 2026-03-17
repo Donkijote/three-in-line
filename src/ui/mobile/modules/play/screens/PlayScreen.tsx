@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { router } from "expo-router";
 import type { LucideIcon } from "lucide-react-native";
@@ -11,7 +11,7 @@ import {
   Medal,
   Trophy,
 } from "lucide-react-native";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { useMobileHeader } from "@/ui/mobile/application/providers/MobileHeaderProvider";
 import { H3, H6, Muted } from "@/ui/mobile/components/Typography";
@@ -24,6 +24,7 @@ import {
   type PlayMode,
 } from "@/ui/shared/play/constants/modes";
 import { useCreateGame } from "@/ui/shared/play/hooks/useCreateGame";
+import { playModeStyles } from "@/ui/shared/play/style/playModeStyles";
 
 const modeIcons: Record<PlayMode["icon"], LucideIcon> = {
   hash: Hash,
@@ -34,46 +35,9 @@ const modeIcons: Record<PlayMode["icon"], LucideIcon> = {
   "grid-6": Grid3x3,
 };
 
-const modeStyles: Record<
-  PlayMode["tone"],
-  { badge: string; badgeIcon: string; halo: string }
-> = {
-  emerald: {
-    badge: "bg-emerald-500/10",
-    badgeIcon: "text-emerald-500",
-    halo: "bg-emerald-500/10",
-  },
-  yellow: {
-    badge: "bg-yellow-500/10",
-    badgeIcon: "text-yellow-500",
-    halo: "bg-yellow-500/10",
-  },
-  fuchsia: {
-    badge: "bg-fuchsia-500/10",
-    badgeIcon: "text-fuchsia-500",
-    halo: "bg-fuchsia-500/10",
-  },
-  orange: {
-    badge: "bg-orange-500/10",
-    badgeIcon: "text-orange-500",
-    halo: "bg-orange-500/10",
-  },
-  sky: {
-    badge: "bg-sky-500/10",
-    badgeIcon: "text-sky-500",
-    halo: "bg-sky-500/10",
-  },
-  violet: {
-    badge: "bg-violet-500/10",
-    badgeIcon: "text-violet-500",
-    halo: "bg-violet-500/10",
-  },
-};
-
 export const PlayScreen = () => {
   const { setHeader } = useMobileHeader();
   const { createGame, isCreating } = useCreateGame();
-  const [pendingModeId, setPendingModeId] = useState<string | null>(null);
 
   useEffect(() => {
     setHeader({
@@ -87,22 +51,16 @@ export const PlayScreen = () => {
   }, [setHeader]);
 
   const handleSelectMode = async (mode: PlayMode) => {
-    setPendingModeId(mode.id);
+    const gameId = await createGame(mode.config);
 
-    try {
-      const gameId = await createGame(mode.config);
-
-      if (!gameId) {
-        return;
-      }
-
-      router.push({
-        pathname: "/match",
-        params: { gameId },
-      });
-    } finally {
-      setPendingModeId(null);
+    if (!gameId) {
+      return;
     }
+
+    router.push({
+      pathname: "/match",
+      params: { gameId },
+    });
   };
 
   return (
@@ -117,21 +75,17 @@ export const PlayScreen = () => {
       <View className="gap-4">
         {PLAY_MODES.map((mode) => {
           const IconComponent = modeIcons[mode.icon];
-          const styles = modeStyles[mode.tone];
-          const isPending = pendingModeId === mode.id;
+          const styles = playModeStyles[mode.tone].mobile;
 
           return (
             <Card
               key={mode.id}
-              className={cn(
-                "gap-0 overflow-hidden rounded-4xl border-border/60 py-0",
-                isPending && styles.halo,
-              )}
+              className="gap-0 overflow-hidden rounded-4xl border-border/60 py-0"
             >
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={mode.title}
-                className={cn("active:bg-card/80", isCreating && "opacity-70")}
+                className={cn(styles.pressHalo, isCreating && "opacity-70")}
                 disabled={isCreating}
                 onPress={() => handleSelectMode(mode)}
               >
@@ -139,12 +93,12 @@ export const PlayScreen = () => {
                   <View
                     className={cn(
                       "size-10 items-center justify-center rounded-xl",
-                      styles.badge,
+                      styles.background,
                     )}
                   >
                     <Icon
                       as={IconComponent}
-                      className={cn("size-4", styles.badgeIcon)}
+                      className={cn("size-4", styles.iconColor)}
                     />
                   </View>
                   <View className="min-w-0 flex-1 items-center justify-center gap-1">
@@ -156,14 +110,10 @@ export const PlayScreen = () => {
                     </Muted>
                   </View>
                   <View className="size-5 items-center justify-center">
-                    {isPending ? (
-                      <ActivityIndicator style={stylesheets.spinner} />
-                    ) : (
-                      <Icon
-                        as={ChevronRight}
-                        className="size-5 text-muted-foreground"
-                      />
-                    )}
+                    <Icon
+                      as={ChevronRight}
+                      className="size-5 text-muted-foreground"
+                    />
                   </View>
                 </CardContent>
               </Pressable>
@@ -174,10 +124,3 @@ export const PlayScreen = () => {
     </View>
   );
 };
-
-const stylesheets = StyleSheet.create({
-  spinner: {
-    height: 20,
-    width: 20,
-  },
-});

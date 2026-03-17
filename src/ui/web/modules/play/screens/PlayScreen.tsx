@@ -17,6 +17,7 @@ import {
   type PlayMode,
 } from "@/ui/shared/play/constants/modes";
 import { useCreateGame } from "@/ui/shared/play/hooks/useCreateGame";
+import { playModeStyles } from "@/ui/shared/play/style/playModeStyles";
 import { Header } from "@/ui/web/components/Header";
 import { H3, H6, Muted } from "@/ui/web/components/Typography";
 import {
@@ -35,33 +36,6 @@ const modeIcons: Record<PlayMode["icon"], LucideIcon> = {
   clock: Clock,
   "grid-4": Grid2x2,
   "grid-6": Grid3x3,
-};
-
-const modeStyles: Record<PlayMode["tone"], { accent: string; bg: string }> = {
-  emerald: {
-    accent: "text-emerald-500",
-    bg: "bg-emerald-500/15",
-  },
-  yellow: {
-    accent: "text-yellow-500",
-    bg: "bg-yellow-500/15",
-  },
-  fuchsia: {
-    accent: "text-fuchsia-500",
-    bg: "bg-fuchsia-500/15",
-  },
-  orange: {
-    accent: "text-orange-500",
-    bg: "bg-orange-500/15",
-  },
-  sky: {
-    accent: "text-sky-500",
-    bg: "bg-sky-500/15",
-  },
-  violet: {
-    accent: "text-purple-500",
-    bg: "bg-purple-500/15",
-  },
 };
 
 export const PlayScreen = () => {
@@ -96,16 +70,17 @@ export const PlayScreen = () => {
       <ItemGroup className="gap-4 md:grid md:grid-cols-2">
         {PLAY_MODES.map((mode) => {
           const Icon = modeIcons[mode.icon];
-          const styles = modeStyles[mode.tone];
+          const styles = playModeStyles[mode.tone].web;
 
           return (
             <Item
               key={mode.id}
               asChild
               variant="outline"
-              className={
-                "bg-card hover:bg-card/70 cursor-pointer min-h-20 md:min-h-38 md:flex-col md:items-center md:gap-0 rounded-4xl disabled:cursor-not-allowed disabled:opacity-70"
-              }
+              className={cn(
+                "bg-card hover:bg-card/70 cursor-pointer min-h-20 md:min-h-38 md:flex-col md:items-center md:gap-0 rounded-4xl disabled:cursor-not-allowed disabled:opacity-70",
+                styles.pressHalo,
+              )}
             >
               <button
                 type="button"
@@ -114,7 +89,11 @@ export const PlayScreen = () => {
               >
                 <ItemMedia
                   variant="icon"
-                  className={cn("size-10 rounded-xl", styles.accent, styles.bg)}
+                  className={cn(
+                    "size-10 rounded-xl",
+                    styles.iconColor,
+                    styles.background,
+                  )}
                 >
                   <Icon className="size-4" />
                 </ItemMedia>
