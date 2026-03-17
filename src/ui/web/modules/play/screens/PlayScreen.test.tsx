@@ -1,37 +1,28 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
-import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
+import { useCreateGame } from "@/ui/shared/play/hooks/useCreateGame";
 
 import { PlayScreen } from "./PlayScreen";
 
 const navigateMock = vi.fn();
-
-const invokeReactClick = (element: HTMLElement) => {
-  const propsKey = Object.keys(element).find((key) =>
-    key.startsWith("__reactProps$"),
-  );
-  if (!propsKey) {
-    throw new Error("React props key not found");
-  }
-  const reactProps = (
-    element as unknown as Record<string, { onClick?: () => void }>
-  )[propsKey];
-  reactProps.onClick?.();
-};
+const createGameMock = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => navigateMock,
 }));
 
-vi.mock("@/application/games/findOrCreateGameUseCase", () => ({
-  findOrCreateGameUseCase: vi.fn(),
+vi.mock("@/ui/shared/play/hooks/useCreateGame", () => ({
+  useCreateGame: vi.fn(),
 }));
 
 describe("PlayScreen", () => {
   beforeEach(() => {
     navigateMock.mockReset();
-    vi.mocked(findOrCreateGameUseCase).mockReset();
+    createGameMock.mockReset();
+    vi.mocked(useCreateGame).mockReturnValue({
+      createGame: createGameMock,
+      isCreating: false,
+    });
   });
 
   it("renders all game modes", () => {
@@ -46,13 +37,13 @@ describe("PlayScreen", () => {
   });
 
   it("creates and navigates to match when selecting a mode", async () => {
-    vi.mocked(findOrCreateGameUseCase).mockResolvedValue("game-123");
+    createGameMock.mockResolvedValue("game-123");
     render(<PlayScreen />);
 
     fireEvent.click(screen.getByRole("button", { name: /classic mode/i }));
 
     await waitFor(() => {
-      expect(findOrCreateGameUseCase).toHaveBeenCalledWith(gameRepository, {
+      expect(createGameMock).toHaveBeenCalledWith({
         gridSize: 3,
         winLength: 3,
         matchFormat: "single",
@@ -64,40 +55,29 @@ describe("PlayScreen", () => {
     });
   });
 
-  it("prevents duplicate submissions while creating a game", async () => {
-    let resolveCall: (value: string) => void = () => {
-      throw new Error("resolveCall not initialized");
-    };
-    vi.mocked(findOrCreateGameUseCase).mockImplementation(
-      () =>
-        new Promise<string>((resolve) => {
-          resolveCall = resolve;
-        }),
-    );
+  it("does not navigate when the shared create flow returns null", async () => {
+    createGameMock.mockResolvedValue(null);
     render(<PlayScreen />);
 
-    const classicModeButton = screen.getByRole("button", {
-      name: /classic mode/i,
-    });
-    fireEvent.click(classicModeButton);
+    fireEvent.click(screen.getByRole("button", { name: /classic mode/i }));
 
     await waitFor(() => {
-      expect(classicModeButton).toBeDisabled();
+      expect(createGameMock).toHaveBeenCalledTimes(1);
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /best of three/i }));
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
 
-    expect(findOrCreateGameUseCase).toHaveBeenCalledTimes(1);
-
-    invokeReactClick(classicModeButton);
-    expect(findOrCreateGameUseCase).toHaveBeenCalledTimes(1);
-
-    resolveCall("game-999");
-    await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalledWith({
-        to: "/match",
-        search: { gameId: "game-999" },
-      });
+  it("disables mode buttons while the shared create flow is busy", () => {
+    vi.mocked(useCreateGame).mockReturnValue({
+      createGame: createGameMock,
+      isCreating: true,
     });
+
+    render(<PlayScreen />);
+
+    expect(
+      screen.getByRole("button", { name: /classic mode/i }),
+    ).toBeDisabled();
   });
 });
