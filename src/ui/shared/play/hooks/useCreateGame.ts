@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
 import type { GameConfig } from "@/domain/entities/GameConfig";
@@ -8,7 +8,7 @@ export const useCreateGame = () => {
   const inFlightRef = useRef(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  const createGame = useCallback(async (config: GameConfig) => {
+  const createGame = async (config: GameConfig) => {
     if (inFlightRef.current) {
       return null;
     }
@@ -22,7 +22,7 @@ export const useCreateGame = () => {
       inFlightRef.current = false;
       setIsCreating(false);
     }
-  }, []);
+  };
 
   return { createGame, isCreating };
 };
