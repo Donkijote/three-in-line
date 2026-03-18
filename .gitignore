@@ -33,3 +33,6 @@ web/coverage
 *.njsproj
 *.sln
 *.sw?
+design
+scripts
+tech-check-list.md
