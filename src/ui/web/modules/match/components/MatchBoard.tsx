@@ -3,6 +3,7 @@ import { Activity } from "react";
 import { TimerOff } from "lucide-react";
 
 import { DEFAULT_GRID_SIZE, type GameStatus } from "@/domain/entities/Game";
+import { resolveCurrentSlot, toDisplayBoard } from "@/ui/shared/match/utils";
 import { Card } from "@/ui/web/components/ui/card";
 import { cn } from "@/ui/web/lib/utils";
 
@@ -129,29 +130,4 @@ export const MatchBoard = ({
       </Activity>
     </Card>
   );
-};
-
-const toDisplayBoard = (board: Array<"P1" | "P2" | null>, gridSize: number) => {
-  return Array.from({ length: gridSize }, (_, row) => {
-    return board.slice(row * gridSize, (row + 1) * gridSize).map((cell) => {
-      if (cell === "P1") {
-        return "X";
-      }
-      if (cell === "P2") {
-        return "O";
-      }
-      return "";
-    });
-  });
-};
-
-const resolveCurrentSlot = (
-  currentUserId: string | undefined,
-  p1UserId: string,
-) => {
-  if (!currentUserId) {
-    return undefined;
-  }
-
-  return currentUserId === p1UserId ? "P1" : "P2";
 };

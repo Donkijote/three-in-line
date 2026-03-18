@@ -1,7 +1,8 @@
+import type { MatchResultViewModel } from "@/ui/shared/match/types/matchResultOverlay";
+
 import { MatchResultActions } from "./MatchResultActions";
 import { MatchResultCard } from "./MatchResultCard";
 import { MatchResultHeader } from "./MatchResultHeader";
-import type { MatchResultViewModel } from "./MatchResultOverlay.types";
 
 export const MatchResultOverlayBase = ({
   title,

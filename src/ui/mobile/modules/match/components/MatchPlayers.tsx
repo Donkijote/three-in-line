@@ -1,9 +1,9 @@
+import { View } from "react-native";
+
 import type { MatchState } from "@/domain/entities/Game";
 import { buildMatchPlayers, type MatchUser } from "@/ui/shared/match/utils";
-import { cn } from "@/ui/web/lib/utils";
-import { PlayerCard } from "@/ui/web/modules/match/components/PlayerCard";
 
-type MatchPlayersLayout = "desktop" | "mobile";
+import { PlayerCard } from "./PlayerCard";
 
 type MatchPlayersProps = {
   p1UserId: string;
@@ -13,7 +13,6 @@ type MatchPlayersProps = {
   currentUser: MatchUser;
   opponentUser: MatchUser;
   match: MatchState | null;
-  layout: MatchPlayersLayout;
 };
 
 export const MatchPlayers = ({
@@ -24,7 +23,6 @@ export const MatchPlayers = ({
   currentUser,
   opponentUser,
   match,
-  layout,
 }: MatchPlayersProps) => {
   const players = buildMatchPlayers(
     p1UserId,
@@ -36,11 +34,7 @@ export const MatchPlayers = ({
   const showWins = Boolean(match && match.format !== "single");
 
   return (
-    <div
-      className={cn("grid gap-6", {
-        "grid-cols-2": layout === "mobile",
-      })}
-    >
+    <View className="flex-row gap-3">
       {players.map((player) => (
         <PlayerCard
           key={player.id}
@@ -53,6 +47,6 @@ export const MatchPlayers = ({
           {...player}
         />
       ))}
-    </div>
+    </View>
   );
 };

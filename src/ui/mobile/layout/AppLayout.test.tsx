@@ -86,6 +86,20 @@ describe("AppLayout", () => {
     expect(screen.getByText("content")).toBeTruthy();
   });
 
+  it("keeps the header but hides the nav chrome on the match route", () => {
+    jest.mocked(usePathname).mockReturnValue("/match");
+
+    const screen = renderMobile(
+      <AppLayout>
+        <Text>content</Text>
+      </AppLayout>,
+    );
+
+    expect(screen.getByText("header:Home")).toBeTruthy();
+    expect(screen.queryByText("mobile-nav")).toBeNull();
+    expect(screen.getByText("content")).toBeTruthy();
+  });
+
   it("keeps the nav visible without a header and renders dark theme layout tokens", () => {
     jest.mocked(usePathname).mockReturnValue("/");
     mockUseTheme.mockReturnValue({ isDark: true });

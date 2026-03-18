@@ -7,6 +7,7 @@ import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
 import type { GameId, PlayerSlot } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
+import { getOpponentId } from "@/ui/shared/match/utils";
 import { useCurrentUser, useUserById } from "@/ui/shared/user/hooks/useUser";
 import { resolvePlayerLabel } from "@/ui/shared/user/resolvePlayerLabel";
 import { useUserPreferences } from "@/ui/web/application/providers/UserPreferencesProvider";
@@ -33,8 +34,6 @@ import { MatchResultOverlay } from "@/ui/web/modules/match/components/match-resu
 type MatchScreenProps = {
   gameId: GameId;
 };
-
-type Game = ReturnType<typeof useGame>;
 
 export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   useGameHeartbeat({ gameId });
@@ -234,16 +233,6 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
       />
     </section>
   );
-};
-
-const getOpponentId = (game: Game, currentUserId?: string) => {
-  if (!game) return undefined;
-
-  if (!currentUserId) {
-    return game.p2UserId ?? game.p1UserId;
-  }
-
-  return game.p1UserId === currentUserId ? game.p2UserId : game.p1UserId;
 };
 
 const onExpire = async (gameId?: string) => {
