@@ -8,6 +8,8 @@ import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUse
 import { heartbeatUseCase } from "@/application/games/heartbeatUseCase";
 import { placeMarkUseCase } from "@/application/games/placeMarkUseCase";
 import { timeoutTurnUseCase } from "@/application/games/timeoutTurnUseCase";
+import type { Game } from "@/domain/entities/Game";
+import type { User } from "@/domain/entities/User";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { renderMobile } from "@/test/mobile/render";
 import { useGame, useTurnTimer } from "@/ui/shared/match/hooks/useGame";
@@ -52,19 +54,19 @@ const baseGame = {
   version: 1,
   lastMove: null,
   updatedTime: 100,
-};
+} satisfies Game;
 
 const currentUser = {
   id: "user-1",
   username: "You",
   avatar: { type: "preset" as const, value: "avatar-1" },
-};
+} satisfies User;
 
 const opponentUser = {
   id: "user-2",
   username: "Opponent",
   avatar: { type: "preset" as const, value: "avatar-2" },
-};
+} satisfies User;
 
 jest.mock("@/ui/mobile/application/providers/MobileHeaderProvider", () => ({
   useMobileHeader: () => ({
