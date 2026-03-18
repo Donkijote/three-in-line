@@ -2,10 +2,12 @@ import { Activity } from "react";
 
 import { Flag, HeartCrack, Trophy, WifiOff } from "lucide-react";
 
+import type {
+  ResultAccent,
+  ResultIcon,
+} from "@/ui/shared/match/types/matchResultOverlay";
 import { H3, Muted } from "@/ui/web/components/Typography";
 import { cn } from "@/ui/web/lib/utils";
-
-import type { ResultAccent, ResultIcon } from "./MatchResultOverlay.types";
 
 type MatchResultHeaderProps = {
   title: string;

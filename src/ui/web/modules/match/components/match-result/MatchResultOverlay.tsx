@@ -1,7 +1,7 @@
+import type { MatchResultOverlayProps } from "@/ui/shared/match/types/matchResultOverlay";
 import { getMatchResultViewModel } from "@/ui/shared/match/utils";
 import { useMatchResultOverlaySound } from "@/ui/web/hooks/useMatchSound";
 
-import type { MatchResultOverlayProps } from "./MatchResultOverlay.types";
 import { MatchResultOverlayBase } from "./MatchResultOverlayBase";
 
 export const MatchResultOverlay = (props: MatchResultOverlayProps) => {

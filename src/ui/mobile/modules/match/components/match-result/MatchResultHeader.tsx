@@ -4,8 +4,10 @@ import { View } from "react-native";
 import { H3, Muted } from "@/ui/mobile/components/Typography";
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import { cn } from "@/ui/mobile/lib/utils";
-
-import type { ResultAccent, ResultIcon } from "./MatchResultOverlay.types";
+import type {
+  ResultAccent,
+  ResultIcon,
+} from "@/ui/shared/match/types/matchResultOverlay";
 
 type MatchResultHeaderProps = {
   title: string;

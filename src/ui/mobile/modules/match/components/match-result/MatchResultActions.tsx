@@ -6,8 +6,7 @@ import { Button } from "@/ui/mobile/components/ui/button";
 import { Icon } from "@/ui/mobile/components/ui/icon";
 import { Text } from "@/ui/mobile/components/ui/text";
 import { cn } from "@/ui/mobile/lib/utils";
-
-import type { ResultAccent } from "./MatchResultOverlay.types";
+import type { ResultAccent } from "@/ui/shared/match/types/matchResultOverlay";
 
 type MatchResultActionsProps = {
   accent: ResultAccent;

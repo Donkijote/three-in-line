@@ -9,10 +9,12 @@ import type {
   MatchResultViewModel,
 } from "@/ui/shared/match/utils";
 
-export type ResultAccent = "primary" | "destructive";
-export type ResultIcon = "trophy" | "heart" | "wifi" | "flag";
+export type ResultAccent = MatchResultViewModel["accent"];
+export type ResultIcon = MatchResultViewModel["icon"];
 
 export type MatchResultOverlayProps = {
+  soundEnabled?: boolean;
+  hapticsEnabled?: boolean;
   status: GameStatus;
   endedReason: GameEndedReason;
   winner: PlayerSlot | null;

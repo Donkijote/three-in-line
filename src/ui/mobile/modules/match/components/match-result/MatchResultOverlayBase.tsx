@@ -1,11 +1,11 @@
 import { Modal, View } from "react-native";
 
 import { Card, CardContent } from "@/ui/mobile/components/ui/card";
+import type { MatchResultViewModel } from "@/ui/shared/match/types/matchResultOverlay";
 
 import { MatchResultActions } from "./MatchResultActions";
 import { MatchResultCard } from "./MatchResultCard";
 import { MatchResultHeader } from "./MatchResultHeader";
-import type { MatchResultViewModel } from "./MatchResultOverlay.types";
 
 export const MatchResultOverlayBase = ({
   title,
