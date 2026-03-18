@@ -1,7 +1,7 @@
 import { router } from "expo-router";
-import { AppState } from "react-native";
+import { AppState, type AppStateStatus } from "react-native";
 
-import { fireEvent, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, waitFor } from "@testing-library/react-native";
 
 import { abandonGameUseCase } from "@/application/games/abandonGameUseCase";
 import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
@@ -17,6 +17,7 @@ import { MatchScreen } from "./MatchScreen";
 
 const mockSetHeader = jest.fn();
 const mockRemoveAppStateListener = jest.fn();
+let appStateChangeListener: ((status: AppStateStatus) => void) | undefined;
 
 const baseGame = {
   id: "game-123",
@@ -104,9 +105,19 @@ jest.mock("@/application/games/timeoutTurnUseCase", () => ({
 describe("MatchScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(AppState, "addEventListener").mockReturnValue({
-      remove: mockRemoveAppStateListener,
-    } as never);
+    appStateChangeListener = undefined;
+    Object.defineProperty(AppState, "currentState", {
+      configurable: true,
+      value: "active",
+    });
+    jest
+      .spyOn(AppState, "addEventListener")
+      .mockImplementation((_type, listener) => {
+        appStateChangeListener = listener;
+        return {
+          remove: mockRemoveAppStateListener,
+        } as never;
+      });
     jest.mocked(useGame).mockReturnValue(baseGame);
     jest.mocked(useTurnTimer).mockReturnValue({
       isExpired: false,
@@ -120,6 +131,10 @@ describe("MatchScreen", () => {
     jest.mocked(findOrCreateGameUseCase).mockResolvedValue("next-game-id");
     jest.mocked(abandonGameUseCase).mockResolvedValue(undefined);
     jest.mocked(timeoutTurnUseCase).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("shows a missing state when the game id is absent", () => {
@@ -202,6 +217,27 @@ describe("MatchScreen", () => {
     });
   });
 
+  it("stops duplicate move submissions while a move is already pending", async () => {
+    let resolveMove: (() => void) | undefined;
+    jest.mocked(placeMarkUseCase).mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveMove = resolve;
+      }),
+    );
+
+    const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    fireEvent.press(screen.getByLabelText("Match cell 3"));
+    fireEvent.press(screen.getByLabelText("Match cell 6"));
+
+    expect(placeMarkUseCase).toHaveBeenCalledTimes(1);
+
+    resolveMove?.();
+    await waitFor(() => {
+      expect(screen.getByText("Abandon Match")).toBeTruthy();
+    });
+  });
+
   it("ignores taken cells and out-of-turn presses", () => {
     const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
 
@@ -218,6 +254,22 @@ describe("MatchScreen", () => {
     fireEvent.press(rerendered.getByLabelText("Match cell 3"));
 
     expect(placeMarkUseCase).not.toHaveBeenCalled();
+  });
+
+  it("logs move placement failures without crashing the screen", async () => {
+    const consoleSpy = jest.spyOn(console, "debug").mockImplementation();
+    jest.mocked(placeMarkUseCase).mockRejectedValueOnce(new Error("boom"));
+
+    const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    fireEvent.press(screen.getByLabelText("Match cell 3"));
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Place mark failed.",
+        expect.any(Error),
+      );
+    });
   });
 
   it("starts a follow-up game from the result overlay", async () => {
@@ -247,6 +299,100 @@ describe("MatchScreen", () => {
     });
   });
 
+  it("shows the losing overlay state and supports secondary navigation actions", () => {
+    jest.mocked(useGame).mockReturnValue({
+      ...baseGame,
+      status: "ended",
+      endedReason: "win",
+      winner: "P1",
+      match: {
+        ...baseGame.match,
+        score: { P1: 2, P2: 1 },
+      },
+    });
+    jest.mocked(useCurrentUser).mockReturnValue({
+      ...currentUser,
+      id: "user-2",
+      avatar: undefined,
+    });
+    jest.mocked(useUserById).mockReturnValue({
+      ...opponentUser,
+      id: "user-1",
+      avatar: undefined,
+    });
+
+    const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    expect(screen.getByText("Defeat")).toBeTruthy();
+    expect(screen.getByText("Rematch")).toBeTruthy();
+
+    fireEvent.press(screen.getByText("Change Mode"));
+    fireEvent.press(screen.getByText("Back Home"));
+
+    expect(router.replace).toHaveBeenCalledWith("/play");
+    expect(router.replace).toHaveBeenCalledWith("/");
+  });
+
+  it("shows abandonment details in the result overlay", () => {
+    jest.mocked(useGame).mockReturnValue({
+      ...baseGame,
+      status: "ended",
+      endedReason: "abandoned",
+      winner: "P1",
+      abandonedBy: "P2",
+      match: {
+        ...baseGame.match,
+        score: { P1: 2, P2: 0 },
+      },
+    });
+
+    const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    expect(screen.getByText("Opponent Surrendered")).toBeTruthy();
+    expect(screen.getByText("Match Complete")).toBeTruthy();
+    expect(screen.getByText("Win by Forfeit")).toBeTruthy();
+  });
+
+  it("shows the disconnect result copy when the match ends abruptly", () => {
+    jest.mocked(useGame).mockReturnValue({
+      ...baseGame,
+      status: "ended",
+      endedReason: "disconnect",
+      abandonedBy: "P2",
+      match: {
+        ...baseGame.match,
+        score: { P1: 1, P2: 0 },
+      },
+    });
+
+    const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    expect(screen.getByText("Match Ended")).toBeTruthy();
+    expect(screen.getByText("Match Incomplete")).toBeTruthy();
+    expect(screen.getByText("Find New Match")).toBeTruthy();
+  });
+
+  it("logs rematch creation failures", async () => {
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+    jest
+      .mocked(findOrCreateGameUseCase)
+      .mockRejectedValueOnce(new Error("boom"));
+    jest.mocked(useGame).mockReturnValue({
+      ...baseGame,
+      status: "ended",
+      endedReason: "win",
+      winner: "P1",
+    });
+
+    const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    fireEvent.press(screen.getByText("Play Again"));
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+    });
+  });
+
   it("abandons the match and navigates back to play", async () => {
     const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
 
@@ -259,6 +405,32 @@ describe("MatchScreen", () => {
     });
 
     expect(router.replace).toHaveBeenCalledWith("/play");
+  });
+
+  it("does not abandon the match twice while a request is pending", async () => {
+    let resolveAbandon: (() => void) | undefined;
+    jest.mocked(abandonGameUseCase).mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveAbandon = resolve;
+      }),
+    );
+
+    const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    fireEvent.press(screen.getByText("Abandon Match"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Abandoning...")).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByText("Abandoning..."));
+
+    expect(abandonGameUseCase).toHaveBeenCalledTimes(1);
+
+    resolveAbandon?.();
+    await waitFor(() => {
+      expect(router.replace).toHaveBeenCalledWith("/play");
+    });
   });
 
   it("times out the turn when the shared timer expires", async () => {
@@ -281,6 +453,100 @@ describe("MatchScreen", () => {
       expect(timeoutTurnUseCase).toHaveBeenCalledWith(gameRepository, {
         gameId: "game-123",
       });
+    });
+  });
+
+  it("shows the time-up overlay when the current turn expires", () => {
+    jest.mocked(useGame).mockReturnValue({
+      ...baseGame,
+      turnDurationMs: 3000,
+      turnDeadlineTime: Date.now(),
+    });
+    jest.mocked(useTurnTimer).mockReturnValue({
+      isExpired: true,
+      progress: 0,
+      remainingMs: 0,
+    });
+
+    const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    expect(screen.getByText("Time's up")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("Match cell 3"));
+    expect(placeMarkUseCase).not.toHaveBeenCalled();
+  });
+
+  it("logs timeout failures without throwing", async () => {
+    const consoleSpy = jest.spyOn(console, "debug").mockImplementation();
+    jest.mocked(timeoutTurnUseCase).mockRejectedValueOnce(new Error("boom"));
+    jest
+      .mocked(useTurnTimer)
+      .mockImplementation(
+        ({ onExpire }: { onExpire?: () => Promise<void> }) => {
+          void onExpire?.();
+          return {
+            isExpired: false,
+            progress: 0,
+            remainingMs: 0,
+          };
+        },
+      );
+
+    renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Timeout turn failed.",
+        expect.any(Error),
+      );
+    });
+  });
+
+  it("starts heartbeat polling again when the app becomes active", async () => {
+    jest.useFakeTimers();
+    jest.spyOn(Math, "random").mockReturnValue(0);
+
+    renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    await waitFor(() => {
+      expect(heartbeatUseCase).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      appStateChangeListener?.("background");
+      appStateChangeListener?.("active");
+      jest.advanceTimersByTime(20_000);
+    });
+
+    await waitFor(() => {
+      expect(heartbeatUseCase).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it("logs heartbeat failures and delayed heartbeat jitter retries", async () => {
+    jest.useFakeTimers();
+    jest.spyOn(Math, "random").mockReturnValue(0.5);
+    const consoleSpy = jest.spyOn(console, "debug").mockImplementation();
+    jest
+      .mocked(heartbeatUseCase)
+      .mockRejectedValueOnce(new Error("boom"))
+      .mockResolvedValue(undefined);
+
+    renderMobile(<MatchScreen gameId={"game-123"} />);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Game heartbeat failed.",
+        expect.any(Error),
+      );
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(20_000);
+      jest.advanceTimersByTime(750);
+    });
+
+    await waitFor(() => {
+      expect(heartbeatUseCase).toHaveBeenCalledTimes(2);
     });
   });
 });
