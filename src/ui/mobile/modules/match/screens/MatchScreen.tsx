@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { router } from "expo-router";
 import {
+  Circle,
   Crown,
   Flag,
   Frown,
@@ -12,13 +13,9 @@ import {
   TimerOff,
   Trophy,
   WifiOff,
+  X,
 } from "lucide-react-native";
-import {
-  AppState,
-  Modal,
-  Pressable,
-  View,
-} from "react-native";
+import { AppState, Modal, Pressable, View } from "react-native";
 
 import { abandonGameUseCase } from "@/application/games/abandonGameUseCase";
 import { findOrCreateGameUseCase } from "@/application/games/findOrCreateGameUseCase";
@@ -34,7 +31,7 @@ import {
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { useMobileHeader } from "@/ui/mobile/application/providers/MobileHeaderProvider";
 import { FullPageLoader } from "@/ui/mobile/components/FullPageLoader";
-import { H3, H6, Muted, P, Small } from "@/ui/mobile/components/Typography";
+import { H3, H6, Muted, Small } from "@/ui/mobile/components/Typography";
 import {
   Avatar,
   AvatarFallback,
@@ -97,13 +94,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
 
   useEffect(() => {
     setHeader({
-      title: "Tic-Tac-Toe",
-      eyebrow: "Live Match",
-      leftSlot: (
-        <Button size="sm" variant="ghost" onPress={() => router.back()}>
-          <P>Back</P>
-        </Button>
-      ),
+      title: "Tic Tac Toe",
     });
 
     return () => {
@@ -221,7 +212,7 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
 
   return (
     <>
-      <View className="flex-1 gap-6 pb-12">
+      <View className="flex-1 justify-around gap-6 pb-10">
         <MatchPlayersSection
           players={players}
           showWins={game.match.format !== "single"}
@@ -324,14 +315,14 @@ const MatchPlayerCard = ({
           border: "border-opponent/50",
           symbol: "text-opponent",
           timer: "bg-opponent",
-          shadow: "shadow-[0_0_18px_-10px_rgba(227,94,82,0.55)]",
+          shadow: "shadow-[0_0_10px_-8px_rgba(84,126,234,0.28)]",
         }
       : {
           badge: "bg-primary text-primary-foreground",
           border: "border-primary/50",
           symbol: "text-primary",
           timer: "bg-primary",
-          shadow: "shadow-[0_0_18px_-10px_rgba(61,168,105,0.55)]",
+          shadow: "shadow-[0_0_10px_-8px_rgba(61,168,105,0.28)]",
         };
   const timerProgress = Math.max(0, Math.min(turnTimer?.progress ?? 0, 1));
   const isUrgent = showTurnTimer && timerProgress <= 0.1;
@@ -340,67 +331,73 @@ const MatchPlayerCard = ({
     : accentClasses.badge;
 
   return (
-    <Card
-      className={cn(
-        "flex-1 gap-0 rounded-3xl border-border/60 px-0 py-0 shadow-sm shadow-black/5",
-        {
-          "opacity-70": !isTurn,
-          [accentClasses.border]: isTurn,
-          [accentClasses.shadow]: isTurn,
-        },
-      )}
-    >
-      {showTurnTimer ? (
-        <View className="overflow-hidden rounded-t-3xl">
-          <View className="h-1 w-full bg-secondary/80">
-            <View
-              className={cn("h-full", {
-                "bg-destructive": isUrgent,
-                [accentClasses.timer]: !isUrgent,
-              })}
-              style={{ width: `${Math.max(timerProgress * 100, 0)}%` }}
-            />
-          </View>
+    <View className="relative flex-1 pt-2.5">
+      {isTurn ? (
+        <View className="absolute left-1/2 top-0 z-20 -translate-x-1/2">
+          <Small
+            className={cn(
+              "rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em]",
+              badgeClassName,
+            )}
+          >
+            Turn
+          </Small>
         </View>
       ) : null}
-      <CardContent className="items-center gap-3 px-4 py-4">
-        {isTurn ? (
-          <View className="w-full flex-row justify-center">
-            <Small
-              className={cn(
-                "rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em]",
-                badgeClassName,
-              )}
-            >
-              Turn
-            </Small>
+      <Card
+        className={cn(
+          "flex-1 gap-0 rounded-3xl border-border/60 px-0 py-0 shadow-none",
+          {
+            "opacity-70": !isTurn,
+            [accentClasses.border]: isTurn,
+            [accentClasses.shadow]: isTurn,
+          },
+        )}
+      >
+        {showTurnTimer ? (
+          <View className="overflow-hidden rounded-t-3xl">
+            <View className="h-1 w-full bg-secondary/80">
+              <View
+                className={cn("h-full", {
+                  "bg-destructive": isUrgent,
+                  [accentClasses.timer]: !isUrgent,
+                })}
+                style={{ width: `${Math.max(timerProgress * 100, 0)}%` }}
+              />
+            </View>
           </View>
         ) : null}
-        <Avatar
-          alt={name}
-          className={cn("size-16 border-2 bg-card", {
-            [accentClasses.border]: isTurn,
-            "border-border/60": !isTurn,
-          })}
-        >
-          {avatar ? <AvatarImage source={{ uri: avatar }} /> : null}
-          <AvatarFallback className="bg-secondary">
-            <H6>{name.slice(0, 1)}</H6>
-          </AvatarFallback>
-        </Avatar>
-        <View className="items-center gap-1">
-          <H6 className="text-center text-sm">{name}</H6>
-          <Text className={cn("text-sm font-semibold", accentClasses.symbol)}>
-            ({symbol})
-          </Text>
-          {showWins ? (
-            <Muted className="mt-0 text-xs text-muted-foreground">
-              Wins: {wins}
-            </Muted>
-          ) : null}
-        </View>
-      </CardContent>
-    </Card>
+        <CardContent className="items-center gap-3.5 px-4 pb-4 pt-5">
+          <Avatar
+            alt={name}
+            className={cn("size-20 border-2 bg-card", {
+              [accentClasses.border]: isTurn,
+              "border-border/60": !isTurn,
+            })}
+          >
+            {avatar ? <AvatarImage source={{ uri: avatar }} /> : null}
+            <AvatarFallback className="bg-secondary">
+              <H6>{name.slice(0, 1)}</H6>
+            </AvatarFallback>
+          </Avatar>
+          <View className="items-center gap-1">
+            <View className="flex-row items-center gap-2">
+              <H6 className="text-center text-sm">{name}</H6>
+              <Text
+                className={cn("text-sm font-semibold", accentClasses.symbol)}
+              >
+                ({symbol})
+              </Text>
+            </View>
+            {showWins ? (
+              <Muted className="mt-0 text-xs text-muted-foreground">
+                Wins: {wins}
+              </Muted>
+            ) : null}
+          </View>
+        </CardContent>
+      </Card>
+    </View>
   );
 };
 
@@ -431,8 +428,7 @@ const MatchBoardSection = ({
   const currentSlot = resolveCurrentSlot(currentUserId, p1UserId);
   const isCurrentUserP1 = currentSlot ? currentSlot === "P1" : true;
   const displayBoard = toDisplayBoard(board, resolvedGridSize);
-  const cellFontClassName =
-    resolvedGridSize <= 4 ? "text-4xl" : "text-3xl leading-none";
+  const markSize = resolvedGridSize <= 4 ? 76 : 56;
   const currentPlayerClasses = {
     P1: isCurrentUserP1 ? "text-primary" : "text-opponent",
     P2: isCurrentUserP1 ? "text-opponent" : "text-primary",
@@ -441,11 +437,18 @@ const MatchBoardSection = ({
   return (
     <Card
       className={cn(
-        "relative rounded-[2rem] border-border/70 px-4 py-4 shadow-[0_18px_35px_-26px_rgba(0,0,0,0.5)]",
+        "relative rounded-[2rem] border-border/70 px-4 py-4 shadow-none",
         {
           "border-destructive/60": isTimeUp,
         },
       )}
+      style={{
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+        elevation: 2,
+      }}
     >
       <View className="gap-2">
         {displayBoard.map((row, rowIndex) => (
@@ -484,14 +487,15 @@ const MatchBoardSection = ({
                     onCellPress(index);
                   }}
                 >
-                  <Text
-                    className={cn("font-semibold", cellFontClassName, {
-                      [currentPlayerClasses.P1]: cell === "X",
-                      [currentPlayerClasses.P2]: cell === "O",
-                    })}
-                  >
-                    {cell}
-                  </Text>
+                  <BoardCellMark
+                    mark={cell}
+                    size={markSize}
+                    className={
+                      cell === "X"
+                        ? currentPlayerClasses.P1
+                        : currentPlayerClasses.P2
+                    }
+                  />
                 </Pressable>
               );
             })}
@@ -516,6 +520,32 @@ const MatchBoardSection = ({
         </View>
       ) : null}
     </Card>
+  );
+};
+
+type BoardCellMarkProps = {
+  mark: string;
+  size: number;
+  className: string;
+};
+
+const BoardCellMark = ({ mark, size, className }: BoardCellMarkProps) => {
+  if (!mark) {
+    return null;
+  }
+
+  return (
+    <View
+      className="items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      <Icon
+        as={mark === "X" ? X : Circle}
+        className={className}
+        size={size}
+        strokeWidth={3}
+      />
+    </View>
   );
 };
 
@@ -547,7 +577,7 @@ const MatchActionsSection = ({
 
       <Button
         variant="outline"
-        className="h-12 rounded-full border-destructive/30"
+        className="h-12 rounded-full border-destructive/30 bg-secondary"
         onPress={() => void onAbandonMatch()}
         disabled={isAbandoning}
       >

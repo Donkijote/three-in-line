@@ -153,8 +153,17 @@ describe("MatchScreen", () => {
 
     expect(mockSetHeader).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Tic-Tac-Toe",
-        eyebrow: "Live Match",
+        title: "Tic Tac Toe",
+      }),
+    );
+    expect(mockSetHeader).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        eyebrow: expect.anything(),
+      }),
+    );
+    expect(mockSetHeader).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        leftSlot: expect.anything(),
       }),
     );
 
