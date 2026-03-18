@@ -23,7 +23,7 @@ const navItems: NavItem[] = [
   {
     icon: Gamepad2,
     label: "Play",
-    path: "/mock",
+    path: "/play",
   },
   {
     icon: Settings,

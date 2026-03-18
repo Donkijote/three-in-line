@@ -36,7 +36,7 @@ describe("NavBar", () => {
 
     fireEvent.press(screen.getByText("Play"));
 
-    expect(router.replace).toHaveBeenCalledWith("/mock");
+    expect(router.replace).toHaveBeenCalledWith("/play");
   });
 
   it("renders the android navigation shell", () => {

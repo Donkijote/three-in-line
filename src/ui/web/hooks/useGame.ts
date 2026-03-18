@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { heartbeatUseCase } from "@/application/games/heartbeatUseCase";
 import type { GameId } from "@/domain/entities/Game";
@@ -25,14 +25,13 @@ export const useGameHeartbeat = ({
   jitterMs = DEFAULT_JITTER_MS,
 }: HeartbeatParams): void => {
   const gameIdRef = useRef<GameId | undefined>(gameId);
-  const heartbeatRef = useRef(sendHeartbeat);
   const intervalMsRef = useRef(intervalMs);
   const jitterMsRef = useRef(jitterMs);
   const intervalIdRef = useRef<number | null>(null);
   const timeoutIdRef = useRef<number | null>(null);
   const inFlightRef = useRef(false);
 
-  const stopInterval = useCallback(() => {
+  const stopInterval = useEffectEvent(() => {
     if (intervalIdRef.current === null) {
       if (timeoutIdRef.current === null) {
         return;
@@ -48,9 +47,9 @@ export const useGameHeartbeat = ({
       clearTimeout(timeoutIdRef.current);
       timeoutIdRef.current = null;
     }
-  }, []);
+  });
 
-  const triggerHeartbeat = useCallback(async () => {
+  const triggerHeartbeat = useEffectEvent(async () => {
     const currentGameId = gameIdRef.current;
     if (!currentGameId || inFlightRef.current) {
       return;
@@ -58,15 +57,15 @@ export const useGameHeartbeat = ({
 
     inFlightRef.current = true;
     try {
-      await heartbeatRef.current({ gameId: currentGameId });
+      await sendHeartbeat({ gameId: currentGameId });
     } catch (error) {
       console.debug("Game heartbeat failed.", error);
     } finally {
       inFlightRef.current = false;
     }
-  }, []);
+  });
 
-  const triggerHeartbeatWithJitter = useCallback(() => {
+  const triggerHeartbeatWithJitter = useEffectEvent(() => {
     const jitter = jitterMsRef.current;
     const delay = jitter > 0 ? Math.floor(Math.random() * (jitter + 1)) : 0;
 
@@ -82,9 +81,9 @@ export const useGameHeartbeat = ({
     timeoutIdRef.current = setTimeout(() => {
       void triggerHeartbeat();
     }, delay);
-  }, [triggerHeartbeat]);
+  });
 
-  const startInterval = useCallback(() => {
+  const startInterval = useEffectEvent(() => {
     if (intervalIdRef.current !== null || !gameIdRef.current) {
       return;
     }
@@ -92,7 +91,7 @@ export const useGameHeartbeat = ({
     intervalIdRef.current = setInterval(() => {
       triggerHeartbeatWithJitter();
     }, intervalMsRef.current);
-  }, [triggerHeartbeatWithJitter]);
+  });
 
   useEffect(() => {
     gameIdRef.current = gameId;
@@ -115,7 +114,7 @@ export const useGameHeartbeat = ({
         startInterval();
       }
     }
-  }, [gameId, startInterval, stopInterval, triggerHeartbeat]);
+  }, [gameId]);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -143,7 +142,7 @@ export const useGameHeartbeat = ({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       stopInterval();
     };
-  }, [startInterval, stopInterval, triggerHeartbeat]);
+  }, []);
 };
 
 type UseTurnTimerParams = {
@@ -178,6 +177,13 @@ export const useTurnTimer = ({
   const [now, setNow] = useState(() => Date.now());
   const timeoutRef = useRef<number | null>(null);
   const hasTriggeredRef = useRef(false);
+  const handleExpire = useEffectEvent(async () => {
+    if (!onExpire) {
+      return;
+    }
+
+    await onExpire();
+  });
 
   useEffect(() => {
     if (!isActive) {
@@ -202,6 +208,7 @@ export const useTurnTimer = ({
   }, [deadlineTime, durationMs, isActive, expireDelayMs]);
 
   const hasTimer = Boolean(durationMs);
+  const hasOnExpire = Boolean(onExpire);
   const resolvedDeadline = deadlineTime ?? null;
   const isExpired =
     isActive && resolvedDeadline !== null && now > resolvedDeadline && hasTimer;
@@ -212,20 +219,20 @@ export const useTurnTimer = ({
   const progress = hasTimer ? remainingMs / (durationMs as number) : 0;
 
   useEffect(() => {
-    if (!isExpired || !onExpire || hasTriggeredRef.current) {
+    if (!isExpired || !hasOnExpire || hasTriggeredRef.current) {
       return;
     }
 
     hasTriggeredRef.current = true;
     if (expireDelayMs <= 0) {
-      void onExpire();
+      void handleExpire();
       return;
     }
 
     timeoutRef.current = setTimeout(() => {
-      void onExpire();
+      void handleExpire();
     }, expireDelayMs);
-  }, [expireDelayMs, isExpired, onExpire]);
+  }, [expireDelayMs, hasOnExpire, isExpired]);
 
   return { isExpired, remainingMs, progress };
 };
