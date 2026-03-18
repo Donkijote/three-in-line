@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { router } from "expo-router";
-import { Flag, Home, RotateCcw, Shuffle, TimerOff } from "lucide-react-native";
+import {
+  Crown,
+  Flag,
+  Frown,
+  HeartCrack,
+  Home,
+  RotateCcw,
+  Shuffle,
+  TimerOff,
+  Trophy,
+  WifiOff,
+} from "lucide-react-native";
 import {
   ActivityIndicator,
   AppState,
@@ -298,6 +309,7 @@ const MatchPlayerCard = ({
   accent,
   turnTimer,
 }: MatchPlayerCardProps) => {
+  const showTurnTimer = Boolean(turnTimer?.isActive);
   const accentClasses =
     accent === "opponent"
       ? {
@@ -305,15 +317,20 @@ const MatchPlayerCard = ({
           border: "border-opponent/50",
           symbol: "text-opponent",
           timer: "bg-opponent",
+          shadow: "shadow-[0_0_18px_-10px_rgba(227,94,82,0.55)]",
         }
       : {
           badge: "bg-primary text-primary-foreground",
           border: "border-primary/50",
           symbol: "text-primary",
           timer: "bg-primary",
+          shadow: "shadow-[0_0_18px_-10px_rgba(61,168,105,0.55)]",
         };
   const timerProgress = Math.max(0, Math.min(turnTimer?.progress ?? 0, 1));
-  const isUrgent = Boolean(turnTimer?.isActive) && timerProgress <= 0.1;
+  const isUrgent = showTurnTimer && timerProgress <= 0.1;
+  const badgeClassName = isUrgent
+    ? "bg-destructive text-destructive-foreground"
+    : accentClasses.badge;
 
   return (
     <Card
@@ -322,33 +339,36 @@ const MatchPlayerCard = ({
         {
           "opacity-70": !isTurn,
           [accentClasses.border]: isTurn,
+          [accentClasses.shadow]: isTurn,
         },
       )}
     >
-      <View className="overflow-hidden rounded-t-3xl">
-        <View className="h-1 w-full bg-secondary/80">
-          <View
-            className={cn("h-full", {
-              "bg-destructive": isUrgent,
-              [accentClasses.timer]: !isUrgent,
-            })}
-            style={{ width: `${Math.max(timerProgress * 100, 0)}%` }}
-          />
+      {showTurnTimer ? (
+        <View className="overflow-hidden rounded-t-3xl">
+          <View className="h-1 w-full bg-secondary/80">
+            <View
+              className={cn("h-full", {
+                "bg-destructive": isUrgent,
+                [accentClasses.timer]: !isUrgent,
+              })}
+              style={{ width: `${Math.max(timerProgress * 100, 0)}%` }}
+            />
+          </View>
         </View>
-      </View>
+      ) : null}
       <CardContent className="items-center gap-3 px-4 py-4">
-        <View className="w-full flex-row justify-center">
-          <Small
-            className={cn(
-              "rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em]",
-              isTurn
-                ? accentClasses.badge
-                : "bg-secondary text-muted-foreground",
-            )}
-          >
-            {isTurn ? "Turn" : "Waiting"}
-          </Small>
-        </View>
+        {isTurn ? (
+          <View className="w-full flex-row justify-center">
+            <Small
+              className={cn(
+                "rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.18em]",
+                badgeClassName,
+              )}
+            >
+              Turn
+            </Small>
+          </View>
+        ) : null}
         <Avatar
           alt={name}
           className={cn("size-16 border-2 bg-card", {
@@ -546,6 +566,7 @@ const MatchResultOverlay = ({
     return null;
   }
 
+  const iconConfig = resolveResultIcon(model.icon, model.accent);
   const currentAccentClassName = model.isCurrentWinner
     ? "text-primary"
     : "text-destructive";
@@ -561,23 +582,25 @@ const MatchResultOverlay = ({
             <View className="items-center gap-2">
               <View
                 className={cn(
-                  "size-16 items-center justify-center rounded-full",
-                  model.accent === "primary"
-                    ? "bg-primary/12"
-                    : "bg-destructive/12",
+                  "size-20 items-center justify-center rounded-full",
+                  iconConfig.containerClassName,
                 )}
               >
                 <Icon
-                  as={RotateCcw}
-                  className={cn(
-                    "size-7",
-                    model.accent === "primary"
-                      ? "text-primary"
-                      : "text-destructive",
-                  )}
+                  as={iconConfig.icon}
+                  className={iconConfig.iconClassName}
                 />
               </View>
-              <H3 className="text-center">{model.title}</H3>
+              <H3
+                className={cn(
+                  "text-center uppercase tracking-[0.18em]",
+                  model.accent === "primary"
+                    ? "text-primary"
+                    : "text-destructive",
+                )}
+              >
+                {model.title}
+              </H3>
               {model.subtitle ? (
                 <Muted className="mt-0 text-center whitespace-pre-line text-sm leading-6">
                   {model.subtitle}
@@ -598,6 +621,7 @@ const MatchResultOverlay = ({
                   avatar={model.currentUser.avatar}
                   score={model.score?.current}
                   accentClassName={currentAccentClassName}
+                  isWinner={model.isCurrentWinner}
                 />
                 <View className="items-center gap-1">
                   <Small className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -613,6 +637,7 @@ const MatchResultOverlay = ({
                   avatar={model.opponentUser.avatar}
                   score={model.score?.opponent}
                   accentClassName={opponentAccentClassName}
+                  isWinner={!model.isCurrentWinner}
                   align="right"
                 />
               </View>
@@ -672,6 +697,7 @@ type ResultPlayerProps = {
   avatar?: UserAvatar;
   score?: number;
   accentClassName: string;
+  isWinner: boolean;
   align?: "left" | "right";
 };
 
@@ -681,6 +707,7 @@ const ResultPlayer = ({
   avatar,
   score,
   accentClassName,
+  isWinner,
   align = "left",
 }: ResultPlayerProps) => {
   const avatarSrc = resolveAvatarSrc(avatar);
@@ -695,7 +722,9 @@ const ResultPlayer = ({
       <Avatar
         alt={name}
         className={cn("size-14 border-2 bg-card", {
-          "border-border/60": true,
+          "border-border/60": !isWinner,
+          "border-primary/70": isWinner,
+          "border-destructive/70": !isWinner,
         })}
       >
         {avatarSrc ? <AvatarImage source={{ uri: avatarSrc }} /> : null}
@@ -703,6 +732,22 @@ const ResultPlayer = ({
           <H6>{name.slice(0, 1)}</H6>
         </AvatarFallback>
       </Avatar>
+      <View
+        className={cn(
+          "absolute top-10 size-5 items-center justify-center rounded-full",
+          {
+            "-right-1 bg-primary": align === "left" && isWinner,
+            "-right-1 bg-destructive": align === "left" && !isWinner,
+            "-left-1 bg-primary": align === "right" && isWinner,
+            "-left-1 bg-destructive": align === "right" && !isWinner,
+          },
+        )}
+      >
+        <Icon
+          as={isWinner ? Crown : Frown}
+          className="size-3 text-primary-foreground"
+        />
+      </View>
       <View
         className={cn("gap-1", {
           "items-end": align === "right",
@@ -860,4 +905,42 @@ const useGameHeartbeat = (gameId?: GameId) => {
       stop();
     };
   }, [gameId]);
+};
+
+const resolveResultIcon = (
+  icon: NonNullable<ReturnType<typeof getMatchResultViewModel>>["icon"],
+  accent: NonNullable<ReturnType<typeof getMatchResultViewModel>>["accent"],
+) => {
+  if (icon === "wifi") {
+    return {
+      icon: WifiOff,
+      iconClassName: "size-10 text-amber-500",
+      containerClassName: "bg-amber-500/12",
+    };
+  }
+
+  if (icon === "flag") {
+    return {
+      icon: Flag,
+      iconClassName: "size-10 text-muted-foreground",
+      containerClassName: "bg-secondary",
+    };
+  }
+
+  if (icon === "trophy") {
+    return {
+      icon: Trophy,
+      iconClassName: "size-10 text-primary",
+      containerClassName:
+        accent === "primary"
+          ? "bg-primary/12 border border-primary/20"
+          : "bg-destructive/12 border border-destructive/20",
+    };
+  }
+
+  return {
+    icon: HeartCrack,
+    iconClassName: "size-10 text-destructive",
+    containerClassName: "bg-destructive/12 border border-destructive/20",
+  };
 };
