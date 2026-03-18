@@ -1,29 +1,9 @@
-import type { UserAvatar } from "@/domain/entities/Avatar";
-import { resolveAvatarSrc } from "@/domain/entities/Avatar";
 import type { MatchState } from "@/domain/entities/Game";
-import { resolvePlayerLabel } from "@/ui/shared/user/resolvePlayerLabel";
+import { buildMatchPlayers, type MatchUser } from "@/ui/shared/match/utils";
 import { cn } from "@/ui/web/lib/utils";
 import { PlayerCard } from "@/ui/web/modules/match/components/PlayerCard";
 
 type MatchPlayersLayout = "desktop" | "mobile";
-
-type MatchUser = {
-  id?: string;
-  username?: string | null;
-  name?: string | null;
-  email?: string | null;
-  avatar?: UserAvatar;
-};
-
-type MatchPlayer = {
-  id: string;
-  name: string;
-  symbol: "X" | "O";
-  wins: number;
-  isTurn: boolean;
-  avatar?: string;
-  accent: "primary" | "opponent";
-};
 
 type MatchPlayersProps = {
   p1UserId: string;
@@ -75,48 +55,4 @@ export const MatchPlayers = ({
       ))}
     </div>
   );
-};
-
-const resolvePlayerAvatar = (value: MatchUser) =>
-  resolveAvatarSrc(value?.avatar);
-
-const buildMatchPlayers = (
-  p1UserId: string,
-  currentTurn: "P1" | "P2",
-  currentUser: MatchUser,
-  opponentUser: MatchUser,
-  match: MatchState | null,
-): MatchPlayer[] => {
-  const currentUserId = currentUser?.id;
-  const isP1 = !currentUserId || p1UserId === currentUserId;
-  const mySymbol: "X" | "O" = isP1 ? "X" : "O";
-  const opponentSymbol: "X" | "O" = isP1 ? "O" : "X";
-  const myTurnSlot = isP1 ? "P1" : "P2";
-  const opponentTurnSlot = isP1 ? "P2" : "P1";
-  const matchScore = match?.score;
-
-  return [
-    {
-      id: "player-me",
-      name: resolvePlayerLabel(currentUser, "You", {
-        useInitialsFallback: true,
-      }),
-      symbol: mySymbol,
-      wins: matchScore?.[myTurnSlot] ?? 0,
-      isTurn: currentTurn === myTurnSlot,
-      accent: "primary",
-      avatar: resolvePlayerAvatar(currentUser),
-    },
-    {
-      id: "player-opponent",
-      name: resolvePlayerLabel(opponentUser, "P2", {
-        useInitialsFallback: true,
-      }),
-      symbol: opponentSymbol,
-      wins: matchScore?.[opponentTurnSlot] ?? 0,
-      isTurn: currentTurn === opponentTurnSlot,
-      accent: "opponent",
-      avatar: resolvePlayerAvatar(opponentUser),
-    },
-  ];
 };
