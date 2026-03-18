@@ -56,7 +56,7 @@ describe("useCreateGame", () => {
 
     const { result } = renderHook(() => useCreateGame());
 
-    let firstRequest: Promise<string | null> | undefined;
+    let firstRequest!: Promise<string | null>;
 
     act(() => {
       firstRequest = result.current.createGame(config);
