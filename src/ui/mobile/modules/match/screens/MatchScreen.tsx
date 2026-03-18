@@ -14,7 +14,6 @@ import {
   WifiOff,
 } from "lucide-react-native";
 import {
-  ActivityIndicator,
   AppState,
   Modal,
   Pressable,
@@ -34,6 +33,7 @@ import {
 } from "@/domain/entities/Game";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
 import { useMobileHeader } from "@/ui/mobile/application/providers/MobileHeaderProvider";
+import { FullPageLoader } from "@/ui/mobile/components/FullPageLoader";
 import { H3, H6, Muted, P, Small } from "@/ui/mobile/components/Typography";
 import {
   Avatar,
@@ -145,14 +145,21 @@ export const MatchScreen = ({ gameId }: MatchScreenProps) => {
   }
 
   if (!game || !currentUser) {
-    return <LoadingState message="Loading match..." />;
+    return (
+      <FullPageLoader
+        label="Match"
+        message="Loading match"
+        subMessage="Syncing the latest game state."
+      />
+    );
   }
 
   if ((game.status === "waiting" && !game.p2UserId) || !opponentUser) {
     return (
-      <CenteredState
-        title="Waiting for opponent"
-        description="Waiting for the second player to connect."
+      <FullPageLoader
+        label="Match"
+        message="Waiting for opponent"
+        subMessage="Waiting for the second player to connect."
       />
     );
   }
@@ -784,15 +791,6 @@ const CenteredState = ({ title, description }: CenteredStateProps) => {
           <Muted className="mt-0 text-base leading-6">{description}</Muted>
         </CardContent>
       </Card>
-    </View>
-  );
-};
-
-const LoadingState = ({ message }: { message: string }) => {
-  return (
-    <View className="flex-1 items-center justify-center gap-3">
-      <ActivityIndicator />
-      <Muted>{message}</Muted>
     </View>
   );
 };

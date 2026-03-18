@@ -179,7 +179,9 @@ describe("MatchScreen", () => {
 
     const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
 
-    expect(screen.getByText("Loading match...")).toBeTruthy();
+    expect(screen.getByText("Match")).toBeTruthy();
+    expect(screen.getByText("Loading match")).toBeTruthy();
+    expect(screen.getByText("Syncing the latest game state.")).toBeTruthy();
   });
 
   it("shows the waiting state when the opponent is missing", () => {
@@ -193,6 +195,9 @@ describe("MatchScreen", () => {
     const screen = renderMobile(<MatchScreen gameId={"game-123"} />);
 
     expect(screen.getByText("Waiting for opponent")).toBeTruthy();
+    expect(
+      screen.getByText("Waiting for the second player to connect."),
+    ).toBeTruthy();
   });
 
   it("renders the live match details", () => {

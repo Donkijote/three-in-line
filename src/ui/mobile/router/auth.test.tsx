@@ -35,7 +35,7 @@ describe("mobile auth guards", () => {
       </RequireAuth>,
     );
 
-    expect(screen.getByText("Loading session...")).toBeTruthy();
+    expect(screen.getByText("Loading")).toBeTruthy();
     expect(screen.queryByText("private")).toBeNull();
   });
 
@@ -97,5 +97,21 @@ describe("mobile auth guards", () => {
     );
 
     expect(screen.getByText("public")).toBeTruthy();
+  });
+
+  it("uses the shared unauthorized loader for unauthenticated routes while auth is pending", () => {
+    mockUseConvexAuth.mockReturnValue({
+      isAuthenticated: false,
+      isLoading: true,
+    });
+
+    const screen = renderMobile(
+      <RequireUnAuth>
+        <Text>public</Text>
+      </RequireUnAuth>,
+    );
+
+    expect(screen.getByText("Loading")).toBeTruthy();
+    expect(screen.getByText("Unauthorized")).toBeTruthy();
   });
 });
