@@ -5,7 +5,7 @@ Tracking issue: Donkijote/three-in-line#103.
 ## Runtime and compatibility
 
 - Use Bun 1.4.4, matching `packageManager` and the GitHub workflows. The scoped overrides produce version 3 lockfiles, which older Bun versions cannot read.
-- CI uses Node 24.x. The upgraded JSDOM requires Node 22.22.2+, 24.15.0+, or 26+; Node 22.14 is no longer sufficient.
+- CI uses `actions/setup-node` 7.1.0 and reads Node 26.12.1 from the root `.nvmrc`, matching the current local nvm version. Run `nvm use` to select the same version locally. The upgraded JSDOM requires Node 22.22.2+, 24.15.0+, or 26+; Node 22.14 is no longer sufficient.
 - Web uses Vite 8, React plugin 6, Vitest 5, JSDOM 30, TypeScript 7, and Lucide 1. React Compiler now runs through `@rolldown/plugin-babel`; TypeScript paths are relative to each config rather than the removed `baseUrl` option.
 - Mobile stays on the Expo SDK 54 release line, updated to 54.0.38. React 19.1, React Native 0.81.5, native modules, and Jest remain aligned with that SDK. NativeWind 4 requires the mobile Tailwind 3 stack. A newer Expo SDK is a separate native migration, not required to resolve the patched security findings here.
 - Mobile Lucide and NativeWind are updated to 1.64.0 and 4.2.7. Convex, Convex Auth, and shared form dependencies are updated in both contexts.
