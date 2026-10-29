@@ -13,7 +13,7 @@ const packageJson = require("./package.json") as { version?: string };
 const appVersion = packageJson.version ?? "0.0.0";
 const buildNumber =
   process.env.BUILD_NUMBER ?? process.env.VITE_BUILD_NUMBER ?? "dev";
-const workspaceRoot = path.resolve(__dirname, "..");
+const workspaceRoot = path.resolve(import.meta.dirname, "..");
 const runtimePackages = [
   "@auth/core",
   "@base-ui/react",
@@ -35,12 +35,13 @@ const runtimePackages = [
 const webPackageAliases = Object.fromEntries(
   runtimePackages.map((packageName) => [
     packageName,
-    path.resolve(__dirname, "node_modules", packageName),
+    path.resolve(import.meta.dirname, "node_modules", packageName),
   ]),
 );
 
 export default defineConfig({
-  envDir: __dirname,
+  envDir: import.meta.dirname,
+  tsconfig: "./tsconfig.app.json",
   define: {
     __APP_VERSION__: JSON.stringify(appVersion),
     __BUILD_NUMBER__: JSON.stringify(buildNumber),
@@ -70,22 +71,22 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@/convex": path.resolve(__dirname, "../convex"),
-      "@": path.resolve(__dirname, "../src"),
+      "@/convex": path.resolve(import.meta.dirname, "../convex"),
+      "@": path.resolve(import.meta.dirname, "../src"),
       "shadcn/tailwind.css": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "node_modules/shadcn/dist/tailwind.css",
       ),
       "@fontsource-variable/noto-sans": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "node_modules/@fontsource-variable/noto-sans/index.css",
       ),
       tailwindcss: path.resolve(
-        __dirname,
+        import.meta.dirname,
         "node_modules/tailwindcss/index.css",
       ),
       "tw-animate-css": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "node_modules/tw-animate-css/dist/tw-animate.css",
       ),
       ...webPackageAliases,
