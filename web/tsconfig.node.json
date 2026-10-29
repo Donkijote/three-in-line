@@ -21,9 +21,8 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": "..",
     "paths": {
-      "*": ["./web/node_modules/*", "./web/node_modules/@types/*"]
+      "*": ["./node_modules/*", "./node_modules/@types/*"]
     }
   },
   "include": [

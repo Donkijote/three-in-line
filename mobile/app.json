@@ -24,13 +24,6 @@
     "experiments": {
       "reactCompiler": true
     },
-    "plugins": [
-      [
-        "expo-router",
-        {
-          "root": "../src/ui/mobile/routes"
-        }
-      ]
-    ]
+    "plugins": ["expo-router"]
   }
 }

@@ -2,6 +2,7 @@
   "name": "three-in-line",
   "private": true,
   "type": "module",
+  "packageManager": "bun@1.4.4",
   "scripts": {
     "install:web": "cd web && bun install --frozen-lockfile",
     "install:mobile": "cd mobile && bun install --frozen-lockfile",
