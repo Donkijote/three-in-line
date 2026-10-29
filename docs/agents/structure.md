@@ -6,7 +6,7 @@ The codebase is organized around shared domain/application/infrastructure layers
 - `src/ui/web/router.tsx` defines the TanStack Router instance.
 - `src/ui/web/routes/` contains file-based routes (`__root.tsx`, `index.tsx`).
 - `src/ui/web/modules/` groups web feature areas by screen and components.
-- `src/ui/mobile/routes/` contains the Expo Router screens consumed by the mobile runtime in `mobile/`.
+- `src/ui/mobile/routes/` contains the mobile route implementations. Thin entry files in `mobile/app/` re-export them so Expo Router stays inside the mobile project root.
 - `src/ui/mobile/application/providers/` contains mobile app-level providers.
 - `src/ui/mobile/components/ui/` contains mobile reusable UI primitives (reusables-generated and project-owned).
 - `src/ui/mobile/lib/` contains mobile UI helpers (`cn`, theme utilities, etc.).

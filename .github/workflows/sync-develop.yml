@@ -99,15 +99,15 @@ jobs:
           fi
 
       - name: Setup runtime
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: 'lts/*'
+          node-version-file: '.nvmrc'
 
       - name: Setup Bun
         if: steps.pm.outputs.pm == 'bun'
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.6
+          bun-version: 1.4.4
 
       - name: Create sync branch
         id: branch

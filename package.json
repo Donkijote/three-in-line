@@ -2,6 +2,7 @@
   "name": "three-in-line",
   "private": true,
   "type": "module",
+  "packageManager": "bun@1.4.4",
   "scripts": {
     "install:web": "cd web && bun install --frozen-lockfile",
     "install:mobile": "cd mobile && bun install --frozen-lockfile",
@@ -27,5 +28,10 @@
     "mobile:build:ios": "bun run --cwd mobile expo run:ios",
     "lint": "bunx @biomejs/biome check --write .",
     "typecheck": "bun run web:typecheck && bun run mobile:typecheck"
+  },
+  "dependencies": {
+    "@auth/core": "0.41.3",
+    "@convex-dev/auth": "0.0.96",
+    "convex": "1.48.0"
   }
 }
