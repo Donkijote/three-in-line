@@ -2,10 +2,9 @@ import { Home, RotateCcw, Shuffle } from "lucide-react";
 
 import { useNavigate } from "@tanstack/react-router";
 
+import type { ResultAccent } from "@/ui/shared/match/types/matchResultOverlay";
 import { Button } from "@/ui/web/components/ui/button";
 import { cn } from "@/ui/web/lib/utils";
-
-import type { ResultAccent } from "./MatchResultOverlay.types";
 
 type MatchResultActionsProps = {
   accent: ResultAccent;

@@ -5,6 +5,7 @@ import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { H6, Small } from "@/ui/mobile/components/Typography";
+import { Visibility } from "@/ui/mobile/layout/components/Visibility";
 import { cn } from "@/ui/mobile/lib/utils";
 
 type HeaderProps = {
@@ -35,22 +36,25 @@ export const Header = ({ title, eyebrow, leftSlot }: HeaderProps) => {
           className="relative flex-row items-center justify-center px-4 pb-3"
           style={{ paddingTop: insets.top + 8 }}
         >
-          {leftSlot ? (
+          <Visibility visible={Boolean(leftSlot)}>
             <View className="absolute left-4 z-10 flex-row items-center">
               {leftSlot}
             </View>
-          ) : null}
-          <View className="items-center">
-            <View className="h-[14px] items-center justify-center">
-              {eyebrow ? (
-                <Small
-                  variant="label"
-                  className="text-[10px] tracking-[1.5px] text-primary/80"
-                >
-                  {eyebrow}
-                </Small>
-              ) : null}
-            </View>
+          </Visibility>
+          <View
+            className={cn("items-center", {
+              "gap-0.5": eyebrow,
+              "justify-center min-h-[28px]": !eyebrow,
+            })}
+          >
+            <Visibility visible={Boolean(eyebrow)}>
+              <Small
+                variant="label"
+                className="text-[10px] tracking-[1.5px] text-primary/80"
+              >
+                {eyebrow}
+              </Small>
+            </Visibility>
             <H6
               className={cn(
                 "font-semibold uppercase tracking-[2px] leading-none",

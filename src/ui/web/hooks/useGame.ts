@@ -1,9 +1,13 @@
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 
 import { heartbeatUseCase } from "@/application/games/heartbeatUseCase";
 import type { GameId } from "@/domain/entities/Game";
-import { useGameById } from "@/infrastructure/convex/GameApi";
 import { gameRepository } from "@/infrastructure/convex/repository/gameRepository";
+
+export {
+  useGame,
+  useTurnTimer,
+} from "@/ui/shared/match/hooks/useGame";
 
 type HeartbeatParams = {
   gameId?: GameId;
@@ -13,8 +17,6 @@ type HeartbeatParams = {
 
 const DEFAULT_INTERVAL_MS = 20_000;
 const DEFAULT_JITTER_MS = 1_500;
-
-export const useGame = (gameId?: string | null) => useGameById(gameId);
 
 const sendHeartbeat = (params: { gameId: GameId }) =>
   heartbeatUseCase(gameRepository, params);
@@ -143,96 +145,4 @@ export const useGameHeartbeat = ({
       stopInterval();
     };
   }, []);
-};
-
-type UseTurnTimerParams = {
-  isActive: boolean;
-  durationMs: number | null | undefined;
-  deadlineTime: number | null | undefined;
-  intervalMs?: number;
-  expireDelayMs?: number;
-  onExpire?: () => Promise<void>;
-};
-
-type UseTurnTimerResult = {
-  isExpired: boolean;
-  remainingMs: number;
-  progress: number;
-};
-
-const clamp = (value: number, min: number, max: number) => {
-  if (value < min) return min;
-  if (value > max) return max;
-  return value;
-};
-
-export const useTurnTimer = ({
-  isActive,
-  durationMs,
-  deadlineTime,
-  intervalMs = 100,
-  expireDelayMs = 0,
-  onExpire,
-}: UseTurnTimerParams): UseTurnTimerResult => {
-  const [now, setNow] = useState(() => Date.now());
-  const timeoutRef = useRef<number | null>(null);
-  const hasTriggeredRef = useRef(false);
-  const handleExpire = useEffectEvent(async () => {
-    if (!onExpire) {
-      return;
-    }
-
-    await onExpire();
-  });
-
-  useEffect(() => {
-    if (!isActive) {
-      return;
-    }
-
-    const intervalId = setInterval(() => {
-      setNow(Date.now());
-    }, intervalMs);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [intervalMs, isActive]);
-
-  useEffect(() => {
-    hasTriggeredRef.current = false;
-    if (timeoutRef.current !== null) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, [deadlineTime, durationMs, isActive, expireDelayMs]);
-
-  const hasTimer = Boolean(durationMs);
-  const hasOnExpire = Boolean(onExpire);
-  const resolvedDeadline = deadlineTime ?? null;
-  const isExpired =
-    isActive && resolvedDeadline !== null && now > resolvedDeadline && hasTimer;
-  const rawRemainingMs = resolvedDeadline === null ? 0 : resolvedDeadline - now;
-  const remainingMs = hasTimer
-    ? clamp(rawRemainingMs, 0, durationMs as number)
-    : 0;
-  const progress = hasTimer ? remainingMs / (durationMs as number) : 0;
-
-  useEffect(() => {
-    if (!isExpired || !hasOnExpire || hasTriggeredRef.current) {
-      return;
-    }
-
-    hasTriggeredRef.current = true;
-    if (expireDelayMs <= 0) {
-      void handleExpire();
-      return;
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      void handleExpire();
-    }, expireDelayMs);
-  }, [expireDelayMs, hasOnExpire, isExpired]);
-
-  return { isExpired, remainingMs, progress };
 };

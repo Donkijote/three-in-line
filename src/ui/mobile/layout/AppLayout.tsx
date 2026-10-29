@@ -21,10 +21,11 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
   const pathname = usePathname();
   const { isDark } = useTheme();
   const { header } = useMobileHeader();
-  const shouldHideChrome = pathname === "/login";
+  const shouldHideHeaderChrome = pathname === "/login";
+  const shouldHideNavChrome = pathname === "/login" || pathname === "/match";
   const insets = useSafeAreaInsets();
   const headerScrollOffset =
-    !shouldHideChrome && header ? insets.top + 64 : insets.top + 16;
+    !shouldHideHeaderChrome && header ? insets.top + 64 : insets.top + 16;
   const topFadeOpaque = isDark
     ? "rgba(10, 10, 10, 0.82)"
     : "rgba(245, 245, 247, 0.82)";
@@ -45,7 +46,7 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
       })}
     >
       <StatusBar style={isDark ? "light" : "dark"} />
-      <Visibility visible={!shouldHideChrome && Boolean(header)}>
+      <Visibility visible={!shouldHideHeaderChrome && Boolean(header)}>
         <View className="absolute inset-x-0 top-0 z-20">
           {header ? <Header {...header} /> : null}
         </View>
@@ -56,7 +57,7 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
           contentInsetAdjustmentBehavior="never"
           contentContainerClassName="min-h-full px-6"
           contentContainerStyle={{
-            paddingBottom: shouldHideChrome
+            paddingBottom: shouldHideNavChrome
               ? insets.bottom + 24
               : insets.bottom + 96,
             paddingTop: headerScrollOffset,
@@ -64,11 +65,11 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
         >
           <View className="flex-1">{children}</View>
         </ScrollArea>
-        <Visibility visible={!shouldHideChrome}>
+        <Visibility visible={!shouldHideNavChrome}>
           <NavBar />
         </Visibility>
       </SafeAreaView>
-      <Visibility visible={!shouldHideChrome}>
+      <Visibility visible={!shouldHideHeaderChrome && Boolean(header)}>
         <LinearGradient
           key="top-fade"
           pointerEvents="none"
@@ -84,6 +85,8 @@ export const AppLayout = ({ children }: PropsWithChildren) => {
             zIndex: 15,
           }}
         />
+      </Visibility>
+      <Visibility visible={!shouldHideNavChrome}>
         <LinearGradient
           key="bottom-fade"
           pointerEvents="none"
